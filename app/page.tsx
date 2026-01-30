@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { VisaIcon, MastercardIcon, CbIcon, PayPalIcon } from "@/components/payment-icons"
 
 export default function Home() {
   return (
@@ -71,9 +72,12 @@ export default function Home() {
                     FAIRE UN DON
                   </Link>
                 </Button>
-                <p className="text-sm text-gray-600 text-center">
-                  66% de déduction fiscale
-                </p>
+                <div className="flex items-center gap-3">
+                  <VisaIcon className="w-12 h-8" />
+                  <MastercardIcon className="w-12 h-8" />
+                  <CbIcon className="w-12 h-8" />
+                  <PayPalIcon className="w-12 h-8" />
+                </div>
               </div>
             </div>
           </div>
