@@ -7,6 +7,7 @@ import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { VisaIcon, MastercardIcon, CbIcon, PayPalIcon } from "@/components/payment-icons"
 import { WaveDivider, WAVE_PATH_INV } from "@/components/wave-divider"
+import { AnimatedCounter } from "@/components/animated-counter"
 import { DARK_BG, CREAM_BG, GRAY_50 } from "@/lib/constants"
 
 const ACTIONS = [
@@ -61,7 +62,7 @@ export default function Home() {
               </h2>
               <div className="flex flex-wrap gap-4 pt-2">
                 <Button asChild size="lg" className="text-base px-8">
-                  <Link href="/about-us">DÉCOUVRIR L'ASSO</Link>
+                  <Link href="/about-us">Découvrir l'asso</Link>
                 </Button>
                 <Button
                   asChild
@@ -69,7 +70,7 @@ export default function Home() {
                   variant="outline"
                   className="text-base px-8 bg-transparent text-white border-white/40 hover:bg-white/10 hover:text-white"
                 >
-                  <Link href="/adopt-pet">ADOPTER UN CHAT</Link>
+                  <Link href="/adopt-pet">Adopter un chat</Link>
                 </Button>
               </div>
             </div>
@@ -110,7 +111,7 @@ export default function Home() {
                     href="https://www.helloasso.com/associations/sans-croquettes-fixes/formulaires/1"
                     target="_blank"
                   >
-                    FAIRE UN DON
+                    Faire un don
                   </Link>
                 </Button>
                 <div className="flex items-center gap-3">
@@ -144,10 +145,7 @@ export default function Home() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-5">
               {ACTIONS.map(({ icon: Icon, title, desc }) => (
-                <Card
-                  key={title}
-                  className="text-center rounded-2xl hover:-translate-y-2 hover:shadow-xl transition-all duration-300"
-                >
+                <Card key={title} className="text-center">
                   <CardHeader>
                     <div className="mx-auto w-16 h-16 bg-[hsl(var(--primary))]/10 rounded-full flex items-center justify-center mb-4">
                       <Icon className="w-8 h-8 text-[hsl(var(--primary))]" />
@@ -190,7 +188,7 @@ export default function Home() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
               {[1, 2, 3].map((i) => (
-                <Card key={i} className="overflow-hidden rounded-2xl hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
+                <Card key={i} className="overflow-hidden">
                   <div className="h-64 bg-gradient-to-br from-[hsl(var(--primary))]/10 to-[hsl(var(--primary))]/25 relative">
                     <div className="absolute top-4 left-4 bg-[hsl(var(--primary))] text-white px-3 py-1 rounded-full text-sm font-semibold">
                       Adulte
@@ -283,7 +281,7 @@ export default function Home() {
 
             <div className="grid md:grid-cols-2 gap-8">
               {[1, 2].map((i) => (
-                <Card key={i} className="overflow-hidden rounded-2xl hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
+                <Card key={i} className="overflow-hidden">
                   <div className="h-64 bg-gradient-to-br from-gray-200 to-gray-300" />
                   <CardHeader>
                     <div className="text-sm text-gray-500 mb-2">juillet 25, 2025</div>
@@ -318,14 +316,17 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-3 gap-6 md:gap-12 max-w-3xl mx-auto">
               {[
-                { value: "10", label: "Ans d'engagement" },
-                { value: "5.6k", label: "Animaux sauvés" },
-                { value: "18k", label: "Tonnes de croquettes" },
-              ].map(({ value, label }) => (
+                { value: 10, suffix: "", decimals: 0, label: "Ans d'engagement" },
+                { value: 5.6, suffix: "k", decimals: 1, label: "Animaux sauvés" },
+                { value: 18, suffix: "k", decimals: 0, label: "Tonnes de croquettes" },
+              ].map(({ value, suffix, decimals, label }) => (
                 <div key={label} className="text-center">
-                  <div className="text-6xl md:text-8xl font-extrabold text-[hsl(var(--primary))] mb-3">
-                    {value}
-                  </div>
+                  <AnimatedCounter
+                    value={value}
+                    suffix={suffix}
+                    decimals={decimals}
+                    className="text-6xl md:text-8xl font-extrabold text-[hsl(var(--primary))] mb-3 block"
+                  />
                   <div className="text-white/70 text-xs md:text-sm font-medium uppercase tracking-widest">
                     {label}
                   </div>
@@ -384,7 +385,7 @@ export default function Home() {
                 ].map(({ icon: Icon, title, desc, colSpan }) => (
                   <Card
                     key={title}
-                    className={`text-center rounded-2xl border-t-4 border-[hsl(var(--primary))] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 ${colSpan ? "md:col-span-2" : ""}`}
+                    className={`text-center border-t-4 border-[hsl(var(--primary))] ${colSpan ? "md:col-span-2" : ""}`}
                   >
                     <CardHeader>
                       <div className="mx-auto w-12 h-12 bg-[hsl(var(--primary))]/10 rounded-full flex items-center justify-center mb-4">

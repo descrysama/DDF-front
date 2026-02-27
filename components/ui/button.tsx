@@ -4,19 +4,19 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 [font-family:var(--font-nunito)]",
   {
     variants: {
       variant: {
         default:
-          "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow hover:opacity-90",
+          "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:brightness-90",
         destructive:
-          "bg-[hsl(var(--destructive))] text-[hsl(var(--destructive-foreground))] shadow-sm hover:opacity-90",
+          "bg-[hsl(var(--destructive))] text-[hsl(var(--destructive-foreground))] hover:brightness-90",
         outline:
-          "border border-[hsl(var(--input))] bg-[hsl(var(--background))] shadow-sm hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))]",
+          "border border-[hsl(var(--border))] bg-transparent hover:bg-[hsl(var(--primary))]/10 hover:border-[hsl(var(--primary))]/50 hover:text-[hsl(var(--primary))]",
         secondary:
-          "bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] shadow-sm hover:opacity-80",
-        ghost: "hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))]",
+          "bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] hover:brightness-90",
+        ghost: "hover:bg-[hsl(var(--primary))]/10 hover:text-[hsl(var(--primary))]",
         link: "text-[hsl(var(--primary))] underline-offset-4 hover:underline",
       },
       size: {
