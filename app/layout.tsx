@@ -12,6 +12,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+
 export const metadata: Metadata = {
   title: "Sans Croquettes Fixes - Association de protection animale à Lyon",
   description: "Sans Croquettes Fixes est une association 100% bénévole basée à Lyon, active dans la région Auvergne-Rhône-Alpes. Nous aidons les animaux en détresse et leurs humains.",
