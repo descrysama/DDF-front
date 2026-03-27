@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
-import { VisaIcon, MastercardIcon, CbIcon, PayPalIcon } from "@/components/payment-icons"
 import { WaveDivider, WAVE_PATH_INV } from "@/components/wave-divider"
 import { AnimatedCounter } from "@/components/animated-counter"
 import { DARK_BG, CREAM_BG, GRAY_50 } from "@/lib/constants"
+import { AdoptionCarousel } from "@/components/adoption-carousel"
 
 const ACTIONS = [
   {
@@ -48,17 +48,17 @@ export default function Home() {
           className="relative overflow-hidden"
           style={{ background: `linear-gradient(to right, ${DARK_BG}, #292930)` }}
         >
-          <div className="container mx-auto px-4 pt-20 pb-32 md:pt-32 md:pb-40">
-            <div className="max-w-3xl space-y-6"> {/* Augmenté de 2xl à 3xl pour le confort de lecture */}
+          <div className="container mx-auto px-4 pt-14 pb-24 md:pt-20 md:pb-28">
+            <div className="max-w-3xl space-y-6">
               <span className="inline-block text-primary font-semibold text-sm tracking-widest uppercase">
                 Association de protection animale (69)
               </span>
 
-              <h1 className="text-5xl md:text-7xl font-extrabold text-white leading-tight">
+              <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight">
                 Sans Croquettes Fixes : L'association des chats à Lyon.
               </h1>
 
-              <h2 className="text-xl md:text-2xl font-medium text-white/80 leading-relaxed max-w-2xl">
+              <h2 className="text-base md:text-lg font-medium text-white/80 leading-relaxed max-w-2xl">
                 Depuis 2015, nous luttons contre l'abandon et la précarité animale. 
                 <strong> Adoptez, donnez ou agissez</strong> pour offrir une seconde chance aux félins oubliés.
               </h2>
@@ -78,7 +78,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Decorative paw prints */}
           <div className="absolute right-10 top-10 opacity-10 rotate-[-25deg] hidden md:block">
             <Image src="/paw.png" alt="" width={180} height={180} />
           </div>
@@ -86,7 +85,6 @@ export default function Home() {
             <Image src="/paw.png" alt="" width={100} height={100} />
           </div>
 
-          {/* Wave interne : dark → white */}
           <div aria-hidden="true" className="absolute bottom-0 left-0 right-0" style={{ lineHeight: 0 }}>
             <svg
               viewBox="0 0 1440 70"
@@ -98,8 +96,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Donation Banner ── */}
-        <section className="bg-white py-14">
+        <section className="bg-white py-8">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div className="border-l-4 border-primary pl-6">
@@ -119,25 +116,60 @@ export default function Home() {
                     Je fais un don pour les chats de Lyon
                   </Link>
                 </Button>
-                <div className="flex items-center gap-3">
-                  <VisaIcon className="w-12 h-8" />
-                  <MastercardIcon className="w-12 h-8" />
-                  <CbIcon className="w-12 h-8" />
-                  <PayPalIcon className="w-12 h-8" />
-                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── About / Actions ── */}
-        <section className="bg-gray-50 py-20 md:py-28">
+        <section className="bg-white py-12 md:py-16">
           <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center mb-14">
+            <div className="grid md:grid-cols-2 gap-10 items-start">
+
+              <div className="space-y-5">
+                <span className="inline-block text-primary font-semibold tracking-widest uppercase text-sm">
+                  Nos chats disponibles à l'adoption
+                </span>
+                <h2 className="text-3xl md:text-4xl font-extrabold leading-tight">
+                  Adopter un chat à Lyon : ils n'attendent que vous
+                </h2>
+                <p className="text-base text-gray-700 leading-relaxed">
+                  Adopter un chat à Lyon, c'est offrir une seconde chance à un animal qui a souvent tout perdu.
+                  Nos chats sont <strong>vaccinés, identifiés et stérilisés</strong> — et surtout, ils ont été aimés
+                  et suivis par nos bénévoles. On vous accompagne avant, pendant et après l'adoption.
+                </p>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  <strong>Important :</strong> notre nouveau site étant en construction, toutes les fiches ne sont pas forcément à jour.
+                  Consultez notre page Facebook{" "}
+                  <Link
+                    href="https://www.facebook.com/sanscroquettesfixes"
+                    target="_blank"
+                    className="text-primary hover:underline"
+                  >
+                    en cliquant ici
+                  </Link>.
+                </p>
+              </div>
+
+              <div>
+                <AdoptionCarousel />
+                <div className="mt-5">
+                  <Button asChild size="sm" className="w-full">
+                    <Link href="/adopt-pet">Voir tous les chats à adopter</Link>
+                  </Button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-gray-50 py-12 md:py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center mb-8">
               <span className="inline-block text-primary font-semibold mb-3 tracking-widest uppercase text-sm">
                 Qui sommes-nous ?
               </span>
-              <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
+              <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
                 Une association lyonnaise au service des chats —{" "}
                 <br />et de ceux qui les aiment
               </h2>
@@ -153,10 +185,10 @@ export default function Home() {
               {ACTIONS.map(({ icon: Icon, title, desc }) => (
                 <Card key={title} className="text-center">
                   <CardHeader>
-                    <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                      <Icon className="w-8 h-8 text-primary" />
+                    <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
+                      <Icon className="w-6 h-6 text-primary" />
                     </div>
-                    <CardTitle className="text-xl">{title}</CardTitle>
+                    <CardTitle className="text-base">{title}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <CardDescription>{desc}</CardDescription>
@@ -167,73 +199,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Adoption ── */}
-        <section className="bg-white py-20 md:py-28">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center mb-14">
-              <span className="inline-block text-primary font-semibold mb-3 tracking-widest uppercase text-sm">
-                Nos chats disponibles à l'adoption
-              </span>
-              <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
-                Adopter un chat à Lyon : ils n'attendent que vous
-              </h2>
-              <p className="text-lg text-gray-700">
-                Adopter un chat à Lyon, c'est offrir une seconde chance à un animal qui a souvent tout perdu.
-                Nos chats sont <strong>vaccinés, identifiés et stérilisés</strong> — et surtout, ils ont été aimés
-                et suivis par nos bénévoles. On vous accompagne avant, pendant et après l'adoption.
-              </p>
-              <p className="text-sm text-gray-600 mt-4">
-                <strong>Important :</strong> notre nouveau site internet étant encore en construction, toutes les fiches ne sont pas forcément à jour. Exceptionnellement, nous vous prions de bien vouloir vous tourner vers notre page Facebook{" "}
-                <Link
-                  href="https://www.facebook.com/sanscroquettesfixes"
-                  target="_blank"
-                  className="text-primary hover:underline"
-                >
-                  en cliquant ici
-                </Link>.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="overflow-hidden">
-                  <div className="h-64 bg-gradient-to-br from-primary/10 to-primary/25 relative">
-                    <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-semibold">
-                      Adulte
-                    </div>
-                  </div>
-                  <CardHeader>
-                    <CardTitle>Chat {i}</CardTitle>
-                    <CardDescription>Description du chat à venir depuis Strapi</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <HomeIcon className="w-4 h-4 text-primary" />
-                        <span>Habitué à l'appartement</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Stethoscope className="w-4 h-4 text-primary" />
-                        <span>Vacciné, stérilisé</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <div className="text-center">
-              <Button asChild size="lg" className="text-base px-10">
-                <Link href="/adopt-pet">Voir tous les chats à adopter</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-
         <WaveDivider from="white" to={DARK_BG} />
 
-        {/* ── Les félins de l'ombre ── */}
-        <section className="text-white py-20 md:py-28" style={{ background: DARK_BG }}>
+        <section className="text-white py-12 md:py-16" style={{ background: DARK_BG }}>
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="order-2 md:order-1 flex items-center justify-center select-none">
@@ -247,7 +215,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="order-1 md:order-2 space-y-6">
-                <h2 className="text-4xl md:text-5xl font-extrabold">
+                <h2 className="text-3xl md:text-4xl font-extrabold">
                   Les félins de l'ombre : un refuge pour ceux qu'on oublie trop souvent
                 </h2>
                 <div className="w-20 h-1 bg-primary" />
@@ -271,15 +239,14 @@ export default function Home() {
 
         <WaveDivider from={DARK_BG} to={GRAY_50} invert />
 
-        {/* ── Blog ── */}
-        <section className="bg-gray-50 py-20 md:py-28">
+        <section className="bg-gray-50 py-12 md:py-16">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
               <div>
                 <span className="inline-block text-primary font-semibold mb-3 tracking-widest uppercase text-sm">
                   Découvrez notre blog pour plus d'actualités
                 </span>
-                <h2 className="text-4xl md:text-5xl font-extrabold">Nos dernières updates</h2>
+                <h2 className="text-3xl md:text-4xl font-extrabold">Nos dernières updates</h2>
               </div>
               <Link
                 href="/news"
@@ -292,10 +259,10 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-8">
               {[1, 2].map((i) => (
                 <Card key={i} className="overflow-hidden">
-                  <div className="h-64 bg-gradient-to-br from-gray-200 to-gray-300" />
+                  <div className="h-48 bg-gradient-to-br from-gray-200 to-gray-300" />
                   <CardHeader>
                     <div className="text-sm text-gray-500 mb-2">juillet 25, 2025</div>
-                    <CardTitle className="text-2xl">Titre de l'article {i}</CardTitle>
+                    <CardTitle className="text-xl">Titre de l'article {i}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <CardDescription className="text-base">
@@ -313,10 +280,9 @@ export default function Home() {
 
         <WaveDivider from={GRAY_50} to={DARK_BG} />
 
-        {/* ── Stats ── */}
-        <section className="text-white py-20 md:py-28" style={{ background: DARK_BG }}>
+        <section className="text-white py-12 md:py-16" style={{ background: DARK_BG }}>
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16 max-w-3xl mx-auto">
+            <div className="text-center mb-10 max-w-3xl mx-auto">
               <span className="inline-block text-primary font-semibold mb-3 tracking-widest uppercase text-sm">
                 Comment vous remercier ?
               </span>
@@ -335,7 +301,7 @@ export default function Home() {
                     value={value}
                     suffix={suffix}
                     decimals={decimals}
-                    className="text-6xl md:text-8xl font-extrabold text-primary mb-3 block"
+                    className="text-5xl md:text-6xl font-extrabold text-primary mb-3 block"
                   />
                   <div className="text-white/70 text-xs md:text-sm font-medium uppercase tracking-widest">
                     {label}
@@ -348,8 +314,7 @@ export default function Home() {
 
         <WaveDivider from={DARK_BG} to={CREAM_BG} invert />
 
-        {/* ── Story / Engagement ── */}
-        <section className="py-20 md:py-28" style={{ background: CREAM_BG }}>
+        <section className="py-12 md:py-16" style={{ background: CREAM_BG }}>
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-6 relative">
