@@ -28,10 +28,10 @@ export default function Header() {
 
           {/* Navigation Desktop */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/adopt-pet" className="text-sm font-bold text-white hover:text-[hsl(var(--primary))] transition-colors">
+            <Link href="/adopt-pet" className="text-sm font-bold text-white hover:text-primary transition-colors">
               À l'adoption
             </Link>
-            <Link href="/distribution-de-croquettes" className="text-sm font-bold text-white hover:text-[hsl(var(--primary))] transition-colors">
+            <Link href="/distribution-de-croquettes" className="text-sm font-bold text-white hover:text-primary transition-colors">
               Distribution de croquettes
             </Link>
             <Button asChild>
@@ -41,13 +41,13 @@ export default function Header() {
 
           {/* Social Media */}
           <div className="hidden lg:flex items-center space-x-3">
-            <Link href="https://www.facebook.com/sanscroquettesfixes" target="_blank" className="text-white hover:text-[hsl(var(--primary))] transition-colors">
+            <Link href="https://www.facebook.com/sanscroquettesfixes" target="_blank" className="text-white hover:text-primary transition-colors">
               <Facebook size={20} />
             </Link>
-            <Link href="https://x.com/CroquettesFixes" target="_blank" className="text-white hover:text-[hsl(var(--primary))] transition-colors">
+            <Link href="https://x.com/CroquettesFixes" target="_blank" className="text-white hover:text-primary transition-colors">
               <Twitter size={20} />
             </Link>
-            <Link href="https://www.instagram.com/sanscroquettesfixes/" target="_blank" className="text-white hover:text-[hsl(var(--primary))] transition-colors">
+            <Link href="https://www.instagram.com/sanscroquettesfixes/" target="_blank" className="text-white hover:text-primary transition-colors">
               <Instagram size={20} />
             </Link>
           </div>
@@ -64,10 +64,10 @@ export default function Header() {
         {/* Menu Mobile */}
         {isMenuOpen && (
           <div className="md:hidden pb-4 space-y-2">
-            <Link href="/adopt-pet" className="block py-2 text-white hover:text-[hsl(var(--primary))]">
+            <Link href="/adopt-pet" className="block py-2 text-white hover:text-primary">
               À l'adoption
             </Link>
-            <Link href="/distribution-de-croquettes" className="block py-2 text-white hover:text-[hsl(var(--primary))]">
+            <Link href="/distribution-de-croquettes" className="block py-2 text-white hover:text-primary">
               Distribution de croquettes
             </Link>
             <Link href="/about-us" className="block py-2 text-white hover:text-[hsl(var(--primary))]">
