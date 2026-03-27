@@ -12,7 +12,7 @@ export function StatCard({ icon: Icon, stat, label, desc }: StatCardProps) {
   return (
     <Card className="text-center rounded-2xl border-t-4 border-transparent">
       <CardHeader className="pb-2">
-        <div className="mx-auto w-12 h-12 bg-[hsl(var(--primary))]/10 rounded-full flex items-center justify-center">
+        <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
           <Icon className="w-6 h-6 text-primary" />
         </div>
       </CardHeader>

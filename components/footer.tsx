@@ -33,32 +33,32 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Menu */}
             <nav className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-              <Link href="/" className="text-sm hover:text-[hsl(var(--primary))] transition-colors">
+              <Link href="/" className="text-sm hover:text-primary transition-colors">
                 Home
               </Link>
-              <Link href="/adopt-pet" className="text-sm hover:text-[hsl(var(--primary))] transition-colors">
+              <Link href="/adopt-pet" className="text-sm hover:text-primary transition-colors">
                 À l'adoption
               </Link>
-              <Link href="/about-us" className="text-sm hover:text-[hsl(var(--primary))] transition-colors">
+              <Link href="/about-us" className="text-sm hover:text-primary transition-colors">
                 À propos de nous
               </Link>
-              <Link href="/news" className="text-sm hover:text-[hsl(var(--primary))] transition-colors">
+              <Link href="/news" className="text-sm hover:text-primary transition-colors">
                 Blog
               </Link>
-              <Link href="/mentions-legales" className="text-sm hover:text-[hsl(var(--primary))] transition-colors">
+              <Link href="/mentions-legales" className="text-sm hover:text-primary transition-colors">
                 Mentions légales
               </Link>
             </nav>
 
             {/* Social Media */}
             <div className="flex items-center space-x-4">
-              <Link href="https://www.facebook.com/sanscroquettesfixes" target="_blank" className="hover:text-[hsl(var(--primary))] transition-colors">
+              <Link href="https://www.facebook.com/sanscroquettesfixes" target="_blank" className="hover:text-primary transition-colors">
                 <Facebook size={20} />
               </Link>
-              <Link href="https://x.com/CroquettesFixes" target="_blank" className="hover:text-[hsl(var(--primary))] transition-colors">
+              <Link href="https://x.com/CroquettesFixes" target="_blank" className="hover:text-primary transition-colors">
                 <Twitter size={20} />
               </Link>
-              <Link href="https://www.instagram.com/sanscroquettesfixes/" target="_blank" className="hover:text-[hsl(var(--primary))] transition-colors">
+              <Link href="https://www.instagram.com/sanscroquettesfixes/" target="_blank" className="hover:text-primary transition-colors">
                 <Instagram size={20} />
               </Link>
             </div>
