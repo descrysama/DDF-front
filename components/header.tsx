@@ -34,19 +34,9 @@ export default function Header() {
             <Link href="/distribution-de-croquettes" className="text-sm font-bold text-white hover:text-[hsl(var(--primary))] transition-colors">
               Distribution de croquettes
             </Link>
-            <div className="relative group">
-              <button className="text-sm font-bold text-white hover:text-[hsl(var(--primary))] transition-colors">
-                Pages
-              </button>
-              <div className="absolute top-full left-0 mt-2 w-48 bg-[#393b4f] shadow-lg rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all border border-white/10">
-                <Link href="/donate" className="block px-4 py-2 text-sm text-white hover:bg-[hsl(var(--primary))]/10">
-                  Faire un don
-                </Link>
-                <Link href="/about-us" className="block px-4 py-2 text-sm text-white hover:bg-[hsl(var(--primary))]/10">
-                  À propos de nous
-                </Link>
-              </div>
-            </div>
+            <Link href="/about-us" className="text-sm font-bold text-white hover:text-[hsl(var(--primary))] transition-colors">
+              À propos de nous
+            </Link>
             <Link href="/news" className="text-sm font-bold text-white hover:text-[hsl(var(--primary))] transition-colors">
               Blog
             </Link>
@@ -86,11 +76,11 @@ export default function Header() {
             <Link href="/distribution-de-croquettes" className="block py-2 text-white hover:text-[hsl(var(--primary))]">
               Distribution de croquettes
             </Link>
-            <Link href="/donate" className="block py-2 text-white hover:text-[hsl(var(--primary))]">
-              Faire un don
-            </Link>
             <Link href="/about-us" className="block py-2 text-white hover:text-[hsl(var(--primary))]">
               À propos de nous
+            </Link>
+            <Link href="/donate" className="block py-2 text-white hover:text-[hsl(var(--primary))]">
+              Faire un don
             </Link>
             <Link href="/news" className="block py-2 text-white hover:text-[hsl(var(--primary))]">
               Blog
