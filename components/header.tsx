@@ -34,12 +34,6 @@ export default function Header() {
             <Link href="/distribution-de-croquettes" className="text-sm font-bold text-white hover:text-primary transition-colors">
               Distribution de croquettes
             </Link>
-            <Link href="/about-us" className="text-sm font-bold text-white hover:text-[hsl(var(--primary))] transition-colors">
-              À propos de nous
-            </Link>
-            <Link href="/news" className="text-sm font-bold text-white hover:text-[hsl(var(--primary))] transition-colors">
-              Blog
-            </Link>
             <Button asChild>
               <Link href="/donate">Faire un don</Link>
             </Button>
