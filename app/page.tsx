@@ -1,384 +1,449 @@
 import Link from "next/link"
-import Image from "next/image"
-import { Heart, Home as HomeIcon, Stethoscope, UserCheck, Users } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Shield, Home as HomeIcon, Heart, Smile, PawPrint, ArrowRight } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
-import { WaveDivider, WAVE_PATH_INV } from "@/components/wave-divider"
-import { AnimatedCounter } from "@/components/animated-counter"
-import { DARK_BG, CREAM_BG, GRAY_50 } from "@/lib/constants"
-import { AdoptionCarousel } from "@/components/adoption-carousel"
+import { CatCard } from "@/components/cat-card"
+import { PLACEHOLDER_CATS } from "@/lib/placeholder-cats"
+import { T } from "@/lib/design-tokens"
+
+// ─── HERO ─────────────────────────────────────────────────────────────────────
+
+function HeroSection() {
+  const featuredCat = PLACEHOLDER_CATS[0]
+
+  return (
+    <section style={{ position: 'relative', overflow: 'hidden', background: T.bg }}>
+      {/* Right-side coral wash panel */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute', top: 0, bottom: 0, right: 0, width: '42%',
+          background: `linear-gradient(135deg, ${T.pink} 0%, ${T.rose} 100%)`,
+        }}
+      />
+
+      <div
+        className="grid grid-cols-1 md:grid-cols-2"
+        style={{
+          maxWidth: 1200, margin: '0 auto', padding: '52px 24px 64px',
+          position: 'relative', gap: 48, alignItems: 'center',
+        }}
+      >
+        {/* Left — copy */}
+        <div>
+          {/* Eyebrow badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '5px 12px', borderRadius: 999,
+            background: T.surface, border: `1px solid ${T.coral}40`,
+            fontSize: 12, fontWeight: 500, color: T.coralInk,
+            marginBottom: 22,
+          }}>
+            <span
+              className="animate-scf-pulse"
+              style={{ width: 6, height: 6, borderRadius: '50%', background: T.coral, display: 'inline-block' }}
+            />
+            {PLACEHOLDER_CATS.length} chats actuellement à l&apos;adoption
+          </div>
+
+          <h1 style={{
+            fontSize: 'clamp(40px, 5vw, 60px)',
+            lineHeight: 0.96,
+            letterSpacing: '-0.035em',
+            fontWeight: 600,
+            margin: '0 0 18px',
+            color: T.ink,
+          }}>
+            Un toit, des câlins,{' '}<br />
+            <span style={{
+              background: `linear-gradient(90deg, ${T.coral} 0%, ${T.magenta} 100%)`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              une seconde chance.
+            </span>
+          </h1>
+
+          <p style={{
+            fontSize: 16, lineHeight: 1.55, color: T.inkMuted,
+            margin: '0 0 26px', maxWidth: 480,
+          }}>
+            Sans Croquettes Fixes accompagne les chats les plus fragiles de la région lyonnaise
+            vers une famille pour la vie.
+          </p>
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <Link
+              href="/adopt-pet"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '12px 18px', borderRadius: 6,
+                background: T.coral, color: '#fff',
+                fontSize: 14, fontWeight: 600, textDecoration: 'none',
+              }}
+            >
+              Adopter un chat
+              <ArrowRight size={14} />
+            </Link>
+            <Link
+              href="/about-us"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '12px 18px', borderRadius: 6,
+                background: T.ink, color: '#fff',
+                fontSize: 14, fontWeight: 600, textDecoration: 'none',
+              }}
+            >
+              Découvrir l&apos;asso
+            </Link>
+          </div>
+        </div>
+
+        {/* Right — featured cat photo */}
+        <div style={{ position: 'relative', aspectRatio: '5/4', borderRadius: 10, overflow: 'hidden', boxShadow: '0 18px 50px rgba(37,40,64,0.18)' }}>
+          {/* Gradient placeholder */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: `linear-gradient(135deg, ${featuredCat.tones[0]} 0%, ${featuredCat.tones[1]} 100%)`,
+          }} />
+          {/* Stripe overlay */}
+          <svg
+            width="100%" height="100%"
+            style={{ position: 'absolute', inset: 0, opacity: 0.12, mixBlendMode: 'overlay' }}
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <pattern id="hero-stripe" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                <line x1="0" y1="0" x2="0" y2="14" stroke="#ffffff" strokeWidth="6" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hero-stripe)" />
+          </svg>
+
+          {/* Top tag */}
+          <div style={{
+            position: 'absolute', top: 14, left: 14,
+            padding: '4px 10px', borderRadius: 4,
+            background: T.coral, color: '#fff',
+            fontSize: 11, fontWeight: 600,
+          }}>
+            Nouvelle arrivée
+          </div>
+
+          {/* Bottom overlay — cat info */}
+          <div style={{
+            position: 'absolute', left: 14, bottom: 14, right: 14,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
+            color: '#fff',
+          }}>
+            <div>
+              <div style={{ fontSize: 22, fontWeight: 600, lineHeight: 1 }}>{featuredCat.name}</div>
+              <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>
+                {featuredCat.age} · {featuredCat.sex}
+              </div>
+            </div>
+            <Link
+              href={`/adopt-pet/${featuredCat.id}`}
+              style={{
+                width: 36, height: 36, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.18)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', textDecoration: 'none',
+              }}
+            >
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── STATS STRIP ──────────────────────────────────────────────────────────────
+
+function StatsStrip() {
+  const stats = [
+    { value: '11',   label: 'ans d\'activité' },
+    { value: '350+', label: 'chats adoptés'   },
+    { value: '100%', label: 'bénévole'         },
+    { value: '52',   label: 'distributions / an' },
+  ]
+
+  return (
+    <section style={{ background: T.coral, color: '#fff', position: 'relative', overflow: 'hidden' }}>
+      <div
+        className="flex flex-wrap"
+        style={{
+          maxWidth: 1200, margin: '0 auto', padding: '22px 24px',
+          justifyContent: 'space-between', alignItems: 'center', gap: 20,
+        }}
+      >
+        <div
+          className="grid grid-cols-2 md:grid-cols-4"
+          style={{ flex: 1, gap: 0 }}
+        >
+          {stats.map(({ value, label }, i) => (
+            <div
+              key={label}
+              style={{
+                display: 'flex', alignItems: 'baseline', gap: 10,
+                paddingLeft: i > 0 ? 20 : 0,
+                borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.25)' : 'none',
+                paddingTop: 4, paddingBottom: 4,
+              }}
+            >
+              <span style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.025em' }}>{value}</span>
+              <span style={{ fontSize: 12, opacity: 0.85 }}>{label}</span>
+            </div>
+          ))}
+        </div>
+        <Link
+          href="/about-us"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 14px', borderRadius: 6,
+            background: '#fff', color: T.coral,
+            fontSize: 12, fontWeight: 600, textDecoration: 'none',
+            flexShrink: 0,
+          }}
+        >
+          Notre rapport 2025 <ArrowRight size={12} />
+        </Link>
+      </div>
+    </section>
+  )
+}
+
+// ─── CATS PREVIEW ─────────────────────────────────────────────────────────────
+
+function CatsPreview() {
+  const featured = PLACEHOLDER_CATS.slice(0, 4)
+
+  return (
+    <section style={{ background: T.bg }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '64px 24px 56px' }}>
+        {/* Header */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between',
+          alignItems: 'flex-end', marginBottom: 28, flexWrap: 'wrap', gap: 16,
+        }}>
+          <div>
+            <div style={{ fontSize: 13, color: T.coral, fontWeight: 600, marginBottom: 8 }}>
+              Nos chats disponibles
+            </div>
+            <h2 style={{
+              fontSize: 'clamp(24px, 3.5vw, 34px)',
+              lineHeight: 1.05, letterSpacing: '-0.025em',
+              fontWeight: 600, margin: 0, maxWidth: 520,
+            }}>
+              Trouvez votre nouveau compagnon pour la vie.
+            </h2>
+          </div>
+          <Link
+            href="/adopt-pet"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '8px 14px', borderRadius: 6,
+              border: `1px solid ${T.borderStrong}`,
+              background: T.surface,
+              fontSize: 13, fontWeight: 600, color: T.ink, textDecoration: 'none',
+            }}
+          >
+            Voir les {PLACEHOLDER_CATS.length} chats <ArrowRight size={12} />
+          </Link>
+        </div>
+
+        {/* Grid */}
+        <div
+          className="grid grid-cols-2 md:grid-cols-4"
+          style={{ gap: 14 }}
+        >
+          {featured.map((cat) => (
+            <CatCard key={cat.id} cat={cat} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── ABOUT / MISSION ──────────────────────────────────────────────────────────
 
 const ACTIONS = [
   {
-    icon: Heart,
-    title: "Prise en charge",
-    desc: "Chats malades, âgés ou abandonnés : Sans Croquettes Fixes prend en charge ceux qui n'ont plus d'autre solution, pour leur offrir soins, sécurité et, parfois, une seconde chance.",
+    icon: Shield,
+    label: 'Prise en charge',
+    desc: 'Chats malades, âgés ou abandonnés — on trouve une solution.',
+    tint: T.pink,
+    iconBg: '#FFC8C5',
   },
   {
     icon: HomeIcon,
-    title: "Distribution",
-    desc: "Tous les vendredis à Lyon (69), nous proposons une distribution gratuite de croquettes pour aider les familles en difficulté à nourrir leurs animaux et éviter les abandons pour des raisons financières.",
+    label: 'Distribution',
+    desc: 'Tous les vendredis à Lyon, alimentation aux familles fragiles.',
+    tint: T.lilac,
+    iconBg: '#CBC5E3',
   },
   {
-    icon: Stethoscope,
-    title: "Stérilisation",
-    desc: "Tout au long de l'année, nous menons des campagnes de stérilisation, notamment en partenariat avec les communes, pour limiter la prolifération des chats errants et améliorer leur qualité de vie.",
+    icon: Heart,
+    label: 'Stérilisation',
+    desc: 'Vaccins, stérilisation, soins — casser le cycle des abandons.',
+    tint: T.peach,
+    iconBg: '#F5C9A1',
   },
   {
-    icon: UserCheck,
-    title: "Accompagnement",
-    desc: "Nous accompagnons les particuliers confrontés à des difficultés avec leurs animaux en leur apportant écoute, conseils et solutions adaptées. L'objectif : éviter les abandons.",
+    icon: Smile,
+    label: 'Accompagnement',
+    desc: 'Soutien des particuliers en difficulté pour garder leurs chats.',
+    tint: T.mint,
+    iconBg: '#B4D8C5',
   },
   {
-    icon: Users,
-    title: "Sensibilisation",
-    desc: "Nous participons régulièrement à des événements pour sensibiliser le public à la cause animale, au respect du vivant et au bien-être des animaux, quels qu'ils soient.",
+    icon: PawPrint,
+    label: 'Sensibilisation',
+    desc: 'Auprès du public et des familles, informer change tout.',
+    tint: T.rose,
+    iconBg: '#F5B7CC',
   },
 ]
 
+function AboutSection() {
+  return (
+    <section style={{ background: T.surfaceAlt, padding: '64px 24px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative' }}>
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <div style={{ fontSize: 13, color: T.coral, fontWeight: 600, marginBottom: 8 }}>
+            Qui sommes-nous ?
+          </div>
+          <h2 style={{
+            fontSize: 'clamp(24px, 3.5vw, 34px)',
+            lineHeight: 1.05, letterSpacing: '-0.025em',
+            fontWeight: 600, margin: '0 0 12px', color: T.ink,
+          }}>
+            À propos de Sans Croquettes Fixes
+          </h2>
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: T.inkMuted, margin: '0 auto', maxWidth: 560 }}>
+            Une équipe entièrement bénévole, basée à Lyon depuis 2015. Voici un aperçu de nos actions sur le terrain.
+          </p>
+        </div>
+
+        <div
+          className="grid grid-cols-2 md:grid-cols-5"
+          style={{ gap: 12 }}
+        >
+          {ACTIONS.map(({ icon: Icon, label, desc, tint, iconBg }) => (
+            <div
+              key={label}
+              style={{ background: tint, borderRadius: 10, padding: 18 }}
+            >
+              <div style={{
+                width: 38, height: 38, borderRadius: '50%',
+                background: iconBg,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 14,
+              }}>
+                <Icon size={18} strokeWidth={1.6} style={{ color: T.ink }} />
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, letterSpacing: '-0.01em', color: T.ink }}>
+                {label}
+              </div>
+              <p style={{ fontSize: 12, color: T.inkMuted, lineHeight: 1.45, margin: 0 }}>
+                {desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── CTA PANEL ────────────────────────────────────────────────────────────────
+
+function CtaSection() {
+  return (
+    <section style={{ padding: '64px 24px', background: T.bg }}>
+      <div style={{
+        maxWidth: 1200, margin: '0 auto',
+        background: `linear-gradient(135deg, ${T.coral} 0%, ${T.magenta} 100%)`,
+        color: '#fff',
+        borderRadius: 12, padding: '44px 40px',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div
+          className="grid grid-cols-1 md:grid-cols-2"
+          style={{ gap: 48, alignItems: 'center' }}
+        >
+          {/* Copy */}
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ fontSize: 12, color: T.pink, fontWeight: 600, marginBottom: 8 }}>
+              Comment vous remercier ?
+            </div>
+            <h2 style={{
+              fontSize: 'clamp(22px, 3vw, 32px)',
+              lineHeight: 1.05, letterSpacing: '-0.02em',
+              fontWeight: 600, margin: '0 0 12px', color: '#fff',
+            }}>
+              Grâce à votre aide, des milliers d&apos;animaux ont une seconde chance.
+            </h2>
+            <p style={{ fontSize: 14, lineHeight: 1.55, color: 'rgba(255,255,255,0.88)', margin: 0, maxWidth: 460 }}>
+              Frais vétérinaires, matériel, transports — votre don sert directement nos pensionnaires.
+            </p>
+          </div>
+
+          {/* CTAs */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, position: 'relative', zIndex: 1 }}>
+            <Link
+              href="https://www.helloasso.com/associations/sans-croquettes-fixes/formulaires/1"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '14px 20px', borderRadius: 6,
+                background: '#fff', color: T.ink,
+                fontSize: 14, fontWeight: 600, textDecoration: 'none',
+              }}
+            >
+              <span>Faire un don</span>
+              <ArrowRight size={14} />
+            </Link>
+            <Link
+              href="/about-us#benevoles"
+              style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '14px 20px', borderRadius: 6,
+                background: 'rgba(255,255,255,0.15)', color: '#fff',
+                border: '1px solid rgba(255,255,255,0.30)',
+                fontSize: 14, fontWeight: 500, textDecoration: 'none',
+              }}
+            >
+              <span>Devenir famille d&apos;accueil</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── PAGE ─────────────────────────────────────────────────────────────────────
+
 export default function Home() {
   return (
-    <div className="min-h-screen">
+    <div style={{ minHeight: '100vh', background: T.bg }}>
       <Header />
-
       <main>
-        <section
-          className="relative overflow-hidden"
-          style={{ background: `linear-gradient(to right, ${DARK_BG}, #292930)` }}
-        >
-          <div className="container mx-auto px-4 pt-14 pb-24 md:pt-20 md:pb-28">
-            <div className="max-w-3xl space-y-6">
-              <span className="inline-block text-primary font-semibold text-sm tracking-widest uppercase">
-                Association de protection animale (69)
-              </span>
-
-              <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight">
-                Sans Croquettes Fixes : L'association des chats à Lyon.
-              </h1>
-
-              <h2 className="text-base md:text-lg font-medium text-white/80 leading-relaxed max-w-2xl">
-                Depuis 2015, nous luttons contre l'abandon et la précarité animale. 
-                <strong> Adoptez, donnez ou agissez</strong> pour offrir une seconde chance aux félins oubliés.
-              </h2>
-              <div className="flex flex-wrap gap-4 pt-2">
-                <Button asChild size="lg" className="text-base px-8">
-                  <Link href="/about-us">Notre histoire</Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="text-base px-8 bg-transparent text-white border-white/40 hover:bg-white/10 hover:text-white"
-                >
-                  <Link href="/adopt-pet">Adopter un chat à Lyon</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="absolute right-10 top-10 opacity-10 rotate-[-25deg] hidden md:block">
-            <Image src="/paw.png" alt="" width={180} height={180} />
-          </div>
-          <div className="absolute right-48 bottom-20 opacity-5 rotate-12 hidden lg:block">
-            <Image src="/paw.png" alt="" width={100} height={100} />
-          </div>
-
-          <div aria-hidden="true" className="absolute bottom-0 left-0 right-0" style={{ lineHeight: 0 }}>
-            <svg
-              viewBox="0 0 1440 70"
-              preserveAspectRatio="none"
-              style={{ display: "block", width: "100%", height: 70 }}
-            >
-              <path d={WAVE_PATH_INV} fill="white" />
-            </svg>
-          </div>
-        </section>
-
-        <section className="bg-white py-8">
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="border-l-4 border-primary pl-6">
-                <p className="text-lg leading-relaxed text-gray-700">
-                  Derrière chaque chat soigné, il y a un don. Sans Croquettes Fixes est une{" "}
-                  <strong>association 100 % bénévole basée à Lyon</strong> : pas de salaires, pas de frais cachés.
-                  Votre argent va directement là où il compte — la nourriture, les soins vétérinaires, la stérilisation.{" "}
-                  <strong>Même 5 €, ça change une vie.</strong>
-                </p>
-              </div>
-              <div className="flex flex-col items-center gap-4">
-                <Button asChild size="lg" className="w-full md:w-auto text-base px-10">
-                  <Link
-                    href="https://www.helloasso.com/associations/sans-croquettes-fixes/formulaires/1"
-                    target="_blank"
-                  >
-                    Je fais un don pour les chats de Lyon
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-white py-12 md:py-16">
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-2 gap-10 items-start">
-
-              <div className="space-y-5">
-                <span className="inline-block text-primary font-semibold tracking-widest uppercase text-sm">
-                  Nos chats disponibles à l'adoption
-                </span>
-                <h2 className="text-3xl md:text-4xl font-extrabold leading-tight">
-                  Adopter un chat à Lyon : ils n'attendent que vous
-                </h2>
-                <p className="text-base text-gray-700 leading-relaxed">
-                  Adopter un chat à Lyon, c'est offrir une seconde chance à un animal qui a souvent tout perdu.
-                  Nos chats sont <strong>vaccinés, identifiés et stérilisés</strong> — et surtout, ils ont été aimés
-                  et suivis par nos bénévoles. On vous accompagne avant, pendant et après l'adoption.
-                </p>
-                <p className="text-sm text-gray-500 leading-relaxed">
-                  <strong>Important :</strong> notre nouveau site étant en construction, toutes les fiches ne sont pas forcément à jour.
-                  Consultez notre page Facebook{" "}
-                  <Link
-                    href="https://www.facebook.com/sanscroquettesfixes"
-                    target="_blank"
-                    className="text-primary hover:underline"
-                  >
-                    en cliquant ici
-                  </Link>.
-                </p>
-              </div>
-
-              <div>
-                <AdoptionCarousel />
-                <div className="mt-5">
-                  <Button asChild size="sm" className="w-full">
-                    <Link href="/adopt-pet">Voir tous les chats à adopter</Link>
-                  </Button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-gray-50 py-12 md:py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center mb-8">
-              <span className="inline-block text-primary font-semibold mb-3 tracking-widest uppercase text-sm">
-                Qui sommes-nous ?
-              </span>
-              <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
-                Une association lyonnaise au service des chats —{" "}
-                <br />et de ceux qui les aiment
-              </h2>
-              <p className="text-lg text-gray-700">
-                Sans Croquettes Fixes est née à <strong>Lyon en 2015</strong>, autour d'une idée simple : personne ne devrait avoir à abandonner son animal faute de moyens.
-                <br /><br />
-                Depuis, on se bat chaque jour pour les chats en détresse et les humains qui font de leur mieux pour eux — en Auvergne-Rhône-Alpes et au-delà.
-              </p>
-              <p className="text-lg font-semibold mt-6">Voici un aperçu de nos actions :</p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-5">
-              {ACTIONS.map(({ icon: Icon, title, desc }) => (
-                <Card key={title} className="text-center">
-                  <CardHeader>
-                    <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
-                      <Icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-base">{title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>{desc}</CardDescription>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <WaveDivider from="white" to={DARK_BG} />
-
-        <section className="text-white py-12 md:py-16" style={{ background: DARK_BG }}>
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className="order-2 md:order-1 flex items-center justify-center select-none">
-                <div className="text-center">
-                  <div className="text-[9rem] md:text-[12rem] font-extrabold text-white/[0.06] leading-none">
-                    10
-                  </div>
-                  <div className="text-primary font-semibold uppercase tracking-widest text-sm -mt-6">
-                    Ans d'existence
-                  </div>
-                </div>
-              </div>
-              <div className="order-1 md:order-2 space-y-6">
-                <h2 className="text-3xl md:text-4xl font-extrabold">
-                  Les félins de l'ombre : un refuge pour ceux qu'on oublie trop souvent
-                </h2>
-                <div className="w-20 h-1 bg-primary" />
-                <p className="text-lg leading-relaxed text-white/90">
-                  En 2025, pour nos 10 ans, on se lance dans le projet le plus ambitieux de notre histoire : créer un vrai lieu de vie pour les chats qu'on ne peut ni adopter, ni laisser seuls dehors. Ceux qu'on appelle les invisibles. Ils méritent un chez-eux, eux aussi.
-                </p>
-                <p className="text-lg leading-relaxed text-white/90">
-                  Pour plus d'informations sur le projet, nous vous invitons à vous rendre directement sur la page de notre levée de fonds{" "}
-                  <Link
-                    href="https://www.helloasso.com/associations/sans-croquettes-fixes/collectes/aidez-nous-a-batir-un-lieu-pour-des-chats-oublies"
-                    target="_blank"
-                    className="text-primary hover:underline font-semibold"
-                  >
-                    Soutenir le projet Les félins de l'ombre
-                  </Link>.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <WaveDivider from={DARK_BG} to={GRAY_50} invert />
-
-        <section className="bg-gray-50 py-12 md:py-16">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
-              <div>
-                <span className="inline-block text-primary font-semibold mb-3 tracking-widest uppercase text-sm">
-                  Découvrez notre blog pour plus d'actualités
-                </span>
-                <h2 className="text-3xl md:text-4xl font-extrabold">Nos dernières updates</h2>
-              </div>
-              <Link
-                href="/news"
-                className="mt-4 md:mt-0 text-primary font-semibold hover:underline text-sm"
-              >
-                Voir tout le blog →
-              </Link>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              {[1, 2].map((i) => (
-                <Card key={i} className="overflow-hidden">
-                  <div className="h-48 bg-gradient-to-br from-gray-200 to-gray-300" />
-                  <CardHeader>
-                    <div className="text-sm text-gray-500 mb-2">juillet 25, 2025</div>
-                    <CardTitle className="text-xl">Titre de l'article {i}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-base">
-                      Extrait de l'article à venir depuis Strapi...
-                    </CardDescription>
-                    <Button variant="link" className="mt-4 p-0 text-primary">
-                      Lire la suite →
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <WaveDivider from={GRAY_50} to={DARK_BG} />
-
-        <section className="text-white py-12 md:py-16" style={{ background: DARK_BG }}>
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-10 max-w-3xl mx-auto">
-              <span className="inline-block text-primary font-semibold mb-3 tracking-widest uppercase text-sm">
-                Comment vous remercier ?
-              </span>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-snug">
-                Ce que vous rendez possible, à Lyon et ailleurs
-              </h2>
-            </div>
-            <div className="grid grid-cols-3 gap-6 md:gap-12 max-w-3xl mx-auto">
-              {[
-                { value: 10, suffix: "", decimals: 0, label: "Ans d'engagement" },
-                { value: 5.6, suffix: "k", decimals: 1, label: "Animaux sauvés" },
-                { value: 18, suffix: "k", decimals: 0, label: "Tonnes de croquettes" },
-              ].map(({ value, suffix, decimals, label }) => (
-                <div key={label} className="text-center">
-                  <AnimatedCounter
-                    value={value}
-                    suffix={suffix}
-                    decimals={decimals}
-                    className="text-5xl md:text-6xl font-extrabold text-primary mb-3 block"
-                  />
-                  <div className="text-white/70 text-xs md:text-sm font-medium uppercase tracking-widest">
-                    {label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <WaveDivider from={DARK_BG} to={CREAM_BG} invert />
-
-        <section className="py-12 md:py-16" style={{ background: CREAM_BG }}>
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6 relative">
-                <div
-                  aria-hidden="true"
-                  className="absolute -top-8 -left-4 text-primary/15 text-[9rem] leading-none select-none pointer-events-none"
-                >
-                  "
-                </div>
-                <span className="inline-block text-primary font-semibold tracking-widest uppercase text-sm">
-                  L'histoire de Sans Croquettes Fixes
-                </span>
-                <h3 className="text-3xl md:text-4xl font-extrabold">
-                  L'abandon n'est pas une fatalité. On est là pour le prouver.
-                </h3>
-                <div className="w-20 h-1 bg-primary" />
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  C'est autour de cette conviction que Sans Croquettes Fixes est née à Lyon en 2015. Au départ : quelques bénévoles et des sacs de croquettes distribués aux animaux des sans-abri. Aujourd'hui : des centaines de chats sauvés, des familles soutenues, et une communauté qui refuse de baisser les bras. Parce qu'on croit que l'amour qu'on donne aux animaux dit quelque chose de qui on est.
-                </p>
-                <p className="text-sm text-gray-500 italic">
-                  — Anaïs Hillion, co-fondatrice de Sans Croquettes Fixes
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {[
-                  {
-                    icon: Heart,
-                    title: "Faire un don pour les chats",
-                    desc: "Pour nous aider à financer les soins de nos animaux, nous avons besoin de dons.",
-                  },
-                  {
-                    icon: Stethoscope,
-                    title: "Accueillir un chat temporairement",
-                    desc: "Chez Sans Croquettes Fixes, les chats sont placés temporairement dans des familles d'accueil.",
-                  },
-                  {
-                    icon: Users,
-                    title: "Rejoindre l'équipe bénévole à Lyon",
-                    desc: "Toutes nos actions sont rendues possibles grâce à nos bénévoles.",
-                    colSpan: true,
-                  },
-                ].map(({ icon: Icon, title, desc, colSpan }) => (
-                  <Card
-                    key={title}
-                    className={`text-center border-t-4 border-primary ${colSpan ? "md:col-span-2" : ""}`}
-                  >
-                    <CardHeader>
-                      <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                        <Icon className="w-6 h-6 text-primary" />
-                      </div>
-                      <CardTitle className="text-lg">{title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription>{desc}</CardDescription>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+        <HeroSection />
+        <StatsStrip />
+        <CatsPreview />
+        <AboutSection />
+        <CtaSection />
       </main>
-
       <Footer />
     </div>
   )
