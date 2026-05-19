@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { CAT_TINT } from "@/lib/placeholder-cats"
 import type { CardAnimal } from "@/lib/strapi"
 
@@ -15,29 +16,40 @@ export function CatCard({ cat }: CatCardProps) {
       href={`/adopt-pet/${cat.documentId}`}
       className={`${tintClass} rounded-xl p-2.5 block no-underline text-ink transition-transform duration-150`}
     >
-      {/* Gradient placeholder — replaced by next/image once Strapi media is wired */}
       <div
         className="relative mb-2.5 rounded-lg overflow-hidden aspect-square"
-        style={{
+        style={cat.photoUrl ? undefined : {
           background: `linear-gradient(135deg, ${cat.tones[0]} 0%, ${cat.tones[1]} 100%)`,
         }}
       >
-        <svg
-          width="100%" height="100%"
-          className="absolute inset-0 opacity-[0.15] mix-blend-overlay"
-          preserveAspectRatio="none"
-        >
-          <defs>
-            <pattern id={`stripe-${cat.id}`} width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
-              <line x1="0" y1="0" x2="0" y2="14" stroke="#ffffff" strokeWidth="6" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill={`url(#stripe-${cat.id})`} />
-        </svg>
-
-        <div className="absolute inset-0 flex items-end p-3 text-white/90">
-          <span className="text-2xs font-medium">Photo · {cat.name}</span>
-        </div>
+        {cat.photoUrl ? (
+          <Image
+            src={cat.photoUrl}
+            alt={cat.name}
+            fill
+            unoptimized
+            sizes="(max-width: 768px) 50vw, 25vw"
+            style={{ objectFit: 'cover' }}
+          />
+        ) : (
+          <>
+            <svg
+              width="100%" height="100%"
+              className="absolute inset-0 opacity-[0.15] mix-blend-overlay"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <pattern id={`stripe-${cat.id}`} width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                  <line x1="0" y1="0" x2="0" y2="14" stroke="#ffffff" strokeWidth="6" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill={`url(#stripe-${cat.id})`} />
+            </svg>
+            <div className="absolute inset-0 flex items-end p-3 text-white/90">
+              <span className="text-2xs font-medium">Photo · {cat.name}</span>
+            </div>
+          </>
+        )}
 
         <div className={`absolute bottom-2 right-2 ${tagClass} text-white px-2.5 py-1 rounded text-2xs font-semibold`}>
           {cat.tag}

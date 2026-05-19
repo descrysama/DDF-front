@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 import { fetchAnimals } from "@/lib/strapi"
 
@@ -54,24 +55,38 @@ export async function HeroSection() {
         {/* Right — featured cat */}
         {featured && (
           <div className="relative aspect-[5/4] rounded-[10px] overflow-hidden shadow-card">
-            <div
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(135deg, ${featured.tones[0]} 0%, ${featured.tones[1]} 100%)`,
-              }}
-            />
-            <svg
-              width="100%" height="100%"
-              className="absolute inset-0 opacity-[0.12] mix-blend-overlay"
-              preserveAspectRatio="none"
-            >
-              <defs>
-                <pattern id="hero-stripe" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
-                  <line x1="0" y1="0" x2="0" y2="14" stroke="#ffffff" strokeWidth="6" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#hero-stripe)" />
-            </svg>
+            {featured.photoUrl ? (
+              <Image
+                src={featured.photoUrl}
+                alt={featured.name}
+                fill
+                priority
+                unoptimized
+                sizes="(max-width: 768px) 100vw, 50vw"
+                style={{ objectFit: 'cover' }}
+              />
+            ) : (
+              <>
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: `linear-gradient(135deg, ${featured.tones[0]} 0%, ${featured.tones[1]} 100%)`,
+                  }}
+                />
+                <svg
+                  width="100%" height="100%"
+                  className="absolute inset-0 opacity-[0.12] mix-blend-overlay"
+                  preserveAspectRatio="none"
+                >
+                  <defs>
+                    <pattern id="hero-stripe" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                      <line x1="0" y1="0" x2="0" y2="14" stroke="#ffffff" strokeWidth="6" />
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#hero-stripe)" />
+                </svg>
+              </>
+            )}
 
             <div className="absolute top-3.5 left-3.5 px-2.5 py-1 rounded bg-coral text-white text-[11px] font-semibold">
               Nouvelle arrivée
