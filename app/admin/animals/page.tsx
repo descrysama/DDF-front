@@ -1,126 +1,316 @@
 import Link from 'next/link'
-import { fetchAnimals } from '@/lib/strapi'
+import { fetchAnimals, fetchAdoptionRequests } from '@/lib/strapi'
 import { deleteAnimal } from './actions'
 import StatusBadge from '@/components/admin/status-badge'
-import { ADMIN } from '@/lib/admin-tokens'
+import { AD, TINT } from '@/lib/admin-tokens'
+import { Search, Pencil, Trash2 } from 'lucide-react'
 
-const thStyle: React.CSSProperties = {
-  background: '#f8f9fa',
-  padding: '10px 14px',
-  textAlign: 'left',
-  fontSize: 12,
-  fontWeight: 600,
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  color: ADMIN.inkMuted,
-  borderBottom: `1px solid ${ADMIN.border}`,
+const MONO: React.CSSProperties = {
+  fontFamily: 'Geist Mono, ui-monospace, monospace',
+  fontSize: 11.5,
+  color: AD.inkMuted,
 }
 
-const tdStyle: React.CSSProperties = {
-  padding: '10px 14px',
-  fontSize: 14,
-  color: ADMIN.ink,
-  borderBottom: `1px solid ${ADMIN.border}`,
-  verticalAlign: 'middle',
-}
+const AVATAR_TONES: [string, string][] = [
+  ['#E8C9B3', '#C99879'],
+  ['#D9D3C5', '#9D9485'],
+  ['#E0AC9C', '#A87968'],
+  ['#F1D7C4', '#D3A88C'],
+  ['#D9B898', '#A47A55'],
+  ['#C6C8CB', '#7E8189'],
+  ['#3C3F4E', '#1F2235'],
+  ['#C0B095', '#876D52'],
+]
+
+const GRID_COLS = '32px 1.6fr 0.9fr 0.9fr 1.1fr 110px'
 
 export default async function AdminAnimalsPage() {
-  const { animals, total } = await fetchAnimals({ limit: 100 })
+  const [{ animals, total }, adoptionData] = await Promise.all([
+    fetchAnimals({ limit: 100 }),
+    fetchAdoptionRequests({ limit: 1 }),
+  ])
+
+  const available = animals.filter(a => a.status === 'available').length
+  const in_foster = animals.filter(a => a.status === 'in_foster').length
+  const reserved  = animals.filter(a => a.status === 'reserved').length
+
+  const STAT_CARDS = [
+    { label: 'Publiés',              count: available,              tint: TINT.mint,  dot: '#3FA66E' },
+    { label: 'En famille d\'accueil', count: in_foster,              tint: TINT.peach, dot: '#E0944A' },
+    { label: 'Réservés',             count: reserved,               tint: TINT.lilac, dot: '#7B6CC4' },
+    { label: 'Demandes en attente',  count: adoptionData.total,     tint: TINT.pink,  dot: '#E84A77' },
+  ]
 
   return (
-    <div style={{ padding: 32 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+    <div style={{ padding: '28px 32px' }}>
+      {/* Breadcrumb */}
+      <p style={{ ...MONO, marginBottom: 8 }}>Admin / Chats</p>
+
+      {/* Heading */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 22 }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 2 }}>Animaux</h1>
-          <p style={{ fontSize: 13, color: ADMIN.inkMuted }}>{total} animal(aux) au total</p>
+          <h1 style={{ fontSize: 28, fontWeight: 600, color: AD.ink, letterSpacing: '-0.025em', marginBottom: 4 }}>
+            Chats
+          </h1>
+          <p style={{ fontSize: 13, color: AD.inkMuted }}>{total} chat(s) au total</p>
         </div>
         <Link
           href="/admin/animals/new"
           style={{
             padding: '9px 18px',
-            background: ADMIN.coral,
+            background: AD.coral,
             color: '#fff',
-            borderRadius: 6,
+            borderRadius: 7,
             fontWeight: 600,
-            fontSize: 14,
+            fontSize: 13.5,
             textDecoration: 'none',
+            flexShrink: 0,
           }}
         >
-          + Ajouter un animal
+          + Ajouter un chat
         </Link>
       </div>
 
+      {/* Stat strip */}
       <div
         style={{
-          background: ADMIN.card,
-          border: `1px solid ${ADMIN.border}`,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 14,
+          marginBottom: 22,
+        }}
+      >
+        {STAT_CARDS.map(({ label, count, tint, dot }) => (
+          <div
+            key={label}
+            style={{
+              background: AD.surface,
+              border: `1px solid ${AD.border}`,
+              borderRadius: 10,
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <span style={{ width: 10, height: 10, borderRadius: '50%', background: dot, flexShrink: 0 }} />
+            <div>
+              <p style={{ fontSize: 11.5, color: AD.inkMuted }}>{label}</p>
+              <p style={{ fontSize: 20, fontWeight: 700, color: AD.ink, lineHeight: 1.2 }}>{count}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Table container */}
+      <div
+        style={{
+          background: AD.surface,
+          border: `1px solid ${AD.border}`,
           borderRadius: 10,
           overflow: 'hidden',
         }}
       >
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th style={thStyle}>Nom</th>
-              <th style={thStyle}>Âge</th>
-              <th style={thStyle}>Genre</th>
-              <th style={thStyle}>Race</th>
-              <th style={thStyle}>Statut</th>
-              <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {animals.map((animal) => (
-              <tr key={animal.documentId}>
-                <td style={{ ...tdStyle, fontWeight: 600 }}>{animal.name}</td>
-                <td style={tdStyle}>{animal.age}</td>
-                <td style={tdStyle}>{animal.sex}</td>
-                <td style={{ ...tdStyle, color: ADMIN.inkMuted }}>—</td>
-                <td style={tdStyle}>
-                  <StatusBadge status={animal.status} />
-                </td>
-                <td style={{ ...tdStyle, textAlign: 'right' }}>
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                    <Link
-                      href={`/admin/animals/${animal.documentId}`}
-                      style={{
-                        padding: '5px 12px',
-                        background: ADMIN.border,
-                        color: ADMIN.ink,
-                        borderRadius: 5,
-                        fontSize: 13,
-                        fontWeight: 500,
-                        textDecoration: 'none',
-                      }}
-                    >
-                      Modifier
-                    </Link>
-                    <form action={deleteAnimal.bind(null, animal.documentId)}>
-                      <button
-                        type="submit"
-                        style={{
-                          padding: '5px 12px',
-                          background: '#fee2e2',
-                          color: ADMIN.danger,
-                          border: 'none',
-                          borderRadius: 5,
-                          fontSize: 13,
-                          fontWeight: 500,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Supprimer
-                      </button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Header row */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: GRID_COLS,
+            alignItems: 'center',
+            background: AD.surfaceAlt,
+            padding: '10px 18px',
+            gap: 12,
+            borderBottom: `1px solid ${AD.border}`,
+          }}
+        >
+          <div />
+          {['Chat', 'Catégorie', 'Âge', 'Statut', 'Actions'].map(col => (
+            <div
+              key={col}
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                color: AD.inkMuted,
+              }}
+            >
+              {col}
+            </div>
+          ))}
+        </div>
+
+        {/* Rows */}
+        {animals.map((animal, idx) => {
+          const tones = AVATAR_TONES[idx % AVATAR_TONES.length]
+          return (
+            <div
+              key={animal.documentId}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: GRID_COLS,
+                alignItems: 'center',
+                padding: '12px 18px',
+                gap: 12,
+                borderBottom: `1px solid ${AD.border}`,
+                background: AD.surface,
+              }}
+            >
+              {/* Checkbox placeholder */}
+              <div
+                style={{
+                  width: 16,
+                  height: 16,
+                  border: `1.5px solid ${AD.border}`,
+                  borderRadius: 4,
+                  background: AD.surface,
+                }}
+              />
+
+              {/* Chat — avatar + name + documentId */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 6,
+                    background: `linear-gradient(135deg, ${tones[0]}, ${tones[1]})`,
+                    flexShrink: 0,
+                  }}
+                />
+                <div>
+                  <p style={{ fontSize: 13.5, fontWeight: 600, color: AD.ink }}>{animal.name}</p>
+                  <p style={{ fontSize: 11, color: AD.inkSubtle, fontFamily: 'Geist Mono, ui-monospace, monospace' }}>
+                    {animal.documentId.slice(0, 10)}…
+                  </p>
+                </div>
+              </div>
+
+              {/* Catégorie */}
+              <div>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    padding: '3px 8px',
+                    borderRadius: 4,
+                    background: animal.tagStyle === 'coral' ? AD.coral : AD.ink,
+                    color: '#fff',
+                  }}
+                >
+                  {animal.tag}
+                </span>
+              </div>
+
+              {/* Âge */}
+              <p style={{ fontSize: 13, color: AD.ink }}>{animal.age}</p>
+
+              {/* Statut */}
+              <StatusBadge status={animal.status} />
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <Link
+                  href={`/admin/animals/${animal.documentId}`}
+                  title="Voir"
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 6,
+                    border: `1px solid ${AD.border}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textDecoration: 'none',
+                    background: AD.surface,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Search size={13} color={AD.inkMuted} />
+                </Link>
+                <Link
+                  href={`/admin/animals/${animal.documentId}`}
+                  title="Modifier"
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 6,
+                    background: TINT.peach,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textDecoration: 'none',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Pencil size={13} color="#E0944A" />
+                </Link>
+                <form action={deleteAnimal.bind(null, animal.documentId)}>
+                  <button
+                    type="submit"
+                    title="Supprimer"
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 6,
+                      background: TINT.pink,
+                      border: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Trash2 size={13} color={AD.coralInk} />
+                  </button>
+                </form>
+              </div>
+            </div>
+          )
+        })}
+
         {animals.length === 0 && (
-          <div style={{ padding: 32, textAlign: 'center', color: ADMIN.inkMuted }}>
-            Aucun animal trouvé.
+          <div style={{ padding: 40, textAlign: 'center', color: AD.inkMuted, fontSize: 14 }}>
+            Aucun chat trouvé.
+          </div>
+        )}
+
+        {/* Pagination footer */}
+        {animals.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px 18px',
+              borderTop: `1px solid ${AD.border}`,
+            }}
+          >
+            <p style={{ fontSize: 12.5, color: AD.inkMuted }}>
+              Affichage de 1 à {animals.length} sur {total} résultats
+            </p>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {['←', '1', '→'].map(btn => (
+                <button
+                  key={btn}
+                  disabled
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 6,
+                    border: `1px solid ${AD.border}`,
+                    background: btn === '1' ? AD.ink : AD.surface,
+                    color: btn === '1' ? '#fff' : AD.inkMuted,
+                    fontSize: 12.5,
+                    fontWeight: btn === '1' ? 700 : 400,
+                    cursor: 'default',
+                  }}
+                >
+                  {btn}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
