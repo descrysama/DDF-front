@@ -1,7 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
-import { T } from "@/lib/design-tokens"
 
 const COLUMNS = [
   {
@@ -25,10 +24,10 @@ const COLUMNS = [
   {
     title: 'Soutenir',
     items: [
-      { label: 'Faire un don',    href: '/donate'                },
-      { label: 'Don matériel',    href: '/donate#materiel'       },
-      { label: 'Devenir bénévole', href: '/about-us#benevoles'  },
-      { label: 'Mécénat',         href: '/donate#mecenat'       },
+      { label: 'Faire un don',     href: '/donate'               },
+      { label: 'Don matériel',     href: '/donate#materiel'      },
+      { label: 'Devenir bénévole', href: '/about-us#benevoles'   },
+      { label: 'Mécénat',          href: '/donate#mecenat'       },
     ],
   },
   {
@@ -43,106 +42,77 @@ const COLUMNS = [
 ]
 
 const SOCIAL = [
-  { label: 'ig', bg: T.rose,  href: 'https://www.instagram.com/sanscroquettesfixes/' },
-  { label: 'fb', bg: T.lilac, href: 'https://www.facebook.com/sanscroquettesfixes'   },
-  { label: 'yt', bg: T.mint,  href: 'https://www.youtube.com/@SansCroquettesFixes'   },
+  { label: 'ig', bgClass: 'bg-rose',  href: 'https://www.instagram.com/sanscroquettesfixes/' },
+  { label: 'fb', bgClass: 'bg-lilac', href: 'https://www.facebook.com/sanscroquettesfixes'   },
+  { label: 'yt', bgClass: 'bg-mint',  href: 'https://www.youtube.com/@SansCroquettesFixes'   },
 ]
 
 export default function Footer() {
   return (
-    <footer style={{
-      background: `linear-gradient(180deg, ${T.surfaceAlt} 0%, ${T.peach} 100%)`,
-      color: T.ink,
-      position: 'relative',
-      overflow: 'hidden',
-      borderTop: `3px solid ${T.coral}`,
-    }}>
+    <footer
+      className="text-ink relative overflow-hidden border-t-[3px] border-t-coral"
+      style={{
+        background: 'linear-gradient(180deg, var(--scf-surface-alt) 0%, var(--scf-peach) 100%)',
+      }}
+    >
       {/* Decorative radial wash */}
       <div
         aria-hidden="true"
+        className="absolute top-0 right-0 w-[360px] h-[200px] opacity-60 pointer-events-none"
         style={{
-          position: 'absolute', top: 0, right: 0,
-          width: 360, height: 200,
-          background: `radial-gradient(ellipse at top right, ${T.rose} 0%, transparent 70%)`,
-          opacity: 0.6, pointerEvents: 'none',
+          background: 'radial-gradient(ellipse at top right, var(--scf-rose) 0%, transparent 70%)',
         }}
       />
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', position: 'relative' }}>
+      <div className="max-w-[1200px] mx-auto px-6 relative">
 
         {/* Newsletter strip */}
-        <div
-          className="grid grid-cols-1 md:grid-cols-2"
-          style={{
-            gap: 40, alignItems: 'center',
-            padding: '36px 0 28px',
-            borderBottom: `1px solid ${T.borderStrong}`,
-          }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center py-9 pb-7 border-b border-border-strong">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-              <div style={{ width: 28, height: 28, position: 'relative', flexShrink: 0 }}>
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <div className="relative w-7 h-7 shrink-0">
                 <Image src="/logo.png" alt="" fill className="object-contain" />
               </div>
-              <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.015em' }}>
+              <span className="text-[15px] font-semibold tracking-[-0.015em]">
                 Sans Croquettes Fixes
               </span>
             </div>
-            <p style={{ fontSize: 13, lineHeight: 1.55, color: T.inkMuted, margin: 0, maxWidth: 360 }}>
+            <p className="text-sm leading-[1.55] text-ink-muted m-0 max-w-[360px]">
               Association loi 1901 — Protection animale dans la région lyonnaise depuis 2015.
             </p>
           </div>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 600, margin: '0 0 8px' }}>
+            <p className="text-sm font-semibold m-0 mb-2">
               Recevez les nouvelles de l&apos;asso
             </p>
-            <div style={{
-              display: 'flex', background: '#fff',
-              borderRadius: 8, padding: 4,
-              border: `1px solid ${T.borderStrong}`,
-            }}>
+            <div className="flex bg-white rounded-lg p-1 border border-border-strong">
               <input
                 type="email"
                 placeholder="Votre email"
-                style={{
-                  flex: 1, border: 'none', outline: 'none', background: 'transparent',
-                  fontSize: 13, fontFamily: 'inherit', color: T.ink, padding: '8px 12px',
-                }}
+                className="flex-1 border-none outline-none bg-transparent text-sm text-ink px-3 py-2 font-[inherit]"
               />
               <button
                 type="submit"
-                style={{
-                  padding: '8px 16px', borderRadius: 6,
-                  background: T.coral, color: '#fff',
-                  border: 'none', cursor: 'pointer',
-                  fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                }}
+                className="px-4 py-2 rounded-md bg-coral text-white border-none cursor-pointer text-sm font-semibold font-[inherit] inline-flex items-center gap-1.5"
               >
                 S&apos;abonner <ArrowRight size={12} />
               </button>
             </div>
-            <p style={{ fontSize: 11, color: T.inkMuted, margin: '6px 0 0' }}>
+            <p className="text-2xs text-ink-muted mt-1.5 mb-0">
               Une newsletter par mois, pas plus — promis.
             </p>
           </div>
         </div>
 
         {/* Link columns */}
-        <div
-          className="grid grid-cols-2 md:grid-cols-5"
-          style={{ gap: 28, padding: '28px 0 24px' }}
-        >
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-7 py-7 pb-6">
           {COLUMNS.map(({ title, items }) => (
             <div key={title}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{title}</div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 8 }}>
+              <div className="text-xs font-semibold text-ink mb-2.5">{title}</div>
+              <ul className="list-none p-0 m-0 grid gap-2">
                 {items.map(({ label, href }) => (
                   <li key={label}>
-                    <Link
-                      href={href}
-                      style={{ fontSize: 13, color: T.inkMuted, textDecoration: 'none' }}
-                    >
+                    <Link href={href} className="text-sm text-ink-muted no-underline">
                       {label}
                     </Link>
                   </li>
@@ -153,25 +123,19 @@ export default function Footer() {
 
           {/* Contact + social */}
           <div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: T.ink, marginBottom: 10 }}>Contact</div>
-            <div style={{ display: 'grid', gap: 6, fontSize: 13, color: T.inkMuted, marginBottom: 14 }}>
+            <div className="text-xs font-semibold text-ink mb-2.5">Contact</div>
+            <div className="grid gap-1.5 text-sm text-ink-muted mb-3.5">
               <div>contact@sanscroquettesfixes.fr</div>
               <div>Lyon (69) &amp; alentours</div>
             </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {SOCIAL.map(({ label, bg, href }) => (
+            <div className="flex gap-1.5">
+              {SOCIAL.map(({ label, bgClass, href }) => (
                 <Link
                   key={label}
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    width: 32, height: 32, borderRadius: 8,
-                    background: bg, color: T.ink,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, fontWeight: 600, textDecoration: 'none',
-                    fontFamily: 'var(--font-geist-mono)', flexShrink: 0,
-                  }}
+                  className={`w-8 h-8 rounded-lg ${bgClass} text-ink flex items-center justify-center text-2xs font-semibold no-underline shrink-0 font-[var(--font-geist-mono)]`}
                 >
                   {label}
                 </Link>
@@ -181,19 +145,13 @@ export default function Footer() {
         </div>
 
         {/* Bottom strip */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '16px 0 24px',
-          fontSize: 11, color: T.inkMuted,
-          borderTop: `1px solid ${T.border}`,
-          flexWrap: 'wrap', gap: 12,
-        }}>
+        <div className="flex justify-between items-center py-4 pb-6 text-2xs text-ink-muted border-t border-border flex-wrap gap-3">
           <span>© 2026 Sans Croquettes Fixes · SIRET 81819530700017</span>
-          <div style={{ display: 'flex', gap: 18 }}>
-            <Link href="/mentions-legales" style={{ color: 'inherit', textDecoration: 'none' }}>
+          <div className="flex gap-[18px]">
+            <Link href="/mentions-legales" className="text-ink-muted no-underline">
               Mentions légales
             </Link>
-            <Link href="/confidentialite" style={{ color: 'inherit', textDecoration: 'none' }}>
+            <Link href="/confidentialite" className="text-ink-muted no-underline">
               Confidentialité
             </Link>
           </div>

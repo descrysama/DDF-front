@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { T } from "@/lib/design-tokens"
 import { CAT_TINT, PlaceholderCat } from "@/lib/placeholder-cats"
 
 interface CatCardProps {
@@ -7,35 +6,24 @@ interface CatCardProps {
 }
 
 export function CatCard({ cat }: CatCardProps) {
-  const tint = CAT_TINT[cat.tag]
-  const tagBg = cat.tagStyle === 'coral' ? T.coral : T.ink
+  const tintClass = CAT_TINT[cat.tag]
+  const tagClass = cat.tagStyle === 'coral' ? 'bg-coral' : 'bg-ink'
 
   return (
     <Link
       href={`/adopt-pet/${cat.id}`}
-      style={{
-        background: tint,
-        borderRadius: 12,
-        padding: 10,
-        display: 'block',
-        textDecoration: 'none',
-        color: 'inherit',
-        transition: 'transform .15s',
-      }}
+      className={`${tintClass} rounded-xl p-2.5 block no-underline text-ink transition-transform duration-150`}
     >
       {/* Placeholder photo */}
-      <div style={{
-        position: 'relative',
-        marginBottom: 10,
-        borderRadius: 8,
-        overflow: 'hidden',
-        aspectRatio: '1 / 1',
-        background: `linear-gradient(135deg, ${cat.tones[0]} 0%, ${cat.tones[1]} 100%)`,
-      }}>
-        {/* Stripe texture overlay */}
+      <div
+        className="relative mb-2.5 rounded-lg overflow-hidden aspect-square"
+        style={{
+          background: `linear-gradient(135deg, ${cat.tones[0]} 0%, ${cat.tones[1]} 100%)`,
+        }}
+      >
         <svg
           width="100%" height="100%"
-          style={{ position: 'absolute', inset: 0, opacity: 0.15, mixBlendMode: 'overlay' }}
+          className="absolute inset-0 opacity-[0.15] mix-blend-overlay"
           preserveAspectRatio="none"
         >
           <defs>
@@ -46,35 +34,24 @@ export function CatCard({ cat }: CatCardProps) {
           <rect width="100%" height="100%" fill={`url(#stripe-${cat.id})`} />
         </svg>
 
-        {/* Photo label */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', alignItems: 'flex-end',
-          padding: 12, color: 'rgba(255,255,255,0.9)',
-        }}>
-          <span style={{ fontSize: 11, fontWeight: 500 }}>Photo · {cat.name}</span>
+        <div className="absolute inset-0 flex items-end p-3 text-white/90">
+          <span className="text-2xs font-medium">Photo · {cat.name}</span>
         </div>
 
-        {/* Tag badge */}
-        <div style={{
-          position: 'absolute', bottom: 8, right: 8,
-          background: tagBg, color: '#fff',
-          padding: '4px 10px', borderRadius: 4,
-          fontSize: 11, fontWeight: 600,
-        }}>
+        <div className={`absolute bottom-2 right-2 ${tagClass} text-white px-2.5 py-1 rounded text-2xs font-semibold`}>
           {cat.tag}
         </div>
       </div>
 
       {/* Info */}
-      <div style={{ padding: '0 4px 4px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
-          <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.01em', color: T.ink }}>
+      <div className="px-1 pb-1">
+        <div className="flex justify-between items-baseline mb-0.5">
+          <span className="text-[15px] font-semibold tracking-[-0.01em] text-ink">
             {cat.name}
           </span>
-          <span style={{ fontSize: 11, color: T.inkMuted }}>{cat.age}</span>
+          <span className="text-2xs text-ink-muted">{cat.age}</span>
         </div>
-        <p style={{ fontSize: 12, color: T.inkMuted, lineHeight: 1.4, margin: 0 }}>
+        <p className="text-xs text-ink-muted leading-[1.4] m-0">
           {cat.blurb}
         </p>
       </div>

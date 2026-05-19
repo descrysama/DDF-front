@@ -1,6 +1,5 @@
 import Header from '@/components/header'
 import Footer from '@/components/footer'
-import { T } from '@/lib/design-tokens'
 import DonateForm from './_components/donate-form'
 
 export const metadata = {
@@ -10,7 +9,7 @@ export const metadata = {
 
 export default function DonatePage() {
   return (
-    <div style={{ minHeight: '100vh', background: T.bg }}>
+    <div className="min-h-screen bg-bg">
       <Header />
       <main>
         <DonateForm />

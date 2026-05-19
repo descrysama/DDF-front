@@ -20,12 +20,12 @@ export interface PlaceholderCat {
 }
 
 export const CAT_TINT: Record<CatTag, string> = {
-  'Chaton':          '#FCE9D9',
-  'Adulte mâle':     '#FEE6E5',
-  'Adulte femelle':  '#FEE6E5',
-  'Senior':          '#E8E5F4',
-  'Duo':             '#E0F0E8',
-  'Cas particulier': '#FDE2EC',
+  'Chaton':          'bg-peach',
+  'Adulte mâle':     'bg-pink',
+  'Adulte femelle':  'bg-pink',
+  'Senior':          'bg-lilac',
+  'Duo':             'bg-mint',
+  'Cas particulier': 'bg-rose',
 }
 
 export const PLACEHOLDER_CATS: PlaceholderCat[] = [

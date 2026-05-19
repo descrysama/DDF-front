@@ -51,7 +51,52 @@
   --radius-md:                var(--radius);
   --radius-lg:                calc(var(--radius) + 2px);
   --radius-xl:                calc(var(--radius) + 6px);
+
+  /* ── SCF Tokens ──────────────────────────────────────── */
+
+  /* Colors → bg-*, text-*, border-*, from-*, to-* */
+  --color-bg:            #FBFAF7;
+  --color-surface:       #FFFFFF;
+  --color-surface-alt:   #F4F1EB;
+  --color-ink:           #252840;
+  --color-ink-muted:     #6A6C7A;
+  --color-ink-subtle:    #A6A6AE;
+  --color-border-strong: #D8D3C8;
+  --color-coral:         #F76C70;
+  --color-coral-soft:    #FEE6E5;
+  --color-coral-ink:     #B43A3F;
+  --color-magenta:       #E84A77;
+  --color-pink:          #FEE6E5;
+  --color-peach:         #FCE9D9;
+  --color-mint:          #E0F0E8;
+  --color-lilac:         #E8E5F4;
+  --color-rose:          #FDE2EC;
+
+  /* Custom shadows → shadow-card, shadow-photo */
+  --shadow-card:  0 18px 50px rgba(37,40,64,0.18);
+  --shadow-photo: 0 18px 50px rgba(37,40,64,0.16);
+
+  /* Fluid font sizes → text-2xs … text-h1 */
+  --font-size-2xs:   0.6875rem;
+  --font-size-xs:    0.75rem;
+  --font-size-sm:    0.8125rem;
+  --font-size-base:  0.875rem;
+  --font-size-md:    0.9375rem;
+  --font-size-lg:    1rem;
+  --font-size-h3:    clamp(22px, 3vw, 32px);
+  --font-size-h2:    clamp(24px, 3.5vw, 34px);
+  --font-size-h1-sm: clamp(34px, 4vw, 52px);
+  --font-size-h1-md: clamp(36px, 4.5vw, 54px);
+  --font-size-h1:    clamp(40px, 5vw, 60px);
 }
+
+@utility text-2xs   { font-size: var(--font-size-2xs); }
+@utility text-md    { font-size: var(--font-size-md); }
+@utility text-h3    { font-size: var(--font-size-h3); }
+@utility text-h2    { font-size: var(--font-size-h2); }
+@utility text-h1-sm { font-size: var(--font-size-h1-sm); }
+@utility text-h1-md { font-size: var(--font-size-h1-md); }
+@utility text-h1    { font-size: var(--font-size-h1); }
 
 * {
   border-color: hsl(var(--border));

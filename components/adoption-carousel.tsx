@@ -74,7 +74,7 @@ export function AdoptionCarousel() {
                   <div className="space-y-1 text-xs text-gray-600">
                     <div className="flex items-center gap-2">
                       <HomeIcon className="w-3 h-3 text-primary shrink-0" />
-                      <span>Habitué à l'appartement</span>
+                      <span>Habitué à l&apos;appartement</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Stethoscope className="w-3 h-3 text-primary shrink-0" />
