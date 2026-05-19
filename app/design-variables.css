@@ -1,0 +1,35 @@
+/* ── Sans Croquettes Fixes — Design System ─────────────────────────────── */
+
+:root {
+  /* Core palette */
+  --scf-bg:            #FBFAF7;
+  --scf-surface:       #FFFFFF;
+  --scf-surface-alt:   #F4F1EB;
+  --scf-ink:           #252840;
+  --scf-ink-muted:     #6A6C7A;
+  --scf-ink-subtle:    #A6A6AE;
+  --scf-border:        #ECE7DD;
+  --scf-border-strong: #D8D3C8;
+
+  /* Brand accents */
+  --scf-coral:         #F76C70;
+  --scf-coral-soft:    #FEE6E5;
+  --scf-coral-ink:     #B43A3F;
+  --scf-magenta:       #E84A77;
+
+  /* Pastel tints */
+  --scf-pink:          #FEE6E5;
+  --scf-peach:         #FCE9D9;
+  --scf-mint:          #E0F0E8;
+  --scf-lilac:         #E8E5F4;
+  --scf-rose:          #FDE2EC;
+}
+
+@keyframes scf-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+.animate-scf-pulse {
+  animation: scf-pulse 2s ease-in-out infinite;
+}
