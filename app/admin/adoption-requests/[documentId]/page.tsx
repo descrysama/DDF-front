@@ -1,0 +1,180 @@
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { fetchResource } from '@/lib/strapi'
+import type { StrapiAdoptionRequestRaw } from '@/lib/strapi'
+import { updateRequestStatus } from '../actions'
+import StatusBadge from '@/components/admin/status-badge'
+import { ADMIN } from '@/lib/admin-tokens'
+
+const fieldStyle: React.CSSProperties = {
+  display: 'block',
+  width: '100%',
+  padding: '8px 12px',
+  border: `1px solid ${ADMIN.border}`,
+  borderRadius: 6,
+  fontSize: 14,
+  color: ADMIN.ink,
+  background: '#fff',
+  boxSizing: 'border-box',
+}
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: 13,
+  fontWeight: 600,
+  color: ADMIN.ink,
+  marginBottom: 4,
+}
+
+const metaRowStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  padding: '10px 0',
+  borderBottom: `1px solid ${ADMIN.border}`,
+  fontSize: 14,
+}
+
+export default async function AdoptionRequestDetailPage({
+  params,
+}: {
+  params: Promise<{ documentId: string }>
+}) {
+  const { documentId } = await params
+
+  let request: StrapiAdoptionRequestRaw
+  try {
+    const res = await fetchResource<StrapiAdoptionRequestRaw>(
+      `/api/adoption-requests/${documentId}?populate[0]=announcement&populate[1]=adopter&populate[2]=referent`
+    )
+    request = res.data
+  } catch {
+    notFound()
+  }
+
+  const boundUpdate = updateRequestStatus.bind(null, documentId)
+
+  return (
+    <div style={{ padding: 32 }}>
+      <div style={{ marginBottom: 20 }}>
+        <Link
+          href="/admin/adoption-requests"
+          style={{ fontSize: 13, color: ADMIN.inkMuted, textDecoration: 'none' }}
+        >
+          ← Retour aux demandes
+        </Link>
+      </div>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 4 }}>
+        Demande d&apos;adoption
+      </h1>
+      <p style={{ fontSize: 14, color: ADMIN.inkMuted, marginBottom: 28 }}>
+        {request.announcement?.title ?? 'Annonce inconnue'}
+      </p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        {/* Details card */}
+        <div
+          style={{
+            background: ADMIN.card,
+            border: `1px solid ${ADMIN.border}`,
+            borderRadius: 10,
+            padding: 24,
+          }}
+        >
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: ADMIN.ink, marginBottom: 14 }}>
+            Informations
+          </h2>
+          <div>
+            <div style={metaRowStyle}>
+              <span style={{ color: ADMIN.inkMuted }}>Statut</span>
+              <StatusBadge status={request.status} />
+            </div>
+            <div style={metaRowStyle}>
+              <span style={{ color: ADMIN.inkMuted }}>Score de correspondance</span>
+              <span style={{ fontWeight: 700 }}>
+                {request.match_score != null ? `${request.match_score}%` : '—'}
+              </span>
+            </div>
+            <div style={metaRowStyle}>
+              <span style={{ color: ADMIN.inkMuted }}>Date de demande</span>
+              <span>
+                {request.request_date
+                  ? new Date(request.request_date).toLocaleDateString('fr-FR')
+                  : '—'}
+              </span>
+            </div>
+            <div style={metaRowStyle}>
+              <span style={{ color: ADMIN.inkMuted }}>Adoptant</span>
+              <span>
+                {request.adopter
+                  ? `${request.adopter.username} (${request.adopter.email})`
+                  : '—'}
+              </span>
+            </div>
+            <div style={{ ...metaRowStyle, borderBottom: 'none' }}>
+              <span style={{ color: ADMIN.inkMuted }}>Référent</span>
+              <span>{request.referent?.username ?? '—'}</span>
+            </div>
+          </div>
+
+          {request.message && (
+            <div style={{ marginTop: 20 }}>
+              <p style={{ ...labelStyle, marginBottom: 8 }}>Message</p>
+              <p
+                style={{
+                  fontSize: 14,
+                  color: ADMIN.ink,
+                  lineHeight: 1.6,
+                  background: '#f8f9fa',
+                  padding: 14,
+                  borderRadius: 6,
+                  margin: 0,
+                }}
+              >
+                {request.message}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Status form */}
+        <div
+          style={{
+            background: ADMIN.card,
+            border: `1px solid ${ADMIN.border}`,
+            borderRadius: 10,
+            padding: 24,
+          }}
+        >
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: ADMIN.ink, marginBottom: 14 }}>
+            Changer le statut
+          </h2>
+          <form action={boundUpdate}>
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>Nouveau statut</label>
+              <select name="status" defaultValue={request.status} style={fieldStyle}>
+                <option value="pending">En attente</option>
+                <option value="approved">Approuvé</option>
+                <option value="rejected">Rejeté</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              style={{
+                padding: '10px 24px',
+                background: ADMIN.coral,
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                fontWeight: 600,
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              Mettre à jour
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
