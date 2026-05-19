@@ -96,8 +96,7 @@ export default function Header() {
               Se connecter
             </Link>
             <Link
-              href="https://www.helloasso.com/associations/sans-croquettes-fixes/formulaires/1"
-              target="_blank"
+              href="/donate"
               rel="noopener noreferrer"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,

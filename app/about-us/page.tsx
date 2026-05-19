@@ -1,249 +1,309 @@
-import Link from "next/link"
-import Image from "next/image"
-import { Heart, Home as HomeIcon, Stethoscope, Users, Shield, CheckCircle, HandHeart } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import Header from "@/components/header"
-import Footer from "@/components/footer"
-import { WaveDivider, WAVE_PATH_INV } from "@/components/wave-divider"
-import { DARK_BG } from "@/lib/constants"
-import { StatCard } from "./_components/stat-card"
-import { FeatureOverlayCard } from "./_components/feature-overlay-card"
-import { SavedCatCard } from "./_components/saved-cat-card"
-import { AdoptionCatCard } from "./_components/adoption-cat-card"
+import Link from 'next/link'
+import { Shield, Heart, Home as HomeIcon, ArrowRight } from 'lucide-react'
+import Header from '@/components/header'
+import Footer from '@/components/footer'
+import { T } from '@/lib/design-tokens'
 
-export default function AboutUs() {
+export const metadata = {
+  title: 'À propos – Sans Croquettes Fixes',
+  description: "Découvrez l'association Sans Croquettes Fixes : notre histoire, notre mission et notre équipe de bénévoles à Lyon.",
+}
+
+const TEAM = [
+  { name: 'Clara',   role: 'Présidente, fondatrice', tone: ['#E0AC9C', '#A87968'] },
+  { name: 'Léo',     role: 'Trésorier',              tone: ['#C6C8CB', '#7E8189'] },
+  { name: 'Margaux', role: 'Coordination FA',         tone: ['#E8C9B3', '#C99879'] },
+  { name: 'Yannis',  role: 'Distributions',           tone: ['#D9B898', '#A47A55'] },
+  { name: 'Aïda',    role: 'Réseaux sociaux',         tone: ['#D9D3C5', '#9D9485'] },
+  { name: 'Hugo',    role: 'Vétérinaire bénévole',    tone: ['#F1D7C4', '#D3A88C'] },
+]
+
+const TIMELINE = [
+  { year: '2015', short: '15', title: 'Création',         desc: "Clara et 3 amies lancent l'association après le sauvetage de leur premier chat errant." },
+  { year: '2018', short: '18', title: 'Premier local',    desc: "Ouverture d'un local mutualisé pour stocker la nourriture et accueillir les distributions." },
+  { year: '2020', short: '20', title: 'Pendant le covid', desc: "Les distributions s'intensifient — 1 200 familles aidées en deux mois." },
+  { year: '2023', short: '23', title: 'Réseau FA',        desc: "Mise en place d'un réseau de 30 familles d'accueil dans toute la métropole." },
+  { year: '2026', short: '26', title: "Aujourd'hui",      desc: "350+ chats adoptés, 18 bénévoles actifs, et toujours 100% bénévole." },
+]
+
+const PARTNERS = [
+  'Ville de Lyon', 'Métropole 69', 'Cabinet Vét. Charpennes', 'Croix-Rousse Vet',
+  'Maxi Zoo Part-Dieu', 'Royal Canin', "30 Millions d'Amis", 'Fondation B. Bardot',
+]
+
+const PARTNER_TINTS = [T.peach, T.lilac, T.mint, T.pink]
+
+const FUNDING = [
+  { label: 'Dons particuliers', pct: '62%', width: 62 },
+  { label: 'Subventions',       pct: '24%', width: 24 },
+  { label: 'Évènements',        pct: '9%',  width: 9  },
+  { label: 'Adoptions',         pct: '5%',  width: 5  },
+]
+
+export default function AboutUsPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div style={{ minHeight: '100vh', background: T.bg }}>
       <Header />
-
       <main>
-        {/* Hero Section */}
-        <section className="relative overflow-hidden h-[400px] md:h-[500px] flex items-center justify-center">
-          <div className="absolute inset-0 z-0">
-            <Image 
-              src="https://images.unsplash.com/photo-1548247416-ec66f4900b2e?auto=format&fit=crop&q=80&w=2000" 
-              alt="Background cats" 
-              fill 
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-black/40" />
-            <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
-          </div>
-          
-          <div className="relative z-10 text-center container px-4 pt-16">
-            <span className="inline-block text-primary font-semibold text-sm tracking-widest uppercase mb-3 drop-shadow-md">
-              Qui sommes-nous ?
-            </span>
-            <h1 className="text-5xl md:text-7xl font-extrabold text-white leading-none drop-shadow-lg">
-              À propos de nous
-            </h1>
-          </div>
-          
-          <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 z-10" style={{ lineHeight: 0 }}>
-             <svg
-                viewBox="0 0 1440 70"
-                preserveAspectRatio="none"
-                style={{ display: "block", width: "100%", height: 70 }}
-              >
-                <path d={WAVE_PATH_INV} fill="white" />
-              </svg>
-           </div>
-        </section>
 
-        {/* Section: Qui sommes-nous ? */}
-        <section className="py-20 md:py-28 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col lg:flex-row gap-16">
-              
-              <div className="lg:w-1/3 space-y-4">
-                <span className="inline-block text-primary font-semibold text-sm tracking-widest uppercase">
-                  L&apos;association
-                </span>
-                <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">
-                  Sans Croquettes Fixes
-                </h2>
-                <div className="w-20 h-1 bg-background" />
+        {/* ── Hero ──────────────────────────────────────────────── */}
+        <section style={{ position: 'relative', overflow: 'hidden' }}>
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: `linear-gradient(160deg, ${T.pink} 0%, ${T.peach} 60%, ${T.bg} 100%)`,
+          }} />
+          <div
+            className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr]"
+            style={{
+              maxWidth: 1200, margin: '0 auto',
+              padding: '52px 24px 56px',
+              position: 'relative', gap: 40, alignItems: 'center',
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 13, color: T.coral, fontWeight: 600, marginBottom: 12 }}>
+                Qui sommes-nous&nbsp;?
               </div>
-              
-              <div className="lg:w-2/3">
-                <p className="text-lg text-gray-700 leading-relaxed max-w-3xl">
-                  Sans Croquettes Fixes est née d&apos;un constat simple : la détresse animale 
-                  ne touche pas que les animaux abandonnés. Souvent, derrière un animal en difficulté, 
-                  se trouve un humain qui l&apos;est tout autant. C&apos;est pourquoi nous mettons un point d&apos;honneur 
-                  à accompagner à la fois l&apos;humain et l&apos;animal. Nous agissons au quotidien pour protéger, 
-                  soigner, et offrir une seconde chance à ceux qui n&apos;ont plus d&apos;autres solutions.
-                </p>
+              <h1 style={{
+                fontSize: 'clamp(36px, 4.5vw, 54px)', lineHeight: 0.98,
+                letterSpacing: '-0.035em', fontWeight: 600,
+                margin: '0 0 18px', color: T.ink,
+              }}>
+                Une équipe bénévole, des chats sauvés, depuis{' '}
+                <span style={{ color: T.coral }}>2015</span>.
+              </h1>
+              <p style={{ fontSize: 16, lineHeight: 1.55, color: T.inkMuted, margin: '0 0 22px', maxWidth: 540 }}>
+                Sans Croquettes Fixes est née d&apos;une conviction simple&nbsp;: aucun chat ne devrait
+                dormir dehors faute de moyens. Onze ans plus tard, nous restons une asso 100&nbsp;%
+                bénévole, ancrée à Lyon.
+              </p>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                {[
+                  ['11 ans', "d'engagement"],
+                  ['350+',   'chats sauvés'],
+                  ['18',     'bénévoles actifs'],
+                  ['52',     'distributions / an'],
+                ].map(([n, l]) => (
+                  <div key={l} style={{
+                    background: T.surface, borderRadius: 8,
+                    padding: '10px 14px', border: `1px solid ${T.border}`,
+                  }}>
+                    <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-0.015em', color: T.ink }}>{n}</div>
+                    <div style={{ fontSize: 11, color: T.inkMuted, marginTop: 2 }}>{l}</div>
+                  </div>
+                ))}
               </div>
-
             </div>
 
-            {/* Stat Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-16">
-              {[
-                { icon: Shield, stat: "225", label: "Sauvetages", desc: "Animaux secourus et pris en charge." },
-                { icon: Users, stat: "13", label: "Bénévoles", desc: "Qui s'investissent au quotidien." },
-                { icon: HomeIcon, stat: "36", label: "Adoptions", desc: "Trouvés un foyer pour la vie." },
-                { icon: HandHeart, stat: "7", label: "Accompagnements", desc: "Pour préserver le lien avec l'animal." },
-                { icon: Stethoscope, stat: "60+", label: "Soins à l'année", desc: "Frais vétérinaires et interventions." },
-              ].map((statData, i) => (
-                <StatCard key={i} {...statData} />
-              ))}
+            {/* Photo placeholder — Pilgrim */}
+            <div style={{ position: 'relative', aspectRatio: '5/4', borderRadius: 12, overflow: 'hidden', boxShadow: '0 18px 50px rgba(37,40,64,0.16)' }}>
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(135deg, #3C3F4E 0%, #1F2235 100%)',
+              }} />
+              <div style={{
+                position: 'absolute', bottom: 14, left: 14, right: 14,
+                padding: '10px 14px', borderRadius: 8,
+                background: 'rgba(255,255,255,0.92)',
+                backdropFilter: 'blur(8px)',
+                fontSize: 12, color: T.ink, lineHeight: 1.5,
+              }}>
+                <strong>Pilgrim, 13 ans.</strong> Recueilli en 2024 après l&apos;hospitalisation de son humaine. Il vit désormais en famille d&apos;accueil.
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Section: Que faisons-nous ? */}
-        <section className="bg-gray-50 py-20 md:py-28 relative overflow-hidden">
-          <div className="container mx-auto px-4 relative z-10">
-            
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-               <div className="space-y-6">
-                 <span className="inline-block text-primary font-semibold text-sm tracking-widest uppercase">
-                    Que faisons-nous ?
-                 </span>
-                 <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">
-                    À Lyon, nous venons en aide aux humains et à leurs animaux.
-                 </h2>
-                 <p className="text-lg text-gray-700 leading-relaxed">
-                   La situation des animaux errants ou des animaux de compagnie en grande difficulté est l&apos;affaire de tous. 
-                   C&apos;est avec la volonté d&apos;avoir un impact direct et local que notre association concentre la majorité de 
-                   ses efforts sur la région lyonnaise. Qu&apos;il s&apos;agisse de pallier un manque financier pour nourrir un animal 
-                   ou d&apos;assister physiquement des personnes dépassées, nous sommes sur le terrain.
-                 </p>
-                 <ul className="space-y-4 pt-4">
-                   {[
-                     "Soutien matériel et distributions alimentaires",
-                     "Aide aux soins vétérinaires et à la stérilisation",
-                     "Lutte contre les abandons par un accompagnement adapté"
-                   ].map((item, idx) => (
-                     <li key={idx} className="flex items-center gap-3">
-                       <CheckCircle className="w-6 h-6 text-primary" />
-                       <span className="text-gray-800 font-medium">{item}</span>
-                     </li>
-                   ))}
-                 </ul>
-               </div>
-
-               <div className="relative flex justify-end">
-                 <div className="relative w-full max-w-md h-[400px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl">
-                   <Image 
-                     src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=800" 
-                     alt="Chat aidé" 
-                     fill 
-                     className="object-cover"
-                   />
-                 </div>
-                 
-                 {/* overlay cards */}
-                 <div className="absolute top-1/2 -translate-y-1/2 -left-8 lg:-left-16 hidden md:flex flex-col gap-4 w-64 md:w-72">
-                   {[
-                     { title: "Aide physique et matérielle", icon: HandHeart },
-                     { title: "Soutien moral et conseils", icon: Heart },
-                     { title: "Familles d'accueil et adoption", icon: HomeIcon },
-                   ].map((item, i) => (
-                     <FeatureOverlayCard key={i} {...item} />
-                   ))}
-                 </div>
-               </div>
-            </div>
-
-          </div>
-        </section>
-
-        {/* Section: Notre récompense */}
-        <section className="py-20 md:py-28">
-           <div className="container mx-auto px-4">
-              <div className="max-w-3xl text-center mx-auto mb-16 space-y-4">
-                 <span className="inline-block text-primary font-semibold text-sm tracking-widest uppercase">
-                    Notre récompense
-                 </span>
-                 <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">
-                    Derrière chaque sauvetage, une rencontre inoubliable.
-                 </h2>
-                 <p className="text-lg text-gray-600">
-                    Découvrez quelques visages familiers de nos actions. Leurs regards en disent long 
-                    sur le chemin parcouru depuis leur prise en charge.
-                 </p>
+        {/* ── Mission ───────────────────────────────────────────── */}
+        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '56px 24px 48px' }}>
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.4fr]" style={{ gap: 40 }}>
+            <div>
+              <div style={{ fontSize: 13, color: T.coral, fontWeight: 600, marginBottom: 8 }}>
+                Notre mission
               </div>
-
-              <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                 {[
-                   { name: "Maoutz", img: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&q=80&w=600", desc: "Récupéré errant et malade, il est maintenant un gros nounours dans sa famille." },
-                   { name: "P'tit'ti", img: "https://images.unsplash.com/photo-1513245543132-31f507417b26?auto=format&fit=crop&q=80&w=600", desc: "Trouvé chaton derrière un moteur de voiture. Adoré par sa nouvelle humaine." },
-                   { name: "Bilo", img: "https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&q=80&w=600", desc: "Un caractère affirmé mais tellement d'amour à donner !" },
-                   { name: "Kawaï", img: "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&q=80&w=600", desc: "Une boule d'énergie inépuisable qui fait le bonheur de ses maîtres." }
-                 ].map((cat, i) => (
-                    <SavedCatCard key={i} {...cat} />
-                 ))}
-              </div>
-           </div>
-        </section>
-
-        <WaveDivider from="white" to={DARK_BG} />
-
-        {/* Section: Nos origines */}
-        <section className="text-white py-20 md:py-28" style={{ background: DARK_BG }}>
-           <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto text-center space-y-8">
-                 <span className="inline-block text-primary font-semibold text-sm tracking-widest uppercase mb-2">
-                    Nos origines
-                 </span>
-                 <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">
-                    Les débuts de Sans Croquettes Fixes
-                 </h2>
-                 <div className="w-20 h-1 bg-primary mx-auto" />
-                 
-                 <div className="space-y-6 flex flex-col items-center">
-                    <p className="text-lg md:text-xl text-white/90 leading-relaxed text-left md:text-center max-w-3xl">
-                      <strong>Tout a commencé par une maraude en 2014.</strong> Un soir d&apos;hiver, lors d&apos;une distribution de repas pour les sans-abri, la détresse animale nous a sauté aux yeux. Plusieurs personnes en grande difficulté partageaient le peu qu&apos;elles avaient avec leur précieux compagnon. C&apos;est en réalisant que la misère touche aussi nos amis à quatre pattes que Sans Croquettes Fixes a vu le jour.
-                    </p>
-                    <p className="text-lg md:text-xl text-white/90 leading-relaxed text-left md:text-center max-w-3xl">
-                      Aujourd&apos;hui, l&apos;équipe s&apos;est étoffée et nos actions se sont diversifiées : aides financières, stérilisations, accompagnements sociaux et adoptions. Mais notre cœur d&apos;action est resté le même : <strong>ne laisser aucune patte derrière nous.</strong>
-                    </p>
-                 </div>
-              </div>
-           </div>
-        </section>
-
-        <WaveDivider from={DARK_BG} to={"white"} invert />
-
-        {/* Section: Un nouveau compagnon */}
-        <section className="bg-white py-20 md:py-28">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center mb-14">
-              <span className="inline-block text-primary font-semibold mb-3 tracking-widest uppercase text-sm">
-                Un nouveau compagnon ?
-              </span>
-              <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
-                Votre nouveau compagnon de vie ?
+              <h2 style={{
+                fontSize: 'clamp(24px, 3vw, 32px)', lineHeight: 1.05,
+                letterSpacing: '-0.025em', fontWeight: 600,
+                margin: '0 0 14px', color: T.ink,
+              }}>
+                Soigner, accompagner, replacer.
               </h2>
-              <p className="text-lg text-gray-700">
-                Adopter un chat est un acte responsable qui doit être mûrement réfléchi. Voici quelques pensionnaires qui n&apos;attendent plus que vous.
+              <p style={{ fontSize: 14, lineHeight: 1.6, color: T.inkMuted, margin: 0, maxWidth: 380 }}>
+                Trois piliers qui guident chaque décision et chaque euro de l&apos;association.
               </p>
             </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            <div className="grid grid-cols-1 sm:grid-cols-3" style={{ gap: 12 }}>
               {[
-                 { name: "Chantilly", img: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&q=80&w=400", desc: "Une minette douce et très câline qui a besoin de temps.", tags: ["Femelle", "Calme", "En appartement"] },
-                 { name: "Gipsy", img: "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?auto=format&fit=crop&q=80&w=400", desc: "Joueuse et espiègle, elle adore les sessions de plumeau.", tags: ["Femelle", "Joueuse", "Maison avec jardin"] },
-                 { name: "Oria", img: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&q=80&w=400", desc: "Curieuse de nature, elle vous suivra partout dans la maison.", tags: ["Femelle", "Câline", "Ok chats"] }
-              ].map((cat, i) => (
-                <AdoptionCatCard key={i} {...cat} />
+                { h: 'Sauver',   p: "Identifier les chats en détresse — abandonnés, errants ou maltraités — et leur offrir un refuge immédiat.",   tint: T.pink,  iconBg: '#FFC8C5', Icon: Shield   },
+                { h: 'Soigner',  p: 'Prise en charge vétérinaire complète : vaccins, stérilisation, traitement et identification.',                 tint: T.peach, iconBg: '#F5C9A1', Icon: Heart    },
+                { h: 'Replacer', p: "Sélection rigoureuse des familles d'accueil et adoptantes pour un placement à vie réussi.",                   tint: T.mint,  iconBg: '#B4D8C5', Icon: HomeIcon },
+              ].map(({ h, p, tint, iconBg, Icon }) => (
+                <div key={h} style={{ background: tint, borderRadius: 10, padding: 22 }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%',
+                    background: iconBg,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: 14,
+                  }}>
+                    <Icon size={19} strokeWidth={1.6} style={{ color: T.ink }} />
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, letterSpacing: '-0.01em', color: T.ink }}>{h}</div>
+                  <div style={{ fontSize: 12, color: T.inkMuted, lineHeight: 1.5 }}>{p}</div>
+                </div>
               ))}
             </div>
+          </div>
+        </section>
 
-            <div className="text-center">
-              <Button asChild size="lg" className="text-base px-10">
-                <Link href="/adopt-pet">Voir tous les chats à l&apos;adoption</Link>
-              </Button>
+        {/* ── Timeline ──────────────────────────────────────────── */}
+        <section style={{ background: T.surfaceAlt, padding: '56px 24px' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 13, color: T.coral, fontWeight: 600, marginBottom: 8 }}>
+                Notre histoire
+              </div>
+              <h2 style={{
+                fontSize: 'clamp(24px, 3vw, 32px)', lineHeight: 1.05,
+                letterSpacing: '-0.025em', fontWeight: 600, margin: 0, color: T.ink,
+              }}>
+                Onze ans, étape par étape.
+              </h2>
+            </div>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute', top: 18, left: 16, right: 16, height: 2,
+                background: `linear-gradient(90deg, ${T.coral} 0%, ${T.magenta} 100%)`,
+                opacity: 0.4,
+              }} />
+              <div className="grid grid-cols-2 sm:grid-cols-5" style={{ gap: 16, position: 'relative' }}>
+                {TIMELINE.map(({ year, short, title, desc }, i) => (
+                  <div key={year}>
+                    <div style={{
+                      width: 36, height: 36, borderRadius: '50%',
+                      background: i === TIMELINE.length - 1 ? T.coral : T.surface,
+                      border: `2px solid ${T.coral}`,
+                      color: i === TIMELINE.length - 1 ? '#fff' : T.coral,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, fontWeight: 700, marginBottom: 14,
+                      position: 'relative', zIndex: 1,
+                    }}>{short}</div>
+                    <div style={{ fontSize: 11, color: T.coral, fontWeight: 600, marginBottom: 2 }}>{year}</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.01em', marginBottom: 6, color: T.ink }}>{title}</div>
+                    <div style={{ fontSize: 12, color: T.inkMuted, lineHeight: 1.5 }}>{desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Équipe ────────────────────────────────────────────── */}
+        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '56px 24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 13, color: T.coral, fontWeight: 600, marginBottom: 8 }}>
+                L&apos;équipe
+              </div>
+              <h2 style={{
+                fontSize: 'clamp(24px, 3vw, 32px)', lineHeight: 1.05,
+                letterSpacing: '-0.025em', fontWeight: 600, margin: 0, color: T.ink,
+              }}>
+                18 bénévoles, un seul cap.
+              </h2>
+            </div>
+            <Link
+              href="/about-us#benevoles"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '8px 14px', borderRadius: 6,
+                border: `1px solid ${T.borderStrong}`, background: T.surface,
+                fontSize: 13, fontWeight: 600, color: T.ink, textDecoration: 'none',
+              }}
+            >
+              Devenir bénévole <ArrowRight size={12} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-6" style={{ gap: 12 }}>
+            {TEAM.map(({ name, role, tone }) => (
+              <div key={name}>
+                <div style={{
+                  aspectRatio: '1/1', borderRadius: 10, overflow: 'hidden', marginBottom: 8,
+                  background: `linear-gradient(135deg, ${tone[0]} 0%, ${tone[1]} 100%)`,
+                }} />
+                <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.01em', color: T.ink }}>{name}</div>
+                <div style={{ fontSize: 11, color: T.inkMuted, marginTop: 1 }}>{role}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Partenaires + Transparence ────────────────────────── */}
+        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 56px' }}>
+          <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr]" style={{ gap: 20 }}>
+
+            <div style={{
+              background: T.surface, border: `1px solid ${T.border}`,
+              borderRadius: 12, padding: 24,
+            }}>
+              <div style={{ fontSize: 13, color: T.coral, fontWeight: 600, marginBottom: 8 }}>
+                Nos partenaires
+              </div>
+              <h3 style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.015em', margin: '0 0 18px', color: T.ink }}>
+                Ils nous soutiennent au quotidien.
+              </h3>
+              <div className="grid grid-cols-4" style={{ gap: 10 }}>
+                {PARTNERS.map((name, i) => (
+                  <div key={name} style={{
+                    background: PARTNER_TINTS[i % 4],
+                    borderRadius: 8, padding: '14px 12px',
+                    fontSize: 12, fontWeight: 600, color: T.ink,
+                    textAlign: 'center', lineHeight: 1.3,
+                  }}>{name}</div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{
+              background: `linear-gradient(135deg, ${T.coral} 0%, ${T.magenta} 100%)`,
+              color: '#fff', borderRadius: 12, padding: 24,
+              position: 'relative', overflow: 'hidden',
+            }}>
+              <div style={{ fontSize: 13, color: T.pink, fontWeight: 600, marginBottom: 8 }}>
+                Transparence
+              </div>
+              <h3 style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.015em', margin: '0 0 16px' }}>
+                D&apos;où vient l&apos;argent&nbsp;?
+              </h3>
+              <div style={{ display: 'grid', gap: 10 }}>
+                {FUNDING.map(({ label, pct, width }) => (
+                  <div key={label}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                      <span style={{ fontSize: 13 }}>{label}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600 }}>{pct}</span>
+                    </div>
+                    <div style={{ height: 4, background: 'rgba(255,255,255,0.2)', borderRadius: 2, overflow: 'hidden' }}>
+                      <div style={{ width: `${width}%`, height: '100%', background: '#fff' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <a
+                href="/about-us#rapport"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  marginTop: 16, fontSize: 12, fontWeight: 600, color: '#fff',
+                  textDecoration: 'none', padding: '8px 12px', borderRadius: 6,
+                  background: 'rgba(255,255,255,0.15)',
+                  border: '1px solid rgba(255,255,255,0.30)',
+                }}
+              >
+                Rapport financier 2025 <ArrowRight size={11} />
+              </a>
             </div>
           </div>
         </section>
 
       </main>
-
       <Footer />
     </div>
   )
