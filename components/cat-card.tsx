@@ -1,8 +1,9 @@
 import Link from "next/link"
-import { CAT_TINT, PlaceholderCat } from "@/lib/placeholder-cats"
+import { CAT_TINT } from "@/lib/placeholder-cats"
+import type { CardAnimal } from "@/lib/strapi"
 
 interface CatCardProps {
-  cat: PlaceholderCat
+  cat: CardAnimal
 }
 
 export function CatCard({ cat }: CatCardProps) {
@@ -11,10 +12,10 @@ export function CatCard({ cat }: CatCardProps) {
 
   return (
     <Link
-      href={`/adopt-pet/${cat.id}`}
+      href={`/adopt-pet/${cat.documentId}`}
       className={`${tintClass} rounded-xl p-2.5 block no-underline text-ink transition-transform duration-150`}
     >
-      {/* Placeholder photo */}
+      {/* Gradient placeholder — replaced by next/image once Strapi media is wired */}
       <div
         className="relative mb-2.5 rounded-lg overflow-hidden aspect-square"
         style={{
@@ -43,7 +44,6 @@ export function CatCard({ cat }: CatCardProps) {
         </div>
       </div>
 
-      {/* Info */}
       <div className="px-1 pb-1">
         <div className="flex justify-between items-baseline mb-0.5">
           <span className="text-[15px] font-semibold tracking-[-0.01em] text-ink">

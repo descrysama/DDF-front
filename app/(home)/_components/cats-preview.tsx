@@ -1,10 +1,10 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { CatCard } from "@/components/cat-card"
-import { PLACEHOLDER_CATS } from "@/lib/placeholder-cats"
+import { fetchAnimals } from "@/lib/strapi"
 
-export function CatsPreview() {
-  const featured = PLACEHOLDER_CATS.slice(0, 4)
+export async function CatsPreview() {
+  const { animals, total } = await fetchAnimals({ limit: 4, excludeStatus: 'adopted' })
 
   return (
     <section className="bg-bg">
@@ -22,13 +22,13 @@ export function CatsPreview() {
             href="/adopt-pet"
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-border-strong bg-surface text-sm font-semibold text-ink no-underline"
           >
-            Voir les {PLACEHOLDER_CATS.length} chats <ArrowRight size={12} />
+            Voir les {total} chats <ArrowRight size={12} />
           </Link>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-          {featured.map((cat) => (
-            <CatCard key={cat.id} cat={cat} />
+          {animals.map((cat) => (
+            <CatCard key={cat.documentId} cat={cat} />
           ))}
         </div>
       </div>
