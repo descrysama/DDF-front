@@ -1,12 +1,12 @@
 import { fetchAnimals, fetchAnnouncements, fetchFosterFamilies, fetchAdoptionRequests } from '@/lib/strapi'
-import { ADMIN } from '@/lib/admin-tokens'
+import { AD, TINT } from '@/lib/admin-tokens'
+import { PawPrint, Megaphone, Home, ClipboardList } from 'lucide-react'
 
-const CARDS = [
-  { label: 'Animaux',              color: '#fde2ec', icon: '🐱' },
-  { label: 'Annonces',             color: '#e0f0e8', icon: '📢' },
-  { label: "Familles d'accueil",   color: '#e8e5f4', icon: '🏡' },
-  { label: "Demandes d'adoption",  color: '#fef3c7', icon: '📋' },
-]
+const MONO: React.CSSProperties = {
+  fontFamily: 'Geist Mono, ui-monospace, monospace',
+  fontSize: 11.5,
+  color: AD.inkMuted,
+}
 
 export default async function AdminDashboardPage() {
   const [animals, announcements, fosterFamilies, adoptionRequests] = await Promise.all([
@@ -16,59 +16,101 @@ export default async function AdminDashboardPage() {
     fetchAdoptionRequests({ limit: 1 }),
   ])
 
-  const totals = [
-    animals.total,
-    announcements.total,
-    fosterFamilies.total,
-    adoptionRequests.total,
+  const CARDS = [
+    {
+      label: 'Animaux',
+      subtitle: 'chats référencés',
+      count: animals.total,
+      tint: TINT.mint,
+      iconColor: '#3FA66E',
+      Icon: PawPrint,
+    },
+    {
+      label: 'Annonces',
+      subtitle: 'annonces publiées',
+      count: announcements.total,
+      tint: TINT.pink,
+      iconColor: AD.coral,
+      Icon: Megaphone,
+    },
+    {
+      label: "Familles d'accueil",
+      subtitle: 'familles enregistrées',
+      count: fosterFamilies.total,
+      tint: TINT.peach,
+      iconColor: '#E0944A',
+      Icon: Home,
+    },
+    {
+      label: "Demandes d'adoption",
+      subtitle: 'demandes reçues',
+      count: adoptionRequests.total,
+      tint: TINT.lilac,
+      iconColor: '#7B6CC4',
+      Icon: ClipboardList,
+    },
   ]
 
   return (
-    <div style={{ padding: 32 }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: ADMIN.ink, marginBottom: 8 }}>
+    <div style={{ padding: '28px 32px' }}>
+      {/* Breadcrumb */}
+      <p style={{ ...MONO, marginBottom: 8 }}>Admin / Tableau de bord</p>
+
+      {/* Heading */}
+      <h1
+        style={{
+          fontSize: 28,
+          fontWeight: 600,
+          color: AD.ink,
+          letterSpacing: '-0.025em',
+          marginBottom: 4,
+        }}
+      >
         Tableau de bord
       </h1>
-      <p style={{ color: ADMIN.inkMuted, marginBottom: 32, fontSize: 14 }}>
-        Vue d&apos;ensemble des ressources
+      <p style={{ fontSize: 13, color: AD.inkMuted, marginBottom: 28 }}>
+        Vue d&apos;ensemble des ressources de l&apos;association
       </p>
 
+      {/* Stat cards */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-          gap: 20,
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 16,
         }}
       >
-        {CARDS.map(({ label, color, icon }, i) => (
+        {CARDS.map(({ label, subtitle, count, tint, iconColor, Icon }) => (
           <div
             key={label}
             style={{
-              background: ADMIN.card,
-              border: `1px solid ${ADMIN.border}`,
+              background: AD.surface,
+              border: `1px solid ${AD.border}`,
               borderRadius: 10,
-              padding: '24px 20px',
+              padding: '14px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
             }}
           >
             <div
               style={{
-                width: 44,
-                height: 44,
-                borderRadius: 10,
-                background: color,
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                background: tint,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 22,
-                marginBottom: 14,
+                flexShrink: 0,
               }}
             >
-              {icon}
+              <Icon size={18} color={iconColor} strokeWidth={2} />
             </div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: ADMIN.ink, lineHeight: 1 }}>
-              {totals[i]}
-            </div>
-            <div style={{ fontSize: 13, color: ADMIN.inkMuted, marginTop: 4 }}>
-              {label}
+            <div>
+              <p style={{ fontSize: 11.5, color: AD.inkMuted, marginBottom: 2 }}>{label}</p>
+              <p style={{ fontSize: 22, fontWeight: 700, color: AD.ink, lineHeight: 1 }}>{count}</p>
+              <p style={{ fontSize: 11, color: AD.inkMuted, marginTop: 2 }}>{subtitle}</p>
             </div>
           </div>
         ))}
