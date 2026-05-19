@@ -1,9 +1,9 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import AnimalForm from '@/components/admin/animal-form'
 import { fetchResource } from '@/lib/strapi'
-import { updateAnimal } from '../actions'
-import { ADMIN } from '@/lib/admin-tokens'
+import type { StrapiMedia } from '@/lib/strapi'
+import AnimalEditClient from './edit-client'
+
+const STRAPI_URL = process.env.STRAPI_URL ?? 'http://localhost:1337'
 
 interface AnimalDetail {
   id: number
@@ -18,6 +18,7 @@ interface AnimalDetail {
   ok_with_dogs: boolean
   ok_with_cats: boolean
   indoor_only: boolean
+  medias?: StrapiMedia[]
 }
 
 export default async function EditAnimalPage({
@@ -30,38 +31,12 @@ export default async function EditAnimalPage({
   let animal: AnimalDetail
   try {
     const res = await fetchResource<AnimalDetail>(
-      `/api/animals/${documentId}?populate[0]=breed`
+      `/api/animals/${documentId}?populate[0]=breed&populate[medias][populate]=image`
     )
     animal = res.data
   } catch {
     notFound()
   }
 
-  const boundUpdate = updateAnimal.bind(null, documentId)
-
-  return (
-    <div style={{ padding: 32 }}>
-      <div style={{ marginBottom: 20 }}>
-        <Link
-          href="/admin/animals"
-          style={{ fontSize: 13, color: ADMIN.inkMuted, textDecoration: 'none' }}
-        >
-          ← Retour aux animaux
-        </Link>
-      </div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 24 }}>
-        Modifier : {animal.name}
-      </h1>
-      <div
-        style={{
-          background: ADMIN.card,
-          border: `1px solid ${ADMIN.border}`,
-          borderRadius: 10,
-          padding: 28,
-        }}
-      >
-        <AnimalForm defaultValues={animal} action={boundUpdate} />
-      </div>
-    </div>
-  )
+  return <AnimalEditClient animal={animal} strapiUrl={STRAPI_URL} />
 }

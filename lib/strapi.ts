@@ -31,6 +31,21 @@ interface StrapiBreed {
   species: string
 }
 
+export interface StrapiImageFile {
+  id: number
+  documentId: string
+  url: string
+  width: number | null
+  height: number | null
+  formats?: Record<string, { url: string; width: number; height: number }>
+}
+
+export interface StrapiMedia {
+  id: number
+  is_cover: boolean
+  image: StrapiImageFile | null
+}
+
 interface StrapiAnimalRaw {
   id: number
   documentId: string
@@ -46,6 +61,7 @@ interface StrapiAnimalRaw {
   indoor_only: boolean
   breed: StrapiBreed | null
   bonded_with: StrapiAnimalRaw | null
+  medias?: StrapiMedia[]
 }
 
 /** Shape consumed by UI components */
@@ -60,6 +76,7 @@ export interface CardAnimal {
   tagStyle: 'coral' | 'ink'
   tones: [string, string]
   status: AnimalStatus
+  photoUrl: string | null
 }
 
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
@@ -99,6 +116,8 @@ function formatSex(a: StrapiAnimalRaw): string {
 
 function toCardAnimal(a: StrapiAnimalRaw): CardAnimal {
   const tag = deriveTag(a)
+  const cover = a.medias?.find(m => m.is_cover) ?? a.medias?.[0]
+  const imageUrl = cover?.image?.formats?.small?.url ?? cover?.image?.url ?? null
   return {
     id: a.documentId,
     documentId: a.documentId,
@@ -110,6 +129,7 @@ function toCardAnimal(a: StrapiAnimalRaw): CardAnimal {
     tagStyle: tag === 'Senior' || tag === 'Cas particulier' ? 'ink' : 'coral',
     tones: TONES[a.id % TONES.length],
     status: a.status,
+    photoUrl: imageUrl ? `${STRAPI_URL}${imageUrl}` : null,
   }
 }
 
@@ -138,7 +158,7 @@ export async function fetchAnimals(opts?: {
   const filter = exclude ? `&filters[status][$ne]=${exclude}` : ''
 
   const { data, meta } = await strapiGet<StrapiListResponse<StrapiAnimalRaw>>(
-    `/api/animals?populate[0]=breed&populate[1]=bonded_with&pagination[pageSize]=${limit}${filter}`
+    `/api/animals?populate[0]=breed&populate[1]=bonded_with&populate[medias][populate]=image&pagination[pageSize]=${limit}${filter}`
   )
   return {
     animals: data.map(toCardAnimal),
