@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { strapiPut, strapiDelete } from '@/lib/strapi'
+import { strapiPost, strapiPut, strapiDelete } from '@/lib/strapi'
 
 function parseFosterFamilyFormData(formData: FormData) {
   return {
@@ -12,6 +12,12 @@ function parseFosterFamilyFormData(formData: FormData) {
     has_dogs:     formData.get('has_dogs') === 'on',
     has_cats:     formData.get('has_cats') === 'on',
   }
+}
+
+export async function createFosterFamily(formData: FormData) {
+  await strapiPost('/api/foster-families', parseFosterFamilyFormData(formData))
+  revalidatePath('/admin/foster-families')
+  redirect('/admin/foster-families')
 }
 
 export async function updateFosterFamily(documentId: string, formData: FormData) {

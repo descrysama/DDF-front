@@ -3,7 +3,7 @@ import { fetchAdoptionRequests } from '@/lib/strapi'
 import { deleteAdoptionRequest } from './actions'
 import StatusBadge from '@/components/admin/status-badge'
 import { AD, TINT } from '@/lib/admin-tokens'
-import { MoreHorizontal } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 
 const MONO: React.CSSProperties = {
   fontFamily: 'Geist Mono, ui-monospace, monospace',
@@ -52,10 +52,29 @@ export default async function AdminAdoptionRequestsPage() {
       <p style={{ ...MONO, marginBottom: 8 }}>Admin / Demandes d&apos;adoption</p>
 
       {/* Heading */}
-      <h1 style={{ fontSize: 28, fontWeight: 600, color: AD.ink, letterSpacing: '-0.025em', marginBottom: 4 }}>
-        Demandes d&apos;adoption
-      </h1>
-      <p style={{ fontSize: 13, color: AD.inkMuted, marginBottom: 22 }}>{total} demande(s) au total</p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 22 }}>
+        <div>
+          <h1 style={{ fontSize: 28, fontWeight: 600, color: AD.ink, letterSpacing: '-0.025em', marginBottom: 4 }}>
+            Demandes d&apos;adoption
+          </h1>
+          <p style={{ fontSize: 13, color: AD.inkMuted }}>{total} demande(s) au total</p>
+        </div>
+        <Link
+          href="/admin/adoption-requests/new"
+          style={{
+            padding: '9px 18px',
+            background: AD.coral,
+            color: '#fff',
+            borderRadius: 7,
+            fontWeight: 600,
+            fontSize: 13.5,
+            textDecoration: 'none',
+            flexShrink: 0,
+          }}
+        >
+          + Nouvelle demande
+        </Link>
+      </div>
 
       {/* Stat strip */}
       <div
@@ -194,30 +213,31 @@ export default async function AdminAdoptionRequestsPage() {
               <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                 <Link
                   href={`/admin/adoption-requests/${req.documentId}`}
+                  title="Modifier"
                   style={{
-                    padding: '5px 12px',
-                    background: AD.surfaceAlt,
-                    color: AD.ink,
+                    width: 28,
+                    height: 28,
                     borderRadius: 6,
-                    fontSize: 12.5,
-                    fontWeight: 600,
+                    background: TINT.peach,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     textDecoration: 'none',
-                    border: `1px solid ${AD.border}`,
-                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
                   }}
                 >
-                  Ouvrir
+                  <Pencil size={13} color="#E0944A" />
                 </Link>
                 <form action={deleteAdoptionRequest.bind(null, req.documentId)}>
                   <button
                     type="submit"
-                    title="Plus d'actions"
+                    title="Supprimer"
                     style={{
                       width: 28,
                       height: 28,
                       borderRadius: 6,
-                      border: `1px solid ${AD.border}`,
-                      background: AD.surface,
+                      background: TINT.pink,
+                      border: 'none',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -225,7 +245,7 @@ export default async function AdminAdoptionRequestsPage() {
                       flexShrink: 0,
                     }}
                   >
-                    <MoreHorizontal size={14} color={AD.inkMuted} />
+                    <Trash2 size={13} color={AD.coralInk} />
                   </button>
                 </form>
               </div>

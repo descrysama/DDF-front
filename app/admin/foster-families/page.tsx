@@ -58,10 +58,29 @@ export default async function AdminFosterFamiliesPage() {
       <p style={{ ...MONO, marginBottom: 8 }}>Admin / Familles d&apos;accueil</p>
 
       {/* Heading */}
-      <h1 style={{ fontSize: 28, fontWeight: 600, color: AD.ink, letterSpacing: '-0.025em', marginBottom: 4 }}>
-        Familles d&apos;accueil
-      </h1>
-      <p style={{ fontSize: 13, color: AD.inkMuted, marginBottom: 22 }}>{total} famille(s) au total</p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 22 }}>
+        <div>
+          <h1 style={{ fontSize: 28, fontWeight: 600, color: AD.ink, letterSpacing: '-0.025em', marginBottom: 4 }}>
+            Familles d&apos;accueil
+          </h1>
+          <p style={{ fontSize: 13, color: AD.inkMuted }}>{total} famille(s) au total</p>
+        </div>
+        <Link
+          href="/admin/foster-families/new"
+          style={{
+            padding: '9px 18px',
+            background: AD.coral,
+            color: '#fff',
+            borderRadius: 7,
+            fontWeight: 600,
+            fontSize: 13.5,
+            textDecoration: 'none',
+            flexShrink: 0,
+          }}
+        >
+          + Ajouter une famille
+        </Link>
+      </div>
 
       {/* Stat strip */}
       <div
