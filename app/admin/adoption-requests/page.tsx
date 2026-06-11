@@ -1,15 +1,10 @@
-import Link from 'next/link'
 import { fetchAdoptionRequests } from '@/lib/strapi'
 import { deleteAdoptionRequest } from './actions'
 import StatusBadge from '@/components/admin/status-badge'
-import { AD, TINT } from '@/lib/admin-tokens'
-import { Pencil, Trash2 } from 'lucide-react'
-
-const MONO: React.CSSProperties = {
-  fontFamily: 'Geist Mono, ui-monospace, monospace',
-  fontSize: 11.5,
-  color: AD.inkMuted,
-}
+import PageHeader from '@/components/admin/page-header'
+import StatCard from '@/components/admin/stat-card'
+import ActionButtons from '@/components/admin/action-buttons'
+import { AD } from '@/lib/admin-tokens'
 
 const AVATAR_BG = [
   ['#E8C9B3', '#C99879'],
@@ -39,42 +34,21 @@ export default async function AdminAdoptionRequestsPage() {
   const inProcess = adoptionRequests.filter(r => !['pending','approved','rejected'].includes(r.status)).length
 
   const STAT_CARDS = [
-    { label: 'Nouvelles',      count: pending,   tint: TINT.pink,  dot: '#E84A77' },
-    { label: 'En traitement',  count: inProcess, tint: TINT.peach, dot: '#E0944A' },
-    { label: 'Visites prévues',count: 0,         tint: TINT.lilac, dot: '#7B6CC4' },
-    { label: 'Validées',       count: approved,  tint: TINT.mint,  dot: '#3FA66E' },
-    { label: 'Archivées',      count: rejected,  tint: '#EFEAE2',  dot: '#9C9588' },
+    { label: 'Nouvelles',       count: pending,   dot: '#E84A77' },
+    { label: 'En traitement',   count: inProcess, dot: '#E0944A' },
+    { label: 'Visites prévues', count: 0,         dot: '#7B6CC4' },
+    { label: 'Validées',        count: approved,  dot: '#3FA66E' },
+    { label: 'Archivées',       count: rejected,  dot: '#9C9588' },
   ]
 
   return (
     <div style={{ padding: '28px 32px' }}>
-      {/* Breadcrumb */}
-      <p style={{ ...MONO, marginBottom: 8 }}>Admin / Demandes d&apos;adoption</p>
-
-      {/* Heading */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 22 }}>
-        <div>
-          <h1 style={{ fontSize: 28, fontWeight: 600, color: AD.ink, letterSpacing: '-0.025em', marginBottom: 4 }}>
-            Demandes d&apos;adoption
-          </h1>
-          <p style={{ fontSize: 13, color: AD.inkMuted }}>{total} demande(s) au total</p>
-        </div>
-        <Link
-          href="/admin/adoption-requests/new"
-          style={{
-            padding: '9px 18px',
-            background: AD.coral,
-            color: '#fff',
-            borderRadius: 7,
-            fontWeight: 600,
-            fontSize: 13.5,
-            textDecoration: 'none',
-            flexShrink: 0,
-          }}
-        >
-          + Nouvelle demande
-        </Link>
-      </div>
+      <PageHeader
+        breadcrumb="Admin / Demandes d'adoption"
+        title="Demandes d'adoption"
+        subtitle={`${total} demande(s) au total`}
+        action={{ label: '+ Nouvelle demande', href: '/admin/adoption-requests/new' }}
+      />
 
       {/* Stat strip */}
       <div
@@ -85,25 +59,8 @@ export default async function AdminAdoptionRequestsPage() {
           marginBottom: 22,
         }}
       >
-        {STAT_CARDS.map(({ label, count, tint, dot }) => (
-          <div
-            key={label}
-            style={{
-              background: AD.surface,
-              border: `1px solid ${AD.border}`,
-              borderRadius: 10,
-              padding: '12px 16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-            }}
-          >
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: dot, flexShrink: 0 }} />
-            <div>
-              <p style={{ fontSize: 11.5, color: AD.inkMuted }}>{label}</p>
-              <p style={{ fontSize: 20, fontWeight: 700, color: AD.ink, lineHeight: 1.2 }}>{count}</p>
-            </div>
-          </div>
+        {STAT_CARDS.map(({ label, count, dot }) => (
+          <StatCard key={label} label={label} count={count} dot={dot} />
         ))}
       </div>
 
@@ -210,45 +167,10 @@ export default async function AdminAdoptionRequestsPage() {
               <p style={{ fontSize: 12.5, color: AD.inkMuted }}>{dateStr}</p>
 
               {/* Actions */}
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <Link
-                  href={`/admin/adoption-requests/${req.documentId}`}
-                  title="Modifier"
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 6,
-                    background: TINT.peach,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textDecoration: 'none',
-                    flexShrink: 0,
-                  }}
-                >
-                  <Pencil size={13} color="#E0944A" />
-                </Link>
-                <form action={deleteAdoptionRequest.bind(null, req.documentId)}>
-                  <button
-                    type="submit"
-                    title="Supprimer"
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 6,
-                      background: TINT.pink,
-                      border: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <Trash2 size={13} color={AD.coralInk} />
-                  </button>
-                </form>
-              </div>
+              <ActionButtons
+                editHref={`/admin/adoption-requests/${req.documentId}`}
+                deleteAction={deleteAdoptionRequest.bind(null, req.documentId)}
+              />
             </div>
           )
         })}

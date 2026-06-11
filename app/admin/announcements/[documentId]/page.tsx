@@ -5,6 +5,7 @@ import { fetchResource } from '@/lib/strapi'
 import type { StrapiAnnouncementRaw } from '@/lib/strapi'
 import { updateAnnouncement } from '../actions'
 import { ADMIN } from '@/lib/admin-tokens'
+import { cardStyle } from '@/lib/admin-styles'
 
 export default async function EditAnnouncementPage({
   params,
@@ -36,14 +37,7 @@ export default async function EditAnnouncementPage({
       <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 24 }}>
         Modifier : {announcement.title}
       </h1>
-      <div
-        style={{
-          background: ADMIN.card,
-          border: `1px solid ${ADMIN.border}`,
-          borderRadius: 10,
-          padding: 28,
-        }}
-      >
+      <div style={{ ...cardStyle, padding: 28 }}>
         <AnnouncementForm defaultValues={announcement} action={boundUpdate} />
       </div>
     </div>

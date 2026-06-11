@@ -1,7 +1,9 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { ADMIN } from '@/lib/admin-tokens'
+import { fieldStyle, labelStyle } from '@/lib/admin-styles'
+import SubmitButton from '@/components/admin/submit-button'
 import type { StrapiFosterFamilyRaw } from '@/lib/strapi'
 
 type FosterFamilyFormData = Pick<
@@ -14,33 +16,21 @@ interface FosterFamilyFormProps {
   action: (formData: FormData) => Promise<void>
 }
 
-const fieldStyle: React.CSSProperties = {
-  display: 'block',
-  width: '100%',
-  padding: '8px 12px',
-  border: `1px solid ${ADMIN.border}`,
-  borderRadius: 6,
-  fontSize: 14,
-  color: ADMIN.ink,
-  background: '#fff',
-  boxSizing: 'border-box',
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 13,
-  fontWeight: 600,
-  color: ADMIN.ink,
-  marginBottom: 4,
-}
-
 export default function FosterFamilyForm({ defaultValues = {}, action }: FosterFamilyFormProps) {
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    startTransition(() => action(formData))
+    setError(null)
+    startTransition(async () => {
+      try {
+        await action(formData)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err))
+      }
+    })
   }
 
   return (
@@ -90,22 +80,23 @@ export default function FosterFamilyForm({ defaultValues = {}, action }: FosterF
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        style={{
-          padding: '10px 24px',
-          background: isPending ? '#c4c4c4' : ADMIN.coral,
-          color: '#fff',
-          border: 'none',
-          borderRadius: 6,
-          fontWeight: 600,
-          fontSize: 14,
-          cursor: isPending ? 'not-allowed' : 'pointer',
-        }}
-      >
-        {isPending ? 'Enregistrement…' : 'Enregistrer'}
-      </button>
+      {error && (
+        <div
+          style={{
+            marginBottom: 16,
+            padding: '10px 14px',
+            background: '#FEE6E5',
+            border: '1px solid #F76C70',
+            borderRadius: 6,
+            fontSize: 13,
+            color: '#B43A3F',
+          }}
+        >
+          {error}
+        </div>
+      )}
+
+      <SubmitButton label="Enregistrer" />
     </form>
   )
 }

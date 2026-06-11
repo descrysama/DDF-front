@@ -1,14 +1,9 @@
-import Link from 'next/link'
 import { fetchFosterFamilies } from '@/lib/strapi'
 import { deleteFosterFamily } from './actions'
+import PageHeader from '@/components/admin/page-header'
+import StatCard from '@/components/admin/stat-card'
+import ActionButtons from '@/components/admin/action-buttons'
 import { AD, TINT } from '@/lib/admin-tokens'
-import { Pencil, Trash2 } from 'lucide-react'
-
-const MONO: React.CSSProperties = {
-  fontFamily: 'Geist Mono, ui-monospace, monospace',
-  fontSize: 11.5,
-  color: AD.inkMuted,
-}
 
 const GRID_COLS = '1.6fr 1.4fr 80px 80px 80px 80px 80px 110px'
 
@@ -47,40 +42,19 @@ export default async function AdminFosterFamiliesPage() {
   const totalHosted = fosterFamilies.reduce((s, f) => s + (f.foster_assignments?.length ?? 0), 0)
 
   const STAT_CARDS = [
-    { label: 'Total familles',    count: total,                  tint: TINT.lilac, dot: '#7B6CC4' },
-    { label: 'Familles actives',  count: withAssignments.length, tint: TINT.mint,  dot: '#3FA66E' },
-    { label: 'Animaux hébergés',  count: totalHosted,            tint: TINT.peach, dot: '#E0944A' },
+    { label: 'Total familles',   count: total,                  dot: '#7B6CC4' },
+    { label: 'Familles actives', count: withAssignments.length, dot: '#3FA66E' },
+    { label: 'Animaux hébergés', count: totalHosted,            dot: '#E0944A' },
   ]
 
   return (
     <div style={{ padding: '28px 32px' }}>
-      {/* Breadcrumb */}
-      <p style={{ ...MONO, marginBottom: 8 }}>Admin / Familles d&apos;accueil</p>
-
-      {/* Heading */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 22 }}>
-        <div>
-          <h1 style={{ fontSize: 28, fontWeight: 600, color: AD.ink, letterSpacing: '-0.025em', marginBottom: 4 }}>
-            Familles d&apos;accueil
-          </h1>
-          <p style={{ fontSize: 13, color: AD.inkMuted }}>{total} famille(s) au total</p>
-        </div>
-        <Link
-          href="/admin/foster-families/new"
-          style={{
-            padding: '9px 18px',
-            background: AD.coral,
-            color: '#fff',
-            borderRadius: 7,
-            fontWeight: 600,
-            fontSize: 13.5,
-            textDecoration: 'none',
-            flexShrink: 0,
-          }}
-        >
-          + Ajouter une famille
-        </Link>
-      </div>
+      <PageHeader
+        breadcrumb="Admin / Familles d'accueil"
+        title="Familles d'accueil"
+        subtitle={`${total} famille(s) au total`}
+        action={{ label: '+ Ajouter une famille', href: '/admin/foster-families/new' }}
+      />
 
       {/* Stat strip */}
       <div
@@ -91,25 +65,8 @@ export default async function AdminFosterFamiliesPage() {
           marginBottom: 22,
         }}
       >
-        {STAT_CARDS.map(({ label, count, tint, dot }) => (
-          <div
-            key={label}
-            style={{
-              background: AD.surface,
-              border: `1px solid ${AD.border}`,
-              borderRadius: 10,
-              padding: '12px 16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-            }}
-          >
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: dot, flexShrink: 0 }} />
-            <div>
-              <p style={{ fontSize: 11.5, color: AD.inkMuted }}>{label}</p>
-              <p style={{ fontSize: 20, fontWeight: 700, color: AD.ink, lineHeight: 1.2 }}>{count}</p>
-            </div>
-          </div>
+        {STAT_CARDS.map(({ label, count, dot }) => (
+          <StatCard key={label} label={label} count={count} dot={dot} />
         ))}
       </div>
 
@@ -200,45 +157,10 @@ export default async function AdminFosterFamiliesPage() {
             </p>
 
             {/* Actions */}
-            <div style={{ display: 'flex', gap: 6 }}>
-              <Link
-                href={`/admin/foster-families/${family.documentId}`}
-                title="Modifier"
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 6,
-                  background: TINT.peach,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textDecoration: 'none',
-                  flexShrink: 0,
-                }}
-              >
-                <Pencil size={13} color="#E0944A" />
-              </Link>
-              <form action={deleteFosterFamily.bind(null, family.documentId)}>
-                <button
-                  type="submit"
-                  title="Supprimer"
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 6,
-                    background: TINT.pink,
-                    border: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                  }}
-                >
-                  <Trash2 size={13} color={AD.coralInk} />
-                </button>
-              </form>
-            </div>
+            <ActionButtons
+              editHref={`/admin/foster-families/${family.documentId}`}
+              deleteAction={deleteFosterFamily.bind(null, family.documentId)}
+            />
           </div>
         ))}
 

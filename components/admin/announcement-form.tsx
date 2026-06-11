@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { ADMIN } from '@/lib/admin-tokens'
+import { fieldStyle, labelStyle } from '@/lib/admin-styles'
+import SubmitButton from '@/components/admin/submit-button'
 import type { AnnouncementStatus } from '@/lib/strapi'
 
 interface AnnouncementFormData {
@@ -13,26 +14,6 @@ interface AnnouncementFormData {
 interface AnnouncementFormProps {
   defaultValues?: AnnouncementFormData
   action: (formData: FormData) => Promise<void>
-}
-
-const fieldStyle: React.CSSProperties = {
-  display: 'block',
-  width: '100%',
-  padding: '8px 12px',
-  border: `1px solid ${ADMIN.border}`,
-  borderRadius: 6,
-  fontSize: 14,
-  color: ADMIN.ink,
-  background: '#fff',
-  boxSizing: 'border-box',
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 13,
-  fontWeight: 600,
-  color: ADMIN.ink,
-  marginBottom: 4,
 }
 
 export default function AnnouncementForm({ defaultValues = {}, action }: AnnouncementFormProps) {
@@ -104,22 +85,7 @@ export default function AnnouncementForm({ defaultValues = {}, action }: Announc
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        style={{
-          padding: '10px 24px',
-          background: isPending ? '#c4c4c4' : ADMIN.coral,
-          color: '#fff',
-          border: 'none',
-          borderRadius: 6,
-          fontWeight: 600,
-          fontSize: 14,
-          cursor: isPending ? 'not-allowed' : 'pointer',
-        }}
-      >
-        {isPending ? 'Enregistrement…' : 'Enregistrer'}
-      </button>
+      <SubmitButton label="Enregistrer" />
     </form>
   )
 }

@@ -1,15 +1,12 @@
-import Link from 'next/link'
 import { fetchAnimals, fetchAdoptionRequests } from '@/lib/strapi'
 import { deleteAnimal } from './actions'
 import StatusBadge from '@/components/admin/status-badge'
-import { AD, TINT } from '@/lib/admin-tokens'
-import { Search, Pencil, Trash2 } from 'lucide-react'
-
-const MONO: React.CSSProperties = {
-  fontFamily: 'Geist Mono, ui-monospace, monospace',
-  fontSize: 11.5,
-  color: AD.inkMuted,
-}
+import PageHeader from '@/components/admin/page-header'
+import StatCard from '@/components/admin/stat-card'
+import ActionButtons from '@/components/admin/action-buttons'
+import { AD } from '@/lib/admin-tokens'
+import { Search } from 'lucide-react'
+import Link from 'next/link'
 
 const AVATAR_TONES: [string, string][] = [
   ['#E8C9B3', '#C99879'],
@@ -35,41 +32,20 @@ export default async function AdminAnimalsPage() {
   const reserved  = animals.filter(a => a.status === 'reserved').length
 
   const STAT_CARDS = [
-    { label: 'Publiés',              count: available,              tint: TINT.mint,  dot: '#3FA66E' },
-    { label: 'En famille d\'accueil', count: in_foster,              tint: TINT.peach, dot: '#E0944A' },
-    { label: 'Réservés',             count: reserved,               tint: TINT.lilac, dot: '#7B6CC4' },
-    { label: 'Demandes en attente',  count: adoptionData.total,     tint: TINT.pink,  dot: '#E84A77' },
+    { label: 'Publiés',              count: available,          dot: '#3FA66E' },
+    { label: "En famille d'accueil", count: in_foster,          dot: '#E0944A' },
+    { label: 'Réservés',             count: reserved,           dot: '#7B6CC4' },
+    { label: 'Demandes en attente',  count: adoptionData.total, dot: '#E84A77' },
   ]
 
   return (
     <div style={{ padding: '28px 32px' }}>
-      {/* Breadcrumb */}
-      <p style={{ ...MONO, marginBottom: 8 }}>Admin / Chats</p>
-
-      {/* Heading */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 22 }}>
-        <div>
-          <h1 style={{ fontSize: 28, fontWeight: 600, color: AD.ink, letterSpacing: '-0.025em', marginBottom: 4 }}>
-            Chats
-          </h1>
-          <p style={{ fontSize: 13, color: AD.inkMuted }}>{total} chat(s) au total</p>
-        </div>
-        <Link
-          href="/admin/animals/new"
-          style={{
-            padding: '9px 18px',
-            background: AD.coral,
-            color: '#fff',
-            borderRadius: 7,
-            fontWeight: 600,
-            fontSize: 13.5,
-            textDecoration: 'none',
-            flexShrink: 0,
-          }}
-        >
-          + Ajouter un chat
-        </Link>
-      </div>
+      <PageHeader
+        breadcrumb="Admin / Chats"
+        title="Chats"
+        subtitle={`${total} chat(s) au total`}
+        action={{ label: '+ Ajouter un chat', href: '/admin/animals/new' }}
+      />
 
       {/* Stat strip */}
       <div
@@ -80,25 +56,8 @@ export default async function AdminAnimalsPage() {
           marginBottom: 22,
         }}
       >
-        {STAT_CARDS.map(({ label, count, tint, dot }) => (
-          <div
-            key={label}
-            style={{
-              background: AD.surface,
-              border: `1px solid ${AD.border}`,
-              borderRadius: 10,
-              padding: '12px 16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-            }}
-          >
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: dot, flexShrink: 0 }} />
-            <div>
-              <p style={{ fontSize: 11.5, color: AD.inkMuted }}>{label}</p>
-              <p style={{ fontSize: 20, fontWeight: 700, color: AD.ink, lineHeight: 1.2 }}>{count}</p>
-            </div>
-          </div>
+        {STAT_CARDS.map(({ label, count, dot }) => (
+          <StatCard key={label} label={label} count={count} dot={dot} />
         ))}
       </div>
 
@@ -228,43 +187,10 @@ export default async function AdminAnimalsPage() {
                 >
                   <Search size={13} color={AD.inkMuted} />
                 </Link>
-                <Link
-                  href={`/admin/animals/${animal.documentId}`}
-                  title="Modifier"
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 6,
-                    background: TINT.peach,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textDecoration: 'none',
-                    flexShrink: 0,
-                  }}
-                >
-                  <Pencil size={13} color="#E0944A" />
-                </Link>
-                <form action={deleteAnimal.bind(null, animal.documentId)}>
-                  <button
-                    type="submit"
-                    title="Supprimer"
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 6,
-                      background: TINT.pink,
-                      border: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <Trash2 size={13} color={AD.coralInk} />
-                  </button>
-                </form>
+                <ActionButtons
+                  editHref={`/admin/animals/${animal.documentId}`}
+                  deleteAction={deleteAnimal.bind(null, animal.documentId)}
+                />
               </div>
             </div>
           )

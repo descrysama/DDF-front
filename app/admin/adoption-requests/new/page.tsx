@@ -2,26 +2,8 @@ import Link from 'next/link'
 import { fetchAnnouncements, fetchUsers } from '@/lib/strapi'
 import { createAdoptionRequest } from '../actions'
 import { ADMIN } from '@/lib/admin-tokens'
-
-const fieldStyle: React.CSSProperties = {
-  display: 'block',
-  width: '100%',
-  padding: '8px 12px',
-  border: `1px solid ${ADMIN.border}`,
-  borderRadius: 6,
-  fontSize: 14,
-  color: ADMIN.ink,
-  background: '#fff',
-  boxSizing: 'border-box',
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 13,
-  fontWeight: 600,
-  color: ADMIN.ink,
-  marginBottom: 4,
-}
+import { fieldStyle, labelStyle, cardStyle } from '@/lib/admin-styles'
+import SubmitButton from '@/components/admin/submit-button'
 
 export default async function NewAdoptionRequestPage() {
   const [{ announcements }, users] = await Promise.all([
@@ -43,15 +25,7 @@ export default async function NewAdoptionRequestPage() {
         Nouvelle demande d&apos;adoption
       </h1>
 
-      <div
-        style={{
-          background: ADMIN.card,
-          border: `1px solid ${ADMIN.border}`,
-          borderRadius: 10,
-          padding: 28,
-          maxWidth: 640,
-        }}
-      >
+      <div style={{ ...cardStyle, padding: 28, maxWidth: 640 }}>
         <form action={createAdoptionRequest}>
           <div style={{ marginBottom: 16 }}>
             <label style={labelStyle}>Annonce liée</label>
@@ -117,21 +91,7 @@ export default async function NewAdoptionRequestPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            style={{
-              padding: '10px 24px',
-              background: ADMIN.coral,
-              color: '#fff',
-              border: 'none',
-              borderRadius: 6,
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: 'pointer',
-            }}
-          >
-            Créer la demande
-          </button>
+          <SubmitButton label="Créer la demande" />
         </form>
       </div>
     </div>
