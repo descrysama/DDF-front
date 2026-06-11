@@ -5,7 +5,7 @@ import { fetchResource } from '@/lib/strapi'
 import type { StrapiFosterFamilyRaw } from '@/lib/strapi'
 import { updateFosterFamily } from '../actions'
 import { ADMIN } from '@/lib/admin-tokens'
-import { cardStyle } from '@/lib/admin-styles'
+import { Card } from '@/components/ui/card'
 
 export default async function EditFosterFamilyPage({
   params,
@@ -47,12 +47,12 @@ export default async function EditFosterFamilyPage({
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
         {/* Edit form */}
-        <div style={{ ...cardStyle, padding: 28 }}>
+        <Card className="p-6 hover:translate-y-0">
           <FosterFamilyForm defaultValues={family} action={boundUpdate} />
-        </div>
+        </Card>
 
         {/* Foster assignments */}
-        <div style={{ ...cardStyle, padding: 28 }}>
+        <Card className="p-6 hover:translate-y-0">
           <h2 style={{ fontSize: 16, fontWeight: 700, color: ADMIN.ink, marginBottom: 14 }}>
             Hébergements en cours
           </h2>
@@ -80,7 +80,7 @@ export default async function EditFosterFamilyPage({
               Aucun hébergement en cours.
             </p>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   )

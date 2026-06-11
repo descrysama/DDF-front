@@ -2,8 +2,9 @@ import Link from 'next/link'
 import { fetchAnnouncements, fetchUsers } from '@/lib/strapi'
 import { createAdoptionRequest } from '../actions'
 import { ADMIN } from '@/lib/admin-tokens'
-import { fieldStyle, labelStyle, cardStyle } from '@/lib/admin-styles'
+import { fieldStyle, labelStyle } from '@/lib/admin-styles'
 import SubmitButton from '@/components/admin/submit-button'
+import { Card } from '@/components/ui/card'
 
 export default async function NewAdoptionRequestPage() {
   const [{ announcements }, users] = await Promise.all([
@@ -25,7 +26,7 @@ export default async function NewAdoptionRequestPage() {
         Nouvelle demande d&apos;adoption
       </h1>
 
-      <div style={{ ...cardStyle, padding: 28, maxWidth: 640 }}>
+      <Card className="p-7 max-w-2xl hover:translate-y-0">
         <form action={createAdoptionRequest}>
           <div style={{ marginBottom: 16 }}>
             <label style={labelStyle}>Annonce liée</label>
@@ -93,7 +94,7 @@ export default async function NewAdoptionRequestPage() {
 
           <SubmitButton label="Créer la demande" />
         </form>
-      </div>
+      </Card>
     </div>
   )
 }

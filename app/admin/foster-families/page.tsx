@@ -4,6 +4,7 @@ import PageHeader from '@/components/admin/page-header'
 import StatCard from '@/components/admin/stat-card'
 import ActionButtons from '@/components/admin/action-buttons'
 import { AD, TINT } from '@/lib/admin-tokens'
+import { Card } from '@/components/ui/card'
 
 const GRID_COLS = '1.6fr 1.4fr 80px 80px 80px 80px 80px 110px'
 
@@ -71,14 +72,7 @@ export default async function AdminFosterFamiliesPage() {
       </div>
 
       {/* Table */}
-      <div
-        style={{
-          background: AD.surface,
-          border: `1px solid ${AD.border}`,
-          borderRadius: 10,
-          overflow: 'hidden',
-        }}
-      >
+      <Card className="overflow-hidden hover:translate-y-0">
         {/* Header */}
         <div
           style={{
@@ -169,7 +163,7 @@ export default async function AdminFosterFamiliesPage() {
             Aucune famille d&apos;accueil trouvée.
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

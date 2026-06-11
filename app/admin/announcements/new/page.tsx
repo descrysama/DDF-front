@@ -2,7 +2,7 @@ import Link from 'next/link'
 import AnnouncementForm from '@/components/admin/announcement-form'
 import { createAnnouncement } from '../actions'
 import { ADMIN } from '@/lib/admin-tokens'
-import { cardStyle } from '@/lib/admin-styles'
+import { Card } from '@/components/ui/card'
 
 export default function NewAnnouncementPage() {
   return (
@@ -18,9 +18,9 @@ export default function NewAnnouncementPage() {
       <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 24 }}>
         Créer une annonce
       </h1>
-      <div style={{ ...cardStyle, padding: 28 }}>
+      <Card className="p-7 max-w-2xl hover:translate-y-0">
         <AnnouncementForm action={createAnnouncement} />
-      </div>
+      </Card>
     </div>
   )
 }

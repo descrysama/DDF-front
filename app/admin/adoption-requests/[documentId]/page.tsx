@@ -6,7 +6,9 @@ import { updateAdoptionRequest, deleteAdoptionRequest } from '../actions'
 import StatusBadge from '@/components/admin/status-badge'
 import SubmitButton from '@/components/admin/submit-button'
 import { ADMIN } from '@/lib/admin-tokens'
-import { fieldStyle, labelStyle, metaRowStyle, cardStyle } from '@/lib/admin-styles'
+import { fieldStyle, labelStyle, metaRowStyle } from '@/lib/admin-styles'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 export default async function AdoptionRequestDetailPage({
   params,
@@ -56,27 +58,15 @@ export default async function AdoptionRequestDetailPage({
           </p>
         </div>
         <form action={boundDelete}>
-          <button
-            type="submit"
-            style={{
-              padding: '8px 16px',
-              background: '#FEE6E5',
-              color: '#B43A3F',
-              border: 'none',
-              borderRadius: 6,
-              fontWeight: 600,
-              fontSize: 13,
-              cursor: 'pointer',
-            }}
-          >
+          <Button variant="destructive" type="submit">
             Supprimer
-          </button>
+          </Button>
         </form>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         {/* Informations en lecture seule */}
-        <div style={cardStyle}>
+        <Card className="p-6 hover:translate-y-0">
           <h2 style={{ fontSize: 15, fontWeight: 700, color: ADMIN.ink, marginBottom: 14 }}>
             Informations
           </h2>
@@ -123,10 +113,10 @@ export default async function AdoptionRequestDetailPage({
               </p>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Formulaire d'édition complet */}
-        <div style={cardStyle}>
+        <Card className="p-6 hover:translate-y-0">
           <h2 style={{ fontSize: 15, fontWeight: 700, color: ADMIN.ink, marginBottom: 14 }}>
             Modifier la demande
           </h2>
@@ -206,7 +196,7 @@ export default async function AdoptionRequestDetailPage({
 
             <SubmitButton label="Enregistrer" />
           </form>
-        </div>
+        </Card>
       </div>
     </div>
   )

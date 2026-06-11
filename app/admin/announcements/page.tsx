@@ -5,6 +5,7 @@ import PageHeader from '@/components/admin/page-header'
 import StatCard from '@/components/admin/stat-card'
 import ActionButtons from '@/components/admin/action-buttons'
 import { AD } from '@/lib/admin-tokens'
+import { Card } from '@/components/ui/card'
 
 const GRID_COLS = '1.8fr 0.8fr 1fr 110px'
 
@@ -45,14 +46,7 @@ export default async function AdminAnnouncementsPage() {
       </div>
 
       {/* Table */}
-      <div
-        style={{
-          background: AD.surface,
-          border: `1px solid ${AD.border}`,
-          borderRadius: 10,
-          overflow: 'hidden',
-        }}
-      >
+      <Card className="overflow-hidden hover:translate-y-0">
         {/* Header */}
         <div
           style={{
@@ -116,7 +110,7 @@ export default async function AdminAnnouncementsPage() {
             Aucune annonce trouvée.
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

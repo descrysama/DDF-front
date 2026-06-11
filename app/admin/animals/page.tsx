@@ -5,6 +5,7 @@ import PageHeader from '@/components/admin/page-header'
 import StatCard from '@/components/admin/stat-card'
 import ActionButtons from '@/components/admin/action-buttons'
 import { AD } from '@/lib/admin-tokens'
+import { Card } from '@/components/ui/card'
 import { Search } from 'lucide-react'
 import Link from 'next/link'
 
@@ -62,14 +63,7 @@ export default async function AdminAnimalsPage() {
       </div>
 
       {/* Table container */}
-      <div
-        style={{
-          background: AD.surface,
-          border: `1px solid ${AD.border}`,
-          borderRadius: 10,
-          overflow: 'hidden',
-        }}
-      >
+      <Card className="overflow-hidden hover:translate-y-0">
         {/* Header row */}
         <div
           style={{
@@ -239,7 +233,7 @@ export default async function AdminAnimalsPage() {
             </div>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

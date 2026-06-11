@@ -1,38 +1,15 @@
-import { STATUS_META, StatusKey } from '@/lib/admin-tokens'
+import { Badge } from '@/components/ui/badge'
+import { STATUS_META, type StatusKey } from '@/lib/admin-tokens'
 
 export default function StatusBadge({ status }: { status: string }) {
-  const meta = STATUS_META[status as StatusKey] ?? {
-    label: status,
-    tint: '#F4F1EB',
-    dot: '#A6A6AE',
-    ink: '#6A6C7A',
-  }
-
+  const meta = STATUS_META[status as StatusKey] ?? STATUS_META.available
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '3px 9px',
-        borderRadius: 4,
-        background: meta.tint,
-        color: meta.ink,
-        fontSize: 11,
-        fontWeight: 600,
-        whiteSpace: 'nowrap',
-      }}
+    <Badge
+      className="hover:opacity-100"
+      style={{ background: meta.tint, color: meta.ink, border: 'none' }}
     >
-      <span
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: '50%',
-          background: meta.dot,
-          flexShrink: 0,
-        }}
-      />
+      <span style={{ width: 5, height: 5, borderRadius: '50%', background: meta.dot, marginRight: 4, display: 'inline-block' }} />
       {meta.label}
-    </span>
+    </Badge>
   )
 }
