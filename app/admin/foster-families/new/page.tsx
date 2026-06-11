@@ -2,6 +2,7 @@ import Link from 'next/link'
 import FosterFamilyForm from '@/components/admin/foster-family-form'
 import { createFosterFamily } from '../actions'
 import { ADMIN } from '@/lib/admin-tokens'
+import { cardStyle } from '@/lib/admin-styles'
 
 export default function NewFosterFamilyPage() {
   return (
@@ -17,15 +18,7 @@ export default function NewFosterFamilyPage() {
       <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 24 }}>
         Nouvelle famille d&apos;accueil
       </h1>
-      <div
-        style={{
-          background: ADMIN.card,
-          border: `1px solid ${ADMIN.border}`,
-          borderRadius: 10,
-          padding: 28,
-          maxWidth: 600,
-        }}
-      >
+      <div style={{ ...cardStyle, padding: 28, maxWidth: 600 }}>
         <FosterFamilyForm action={createFosterFamily} />
       </div>
     </div>

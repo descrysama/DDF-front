@@ -4,35 +4,9 @@ import { fetchResource, fetchAnnouncements, fetchUsers } from '@/lib/strapi'
 import type { StrapiAdoptionRequestRaw } from '@/lib/strapi'
 import { updateAdoptionRequest, deleteAdoptionRequest } from '../actions'
 import StatusBadge from '@/components/admin/status-badge'
+import SubmitButton from '@/components/admin/submit-button'
 import { ADMIN } from '@/lib/admin-tokens'
-
-const fieldStyle: React.CSSProperties = {
-  display: 'block',
-  width: '100%',
-  padding: '8px 12px',
-  border: `1px solid ${ADMIN.border}`,
-  borderRadius: 6,
-  fontSize: 14,
-  color: ADMIN.ink,
-  background: '#fff',
-  boxSizing: 'border-box',
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 13,
-  fontWeight: 600,
-  color: ADMIN.ink,
-  marginBottom: 4,
-}
-
-const metaRowStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  padding: '10px 0',
-  borderBottom: `1px solid ${ADMIN.border}`,
-  fontSize: 14,
-}
+import { fieldStyle, labelStyle, metaRowStyle, cardStyle } from '@/lib/admin-styles'
 
 export default async function AdoptionRequestDetailPage({
   params,
@@ -102,14 +76,7 @@ export default async function AdoptionRequestDetailPage({
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         {/* Informations en lecture seule */}
-        <div
-          style={{
-            background: ADMIN.card,
-            border: `1px solid ${ADMIN.border}`,
-            borderRadius: 10,
-            padding: 24,
-          }}
-        >
+        <div style={cardStyle}>
           <h2 style={{ fontSize: 15, fontWeight: 700, color: ADMIN.ink, marginBottom: 14 }}>
             Informations
           </h2>
@@ -159,14 +126,7 @@ export default async function AdoptionRequestDetailPage({
         </div>
 
         {/* Formulaire d'édition complet */}
-        <div
-          style={{
-            background: ADMIN.card,
-            border: `1px solid ${ADMIN.border}`,
-            borderRadius: 10,
-            padding: 24,
-          }}
-        >
+        <div style={cardStyle}>
           <h2 style={{ fontSize: 15, fontWeight: 700, color: ADMIN.ink, marginBottom: 14 }}>
             Modifier la demande
           </h2>
@@ -244,21 +204,7 @@ export default async function AdoptionRequestDetailPage({
               />
             </div>
 
-            <button
-              type="submit"
-              style={{
-                padding: '10px 24px',
-                background: ADMIN.coral,
-                color: '#fff',
-                border: 'none',
-                borderRadius: 6,
-                fontWeight: 600,
-                fontSize: 14,
-                cursor: 'pointer',
-              }}
-            >
-              Enregistrer
-            </button>
+            <SubmitButton label="Enregistrer" />
           </form>
         </div>
       </div>
