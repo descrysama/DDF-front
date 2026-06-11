@@ -11,6 +11,7 @@ import {
   Shield,
   FileText,
   Settings,
+  Megaphone,
 } from 'lucide-react'
 import { AD } from '@/lib/admin-tokens'
 
@@ -26,6 +27,7 @@ type NavItem = {
 const GESTION_ITEMS: NavItem[] = [
   { key: 'dashboard', label: 'Tableau de bord',       href: '/admin',                    icon: Home },
   { key: 'cats',      label: 'Chats',                  href: '/admin/animals',            icon: PawPrint },
+  { key: 'annonces',  label: 'Annonces',                href: '/admin/announcements',      icon: Megaphone },
   { key: 'demandes',  label: "Demandes d'adoption",    href: '/admin/adoption-requests',  icon: Heart,   badge: null, badgeHighlight: true },
   { key: 'fa',        label: "Familles d'accueil",     href: '/admin/foster-families',    icon: Smile },
   { key: 'distrib',   label: 'Distributions',          href: '#',                         icon: Calendar },

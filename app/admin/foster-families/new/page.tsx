@@ -1,0 +1,33 @@
+import Link from 'next/link'
+import FosterFamilyForm from '@/components/admin/foster-family-form'
+import { createFosterFamily } from '../actions'
+import { ADMIN } from '@/lib/admin-tokens'
+
+export default function NewFosterFamilyPage() {
+  return (
+    <div style={{ padding: 32 }}>
+      <div style={{ marginBottom: 20 }}>
+        <Link
+          href="/admin/foster-families"
+          style={{ fontSize: 13, color: ADMIN.inkMuted, textDecoration: 'none' }}
+        >
+          ← Retour aux familles d&apos;accueil
+        </Link>
+      </div>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 24 }}>
+        Nouvelle famille d&apos;accueil
+      </h1>
+      <div
+        style={{
+          background: ADMIN.card,
+          border: `1px solid ${ADMIN.border}`,
+          borderRadius: 10,
+          padding: 28,
+          maxWidth: 600,
+        }}
+      >
+        <FosterFamilyForm action={createFosterFamily} />
+      </div>
+    </div>
+  )
+}

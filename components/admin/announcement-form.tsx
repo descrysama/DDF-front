@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { ADMIN } from '@/lib/admin-tokens'
 import type { AnnouncementStatus } from '@/lib/strapi'
 
@@ -37,11 +37,19 @@ const labelStyle: React.CSSProperties = {
 
 export default function AnnouncementForm({ defaultValues = {}, action }: AnnouncementFormProps) {
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    startTransition(() => action(formData))
+    setError(null)
+    startTransition(async () => {
+      try {
+        await action(formData)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err))
+      }
+    })
   }
 
   return (
@@ -79,6 +87,22 @@ export default function AnnouncementForm({ defaultValues = {}, action }: Announc
           placeholder="Décrivez l'annonce..."
         />
       </div>
+
+      {error && (
+        <div
+          style={{
+            marginBottom: 16,
+            padding: '10px 14px',
+            background: '#FEE6E5',
+            border: '1px solid #F76C70',
+            borderRadius: 6,
+            fontSize: 13,
+            color: '#B43A3F',
+          }}
+        >
+          {error}
+        </div>
+      )}
 
       <button
         type="submit"

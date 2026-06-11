@@ -274,3 +274,13 @@ export async function fetchAdoptionRequests(opts?: {
   )
   return { adoptionRequests: data, total: meta.pagination.total }
 }
+
+export interface StrapiUser {
+  id: number
+  username: string
+  email: string
+}
+
+export async function fetchUsers(): Promise<StrapiUser[]> {
+  return strapiGet<StrapiUser[]>('/api/users')
+}

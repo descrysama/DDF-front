@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { fetchResource } from '@/lib/strapi'
+import { fetchResource, fetchAnnouncements, fetchUsers } from '@/lib/strapi'
 import type { StrapiAdoptionRequestRaw } from '@/lib/strapi'
-import { updateRequestStatus } from '../actions'
+import { updateAdoptionRequest, deleteAdoptionRequest } from '../actions'
 import StatusBadge from '@/components/admin/status-badge'
 import { ADMIN } from '@/lib/admin-tokens'
 
@@ -51,7 +51,16 @@ export default async function AdoptionRequestDetailPage({
     notFound()
   }
 
-  const boundUpdate = updateRequestStatus.bind(null, documentId)
+  const [{ announcements }, users] = await Promise.all([
+    fetchAnnouncements({ limit: 100 }),
+    fetchUsers(),
+  ])
+  const boundUpdate = updateAdoptionRequest.bind(null, documentId)
+  const boundDelete = deleteAdoptionRequest.bind(null, documentId)
+
+  const requestDateValue = request.request_date
+    ? new Date(request.request_date).toISOString().split('T')[0]
+    : ''
 
   return (
     <div style={{ padding: 32 }}>
@@ -63,15 +72,36 @@ export default async function AdoptionRequestDetailPage({
           ← Retour aux demandes
         </Link>
       </div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 4 }}>
-        Demande d&apos;adoption
-      </h1>
-      <p style={{ fontSize: 14, color: ADMIN.inkMuted, marginBottom: 28 }}>
-        {request.announcement?.title ?? 'Annonce inconnue'}
-      </p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 4 }}>
+            Demande d&apos;adoption
+          </h1>
+          <p style={{ fontSize: 14, color: ADMIN.inkMuted }}>
+            {request.announcement?.title ?? 'Annonce inconnue'}
+          </p>
+        </div>
+        <form action={boundDelete}>
+          <button
+            type="submit"
+            style={{
+              padding: '8px 16px',
+              background: '#FEE6E5',
+              color: '#B43A3F',
+              border: 'none',
+              borderRadius: 6,
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: 'pointer',
+            }}
+          >
+            Supprimer
+          </button>
+        </form>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-        {/* Details card */}
+        {/* Informations en lecture seule */}
         <div
           style={{
             background: ADMIN.card,
@@ -85,34 +115,26 @@ export default async function AdoptionRequestDetailPage({
           </h2>
           <div>
             <div style={metaRowStyle}>
-              <span style={{ color: ADMIN.inkMuted }}>Statut</span>
+              <span style={{ color: ADMIN.inkMuted }}>Statut actuel</span>
               <StatusBadge status={request.status} />
             </div>
             <div style={metaRowStyle}>
-              <span style={{ color: ADMIN.inkMuted }}>Score de correspondance</span>
-              <span style={{ fontWeight: 700 }}>
-                {request.match_score != null ? `${request.match_score}%` : '—'}
-              </span>
-            </div>
-            <div style={metaRowStyle}>
-              <span style={{ color: ADMIN.inkMuted }}>Date de demande</span>
-              <span>
-                {request.request_date
-                  ? new Date(request.request_date).toLocaleDateString('fr-FR')
-                  : '—'}
-              </span>
-            </div>
-            <div style={metaRowStyle}>
               <span style={{ color: ADMIN.inkMuted }}>Adoptant</span>
-              <span>
+              <span style={{ fontWeight: 500 }}>
                 {request.adopter
                   ? `${request.adopter.username} (${request.adopter.email})`
                   : '—'}
               </span>
             </div>
-            <div style={{ ...metaRowStyle, borderBottom: 'none' }}>
+            <div style={metaRowStyle}>
               <span style={{ color: ADMIN.inkMuted }}>Référent</span>
               <span>{request.referent?.username ?? '—'}</span>
+            </div>
+            <div style={{ ...metaRowStyle, borderBottom: 'none' }}>
+              <span style={{ color: ADMIN.inkMuted }}>Score de correspondance</span>
+              <span style={{ fontWeight: 700 }}>
+                {request.match_score != null ? `${request.match_score}%` : '—'}
+              </span>
             </div>
           </div>
 
@@ -136,7 +158,7 @@ export default async function AdoptionRequestDetailPage({
           )}
         </div>
 
-        {/* Status form */}
+        {/* Formulaire d'édition complet */}
         <div
           style={{
             background: ADMIN.card,
@@ -146,17 +168,82 @@ export default async function AdoptionRequestDetailPage({
           }}
         >
           <h2 style={{ fontSize: 15, fontWeight: 700, color: ADMIN.ink, marginBottom: 14 }}>
-            Changer le statut
+            Modifier la demande
           </h2>
           <form action={boundUpdate}>
-            <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>Nouveau statut</label>
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>Annonce liée</label>
+              <select
+                name="announcement_id"
+                defaultValue={request.announcement?.documentId ?? ''}
+                style={fieldStyle}
+              >
+                <option value="">— Aucune —</option>
+                {announcements.map(a => (
+                  <option key={a.documentId} value={a.documentId}>
+                    {a.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>Adoptant</label>
+              <select
+                name="adopter_id"
+                defaultValue={users.find(u => u.email === request.adopter?.email)?.id ?? ''}
+                style={fieldStyle}
+              >
+                <option value="">— Aucun —</option>
+                {users.map(u => (
+                  <option key={u.id} value={u.id}>
+                    {u.username} ({u.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>Statut</label>
               <select name="status" defaultValue={request.status} style={fieldStyle}>
                 <option value="pending">En attente</option>
                 <option value="approved">Approuvé</option>
                 <option value="rejected">Rejeté</option>
               </select>
             </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>Score de correspondance (%)</label>
+              <input
+                name="match_score"
+                type="number"
+                min={0}
+                max={100}
+                defaultValue={request.match_score ?? ''}
+                style={fieldStyle}
+              />
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>Date de la demande</label>
+              <input
+                name="request_date"
+                type="date"
+                defaultValue={requestDateValue}
+                style={fieldStyle}
+              />
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <label style={labelStyle}>Message</label>
+              <textarea
+                name="message"
+                rows={4}
+                defaultValue={request.message ?? ''}
+                style={{ ...fieldStyle, resize: 'vertical' }}
+              />
+            </div>
+
             <button
               type="submit"
               style={{
@@ -170,7 +257,7 @@ export default async function AdoptionRequestDetailPage({
                 cursor: 'pointer',
               }}
             >
-              Mettre à jour
+              Enregistrer
             </button>
           </form>
         </div>
