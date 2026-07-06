@@ -3,8 +3,9 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
-import { usePathname } from "next/navigation"
-import { Menu, X, User, Heart } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Menu, X, User, Heart, LogOut, Shield } from "lucide-react"
+import { useUserStore, useIsAdmin } from "@/lib/stores/user-store"
 
 const NAV_LINKS = [
   { label: "Accueil",       href: "/",                            key: "home"    },
@@ -16,7 +17,18 @@ const NAV_LINKS = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const user = useUserStore((s) => s.user)
+  const clear = useUserStore((s) => s.clear)
+  const isAdmin = useIsAdmin()
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    clear()
+    router.push('/')
+    router.refresh()
+  }
 
   function isActive(href: string) {
     return href === "/" ? pathname === "/" : pathname.startsWith(href)
@@ -65,13 +77,38 @@ export default function Header() {
 
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-2">
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-border-strong text-sm font-semibold text-ink no-underline"
-            >
-              <User size={13} />
-              Se connecter
-            </Link>
+            {user ? (
+              <>
+                {isAdmin && (
+                  <Link
+                    href="/admin/animals"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-ink text-white text-sm font-semibold no-underline"
+                  >
+                    <Shield size={13} />
+                    Admin
+                  </Link>
+                )}
+                <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-ink">
+                  <User size={13} />
+                  {user.username}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-border-strong text-sm font-semibold text-ink bg-transparent cursor-pointer"
+                >
+                  <LogOut size={13} />
+                  Déconnexion
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-border-strong text-sm font-semibold text-ink no-underline"
+              >
+                <User size={13} />
+                Se connecter
+              </Link>
+            )}
             <Link
               href="/donate"
               rel="noopener noreferrer"
@@ -108,12 +145,36 @@ export default function Header() {
               ))}
             </nav>
             <div className="flex flex-col gap-2 mt-3.5">
-              <Link
-                href="/login"
-                className="px-4 py-2.5 rounded-md bg-surface-alt text-ink font-semibold text-sm no-underline text-center"
-              >
-                Se connecter
-              </Link>
+              {user ? (
+                <>
+                  {isAdmin && (
+                    <Link
+                      href="/admin/animals"
+                      onClick={() => setMenuOpen(false)}
+                      className="px-4 py-2.5 rounded-md bg-ink text-white font-semibold text-sm no-underline text-center"
+                    >
+                      Admin
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false)
+                      handleLogout()
+                    }}
+                    className="px-4 py-2.5 rounded-md bg-surface-alt text-ink font-semibold text-sm text-center border-0 cursor-pointer"
+                  >
+                    Déconnexion ({user.username})
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="px-4 py-2.5 rounded-md bg-surface-alt text-ink font-semibold text-sm no-underline text-center"
+                >
+                  Se connecter
+                </Link>
+              )}
               <Link
                 href="https://www.helloasso.com/associations/sans-croquettes-fixes/formulaires/1"
                 target="_blank"
