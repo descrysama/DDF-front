@@ -6,6 +6,7 @@ import { useUserStore } from '@/lib/stores/user-store'
 import { Input } from '@/components/ui/input'
 import { Field, FieldLabel, FieldGroup } from '@/components/ui/field'
 import { FormError } from '@/components/ui/form-error'
+import { Button } from '@/components/ui/button'
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -96,13 +97,13 @@ export default function RegisterForm() {
           />
         </Field>
         <FormError message={error} />
-        <button
+        <Button
           type="submit"
           disabled={loading}
-          className="mt-2 rounded-md bg-coral px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          className="mt-2 h-auto rounded-md bg-coral px-4 py-2.5 text-sm font-semibold text-white hover:bg-coral disabled:opacity-60"
         >
           {loading ? 'Création…' : 'Créer mon compte'}
-        </button>
+        </Button>
       </FieldGroup>
     </form>
   )

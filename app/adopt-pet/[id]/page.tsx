@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { ArrowRight, Heart } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { Button } from "@/components/ui/button"
 import { CAT_TINT } from "@/lib/placeholder-cats"
 import { fetchAnimal, fetchAnimals, type CardAnimal, type AnimalActivity } from "@/lib/strapi"
 import { CatCard } from "@/components/cat-card"
@@ -86,12 +87,14 @@ export default async function CatPage({ params }: Props) {
                 <div className={`absolute top-3.5 left-3.5 ${tagClass} text-white px-3 py-[5px] rounded text-xs font-semibold`}>
                   {cat.tag}
                 </div>
-                <button
-                  className="absolute top-3.5 right-3.5 w-[38px] h-[38px] rounded-full bg-white/95 border-none cursor-pointer flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.10)]"
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-3.5 right-3.5 w-[38px] h-[38px] rounded-full bg-white/95 hover:bg-white/95 border-none shadow-[0_2px_8px_rgba(0,0,0,0.10)]"
                   aria-label="Ajouter aux favoris"
                 >
                   <Heart size={16} className="text-coral" />
-                </button>
+                </Button>
 
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-white/90">
                   <span className="text-2xs font-medium">Photo · {cat.name}</span>
@@ -146,9 +149,12 @@ export default async function CatPage({ params }: Props) {
               {/* CTAs */}
               <div className="flex flex-col gap-2">
                 <AdoptModal cat={cat} />
-                <button className="inline-flex items-center justify-center gap-2 px-[18px] py-3 rounded-md bg-white text-ink border border-border-strong text-sm font-semibold cursor-pointer font-[inherit] w-full">
+                <Button
+                  variant="outline"
+                  className="w-full h-auto gap-2 px-[18px] py-3 rounded-md bg-white hover:bg-white shadow-none text-ink border border-border-strong text-sm font-semibold"
+                >
                   Famille d&apos;accueil
-                </button>
+                </Button>
               </div>
 
               {/* Adoption fee note */}

@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { Menu, X, User, Heart, LogOut, Shield } from "lucide-react"
 import { useUserStore, useIsAdmin } from "@/lib/stores/user-store"
+import { Button } from "@/components/ui/button"
 
 const NAV_LINKS = [
   { label: "Accueil",       href: "/",                            key: "home"    },
@@ -93,13 +94,15 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-2">
             {user ? (
               <div className="relative" ref={dropdownRef}>
-                <button
+                <Button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center justify-center w-9 h-9 rounded-full bg-coral-soft text-coral border-0 cursor-pointer transition-colors hover:bg-coral hover:text-white"
+                  variant="ghost"
+                  size="icon"
+                  className="w-9 h-9 rounded-full border-0 bg-coral-soft text-coral transition-colors hover:bg-coral hover:text-white"
                   aria-label="Menu utilisateur"
                 >
-                  <User size={18} />
-                </button>
+                  <User className="size-[18px]" />
+                </Button>
                 {dropdownOpen && (
                   <div
                     className="absolute right-0 mt-2 w-56 rounded-lg border border-border bg-white shadow-lg"
@@ -128,16 +131,17 @@ export default function Header() {
                           Administration
                         </Link>
                       )}
-                      <button
+                      <Button
                         onClick={() => {
                           setDropdownOpen(false)
                           handleLogout()
                         }}
-                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-ink bg-transparent border-0 cursor-pointer hover:bg-surface-alt"
+                        variant="ghost"
+                        className="h-auto w-full justify-start gap-2 rounded-none border-0 bg-transparent px-4 py-2 text-sm font-normal text-ink hover:bg-surface-alt hover:text-ink"
                       >
-                        <LogOut size={14} />
+                        <LogOut className="size-3.5" />
                         Déconnexion
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -162,13 +166,15 @@ export default function Header() {
           </div>
 
           {/* Mobile toggle */}
-          <button
-            className="md:hidden ml-auto bg-transparent border-0 cursor-pointer p-1 text-ink"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden ml-auto h-auto w-auto rounded-md border-0 bg-transparent p-1 text-ink hover:bg-transparent hover:text-ink"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
           >
-            {menuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
+            {menuOpen ? <X className="size-[22px]" /> : <Menu className="size-[22px]" />}
+          </Button>
         </div>
 
         {/* Mobile menu */}
@@ -205,15 +211,16 @@ export default function Header() {
                       Admin
                     </Link>
                   )}
-                  <button
+                  <Button
                     onClick={() => {
                       setMenuOpen(false)
                       handleLogout()
                     }}
-                    className="px-4 py-2.5 rounded-md bg-surface-alt text-ink font-semibold text-sm text-center border-0 cursor-pointer"
+                    variant="ghost"
+                    className="h-auto rounded-md border-0 bg-surface-alt px-4 py-2.5 text-center text-sm font-semibold text-ink hover:bg-surface-alt hover:text-ink"
                   >
                     Déconnexion ({user.username})
-                  </button>
+                  </Button>
                 </>
               ) : (
                 <Link

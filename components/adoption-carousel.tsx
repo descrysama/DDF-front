@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { ChevronLeft, ChevronRight, Home as HomeIcon, Stethoscope } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 
 // Liste des chats à afficher dans le carrousel.
 // Ces données seront remplacées par des données Strapi à terme.
@@ -93,13 +94,15 @@ export function AdoptionCarousel() {
       <div className="flex items-center justify-between mt-3 px-1">
 
         {/* Bouton "précédent" */}
-        <button
+        <Button
           onClick={prev}
-          className="w-8 h-8 rounded-full border border-gray-200 bg-white shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors"
+          variant="outline"
+          size="icon-sm"
+          className="rounded-full border-gray-200 bg-white shadow-sm hover:bg-gray-50 dark:border-gray-200 dark:bg-white dark:hover:bg-gray-50"
           aria-label="Chat précédent"
         >
           <ChevronLeft className="w-4 h-4 text-gray-600" />
-        </button>
+        </Button>
 
         {/*
           Dots de pagination.
@@ -119,13 +122,15 @@ export function AdoptionCarousel() {
         </div>
 
         {/* Bouton "suivant" */}
-        <button
+        <Button
           onClick={next}
-          className="w-8 h-8 rounded-full border border-gray-200 bg-white shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors"
+          variant="outline"
+          size="icon-sm"
+          className="rounded-full border-gray-200 bg-white shadow-sm hover:bg-gray-50 dark:border-gray-200 dark:bg-white dark:hover:bg-gray-50"
           aria-label="Chat suivant"
         >
           <ChevronRight className="w-4 h-4 text-gray-600" />
-        </button>
+        </Button>
 
       </div>
     </div>
