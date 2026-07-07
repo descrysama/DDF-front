@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { STRAPI_URL, AUTH_COOKIE } from './config'
 
 export { AUTH_COOKIE }
@@ -30,6 +31,14 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 
 export function isAdmin(user: AuthUser | null): boolean {
   return user?.role?.type === 'admin'
+}
+
+export async function requireAdmin(): Promise<AuthUser> {
+  const user = await getCurrentUser()
+  if (!user || !isAdmin(user)) {
+    redirect('/login')
+  }
+  return user
 }
 
 export async function registerWithStrapi(

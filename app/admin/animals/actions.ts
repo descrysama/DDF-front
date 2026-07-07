@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { strapiPost, strapiPut, strapiDelete } from '@/lib/strapi'
 import type { StrapiMedia } from '@/lib/strapi'
 import { STRAPI_URL, strapiAuthHeaders } from '@/lib/config'
+import { requireAdmin } from '@/lib/auth'
 
 const AUTH = strapiAuthHeaders()
 const JSON_HEADERS = { ...AUTH, 'Content-Type': 'application/json' }
@@ -71,6 +72,7 @@ async function putAnimalMedias(animalDocumentId: string, medias: StrapiMedia[]) 
 // ─── Animal CRUD ──────────────────────────────────────────────────────────────
 
 export async function createAnimal(formData: FormData) {
+  await requireAdmin()
   const result = await strapiPost<{ data: { documentId: string } }>('/api/animals', parseAnimalFormData(formData))
   const file = formData.get('photo') as File | null
   if (file && file.size > 0) {
@@ -87,6 +89,7 @@ export async function createAnimal(formData: FormData) {
 }
 
 export async function updateAnimal(documentId: string, formData: FormData) {
+  await requireAdmin()
   await strapiPut(`/api/animals/${documentId}`, parseAnimalFormData(formData))
   revalidatePath('/admin/animals')
   revalidatePath('/')
@@ -94,6 +97,7 @@ export async function updateAnimal(documentId: string, formData: FormData) {
 }
 
 export async function deleteAnimal(documentId: string) {
+  await requireAdmin()
   await strapiDelete(`/api/animals/${documentId}`)
   revalidatePath('/admin/animals')
   redirect('/admin/animals')
@@ -102,6 +106,7 @@ export async function deleteAnimal(documentId: string) {
 // ─── Media management ─────────────────────────────────────────────────────────
 
 export async function addMediaToAnimal(animalDocumentId: string, formData: FormData) {
+  await requireAdmin()
   const file = formData.get('photo') as File | null
   if (!file || file.size === 0) return
 
@@ -124,6 +129,7 @@ export async function addMediaToAnimal(animalDocumentId: string, formData: FormD
 }
 
 export async function deleteMedia(componentId: number, animalDocumentId: string) {
+  await requireAdmin()
   const current = await fetchAnimalMedias(animalDocumentId)
   const filtered = current.filter(m => m.id !== componentId)
   // if we deleted the cover, promote first remaining to cover
@@ -136,6 +142,7 @@ export async function deleteMedia(componentId: number, animalDocumentId: string)
 }
 
 export async function setCoverMedia(componentId: number, animalDocumentId: string) {
+  await requireAdmin()
   const current = await fetchAnimalMedias(animalDocumentId)
   const updated = current.map(m => ({ ...m, is_cover: m.id === componentId }))
   await putAnimalMedias(animalDocumentId, updated)
