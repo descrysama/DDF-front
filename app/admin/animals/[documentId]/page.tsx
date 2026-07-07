@@ -2,8 +2,7 @@ import { notFound } from 'next/navigation'
 import { fetchResource } from '@/lib/strapi'
 import type { StrapiMedia } from '@/lib/strapi'
 import AnimalEditClient from './edit-client'
-
-const STRAPI_URL = process.env.STRAPI_URL ?? 'http://localhost:1337'
+import { STRAPI_URL } from '@/lib/config'
 
 interface AnimalDetail {
   id: number

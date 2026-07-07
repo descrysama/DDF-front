@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useTransition, useState, useRef } from 'react'
-import { ADMIN } from '@/lib/admin-tokens'
+import { AD } from '@/lib/admin-tokens'
 import { updateAnimal, deleteAnimal, addMediaToAnimal, deleteMedia, setCoverMedia } from '../actions'
 import type { StrapiMedia } from '@/lib/strapi'
 
@@ -27,10 +27,10 @@ const input: React.CSSProperties = {
   width: '100%',
   boxSizing: 'border-box',
   padding: '9px 12px',
-  border: `1px solid ${ADMIN.border}`,
+  border: `1px solid ${AD.border}`,
   borderRadius: 7,
   fontSize: 13,
-  color: ADMIN.ink,
+  color: AD.ink,
   background: '#fff',
   fontFamily: 'inherit',
   outline: 'none',
@@ -40,13 +40,13 @@ const label: React.CSSProperties = {
   display: 'block',
   fontSize: 12,
   fontWeight: 600,
-  color: ADMIN.ink,
+  color: AD.ink,
   marginBottom: 6,
 }
 
 const card: React.CSSProperties = {
   background: '#fff',
-  border: `1px solid ${ADMIN.border}`,
+  border: `1px solid ${AD.border}`,
   borderRadius: 10,
   padding: 22,
 }
@@ -54,13 +54,13 @@ const card: React.CSSProperties = {
 const cardTitle: React.CSSProperties = {
   fontSize: 13,
   fontWeight: 600,
-  color: ADMIN.ink,
+  color: AD.ink,
   marginBottom: 4,
 }
 
 const cardHint: React.CSSProperties = {
   fontSize: 12,
-  color: ADMIN.inkMuted,
+  color: AD.inkMuted,
   marginBottom: 16,
 }
 
@@ -101,12 +101,12 @@ export default function AnimalEditClient({
     <div style={{ padding: '28px 32px' }}>
       {/* Breadcrumb */}
       <div style={{
-        fontSize: 11.5, color: ADMIN.inkMuted, marginBottom: 6,
+        fontSize: 11.5, color: AD.inkMuted, marginBottom: 6,
         fontFamily: 'Geist Mono, ui-monospace, monospace',
       }}>
-        <Link href="/admin" style={{ color: ADMIN.inkMuted, textDecoration: 'none' }}>Admin</Link>
+        <Link href="/admin" style={{ color: AD.inkMuted, textDecoration: 'none' }}>Admin</Link>
         {' / '}
-        <Link href="/admin/animals" style={{ color: ADMIN.inkMuted, textDecoration: 'none' }}>Chats</Link>
+        <Link href="/admin/animals" style={{ color: AD.inkMuted, textDecoration: 'none' }}>Chats</Link>
         {' / '}
         Modifier · #{animal.id}
       </div>
@@ -116,14 +116,14 @@ export default function AnimalEditClient({
         display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
         marginBottom: 22, gap: 16, flexWrap: 'wrap',
       }}>
-        <h1 style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.025em', margin: 0, lineHeight: 1.1, color: ADMIN.ink }}>
+        <h1 style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.025em', margin: 0, lineHeight: 1.1, color: AD.ink }}>
           Modifier la fiche de{' '}
-          <span style={{ color: ADMIN.coral }}>{animal.name}</span>
+          <span style={{ color: AD.coral }}>{animal.name}</span>
         </h1>
         <div style={{ display: 'flex', gap: 8 }}>
           <Link href="/admin/animals" style={{
             padding: '9px 14px', borderRadius: 6,
-            background: '#fff', color: ADMIN.ink, border: `1px solid ${ADMIN.borderStrong}`,
+            background: '#fff', color: AD.ink, border: `1px solid ${AD.borderStrong}`,
             fontSize: 12.5, fontWeight: 600, textDecoration: 'none',
             display: 'inline-flex', alignItems: 'center',
           }}>Annuler</Link>
@@ -133,7 +133,7 @@ export default function AnimalEditClient({
             disabled={isPending}
             style={{
               padding: '9px 14px', borderRadius: 6,
-              background: isPending ? ADMIN.border : ADMIN.coral,
+              background: isPending ? AD.border : AD.coral,
               color: '#fff', border: 'none',
               fontSize: 12.5, fontWeight: 600, fontFamily: 'inherit',
               cursor: isPending ? 'not-allowed' : 'pointer',
@@ -175,9 +175,9 @@ export default function AnimalEditClient({
                       key={opt.value}
                       style={{
                         flex: 1, padding: '8px 12px', borderRadius: 7, cursor: 'pointer',
-                        border: gender === opt.value ? `1.5px solid ${ADMIN.ink}` : `1px solid ${ADMIN.border}`,
-                        background: gender === opt.value ? ADMIN.surfaceAlt : '#fff',
-                        fontSize: 12.5, fontWeight: 600, color: ADMIN.ink,
+                        border: gender === opt.value ? `1.5px solid ${AD.ink}` : `1px solid ${AD.border}`,
+                        background: gender === opt.value ? AD.surfaceAlt : '#fff',
+                        fontSize: 12.5, fontWeight: 600, color: AD.ink,
                         textAlign: 'center', userSelect: 'none',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}
@@ -219,10 +219,10 @@ export default function AnimalEditClient({
               ].map((item) => (
                 <label key={item.name} style={{
                   display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer',
-                  padding: '8px 12px', borderRadius: 7, background: ADMIN.surfaceAlt,
+                  padding: '8px 12px', borderRadius: 7, background: AD.surfaceAlt,
                 }}>
                   <input type="checkbox" name={item.name} defaultChecked={!!item.checked} style={{ marginTop: 2, flexShrink: 0 }} />
-                  <span style={{ fontSize: 12.5, color: ADMIN.ink }}>{item.label}</span>
+                  <span style={{ fontSize: 12.5, color: AD.ink }}>{item.label}</span>
                 </label>
               ))}
             </div>
@@ -248,7 +248,7 @@ export default function AnimalEditClient({
 
           {/* Publication */}
           <div style={{ ...card, padding: 18 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: ADMIN.ink, marginBottom: 10 }}>Publication</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: AD.ink, marginBottom: 10 }}>Publication</div>
             <span style={label}>Statut</span>
             {/* form attr links this select to the left-column form */}
             <select name="status" form="animal-form" required defaultValue={animal.status} style={input}>
@@ -262,13 +262,13 @@ export default function AnimalEditClient({
           {/* Photos */}
           <div style={{ ...card, padding: 18 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: ADMIN.ink }}>Photos</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: AD.ink }}>Photos</div>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isMediaPending}
                 style={{
-                  fontSize: 11.5, color: ADMIN.coralInk, fontWeight: 600,
+                  fontSize: 11.5, color: AD.coralInk, fontWeight: 600,
                   background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                 }}
               >
@@ -298,15 +298,15 @@ export default function AnimalEditClient({
                 return (
                   <div key={media.id} style={{
                     position: 'relative', borderRadius: 8, overflow: 'hidden',
-                    border: `2px solid ${isCover ? ADMIN.coral : 'transparent'}`,
+                    border: `2px solid ${isCover ? AD.coral : 'transparent'}`,
                   }}>
-                    <div style={{ aspectRatio: '1/1', background: ADMIN.surfaceAlt }}>
+                    <div style={{ aspectRatio: '1/1', background: AD.surfaceAlt }}>
                       {url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       ) : (
                         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: 10, color: ADMIN.inkMuted }}>—</span>
+                          <span style={{ fontSize: 10, color: AD.inkMuted }}>—</span>
                         </div>
                       )}
                     </div>
@@ -314,7 +314,7 @@ export default function AnimalEditClient({
                       <div style={{
                         position: 'absolute', top: 6, left: 6,
                         padding: '2px 7px', borderRadius: 4,
-                        background: ADMIN.coral, color: '#fff',
+                        background: AD.coral, color: '#fff',
                         fontSize: 10, fontWeight: 700,
                       }}>Couverture</div>
                     )}
@@ -326,7 +326,7 @@ export default function AnimalEditClient({
                           disabled={isMediaPending}
                           style={{
                             flex: 1, padding: '3px 0', fontSize: 10,
-                            background: ADMIN.coralSoft, color: ADMIN.coralInk,
+                            background: AD.coralSoft, color: AD.coralInk,
                             border: 'none', borderRadius: 3, cursor: 'pointer', fontWeight: 600,
                           }}
                         >★</button>
@@ -340,7 +340,7 @@ export default function AnimalEditClient({
                         disabled={isMediaPending}
                         style={{
                           padding: '3px 7px', fontSize: 10,
-                          background: '#FEE6E5', color: ADMIN.coralInk,
+                          background: '#FEE6E5', color: AD.coralInk,
                           border: 'none', borderRadius: 3, cursor: 'pointer', fontWeight: 600,
                         }}
                       >✕</button>
@@ -356,10 +356,10 @@ export default function AnimalEditClient({
                 disabled={isMediaPending}
                 style={{
                   aspectRatio: '1/1', borderRadius: 8,
-                  border: `1.5px dashed ${ADMIN.borderStrong}`,
-                  background: ADMIN.bg,
+                  border: `1.5px dashed ${AD.borderStrong}`,
+                  background: AD.bg,
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  color: ADMIN.inkMuted, fontSize: 11, gap: 4,
+                  color: AD.inkMuted, fontSize: 11, gap: 4,
                   cursor: isMediaPending ? 'not-allowed' : 'pointer',
                   padding: 0,
                 }}
@@ -379,13 +379,13 @@ export default function AnimalEditClient({
                 width: 24, height: 24, borderRadius: '50%', background: '#fff', flexShrink: 0,
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke={ADMIN.coralInk} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8 3L14 13H2L8 3Z" /><path d="M8 7V9" /><circle cx="8" cy="11" r="0.5" fill={ADMIN.coralInk} />
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke={AD.coralInk} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 3L14 13H2L8 3Z" /><path d="M8 7V9" /><circle cx="8" cy="11" r="0.5" fill={AD.coralInk} />
                 </svg>
               </span>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: ADMIN.coralInk }}>Zone sensible</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: AD.coralInk }}>Zone sensible</div>
             </div>
-            <div style={{ fontSize: 11.5, color: ADMIN.ink, lineHeight: 1.5, marginBottom: 12 }}>
+            <div style={{ fontSize: 11.5, color: AD.ink, lineHeight: 1.5, marginBottom: 12 }}>
               Supprimer ce chat le retire définitivement du site public. Cette action est irréversible.
             </div>
             <button
@@ -394,7 +394,7 @@ export default function AnimalEditClient({
               disabled={isPending}
               style={{
                 width: '100%', padding: '9px 12px', borderRadius: 6,
-                background: 'transparent', border: `1px solid ${ADMIN.coral}`, color: ADMIN.coralInk,
+                background: 'transparent', border: `1px solid ${AD.coral}`, color: AD.coralInk,
                 fontSize: 12, fontWeight: 600, cursor: isPending ? 'not-allowed' : 'pointer',
                 fontFamily: 'inherit',
               }}

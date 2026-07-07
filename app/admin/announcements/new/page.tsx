@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import AnnouncementForm from '@/components/admin/announcement-form'
 import { createAnnouncement } from '../actions'
-import { ADMIN } from '@/lib/admin-tokens'
+import { AD } from '@/lib/admin-tokens'
 import { Card } from '@/components/ui/card'
 
 export default function NewAnnouncementPage() {
@@ -10,12 +10,12 @@ export default function NewAnnouncementPage() {
       <div style={{ marginBottom: 20 }}>
         <Link
           href="/admin/announcements"
-          style={{ fontSize: 13, color: ADMIN.inkMuted, textDecoration: 'none' }}
+          style={{ fontSize: 13, color: AD.inkMuted, textDecoration: 'none' }}
         >
           ← Retour aux annonces
         </Link>
       </div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 24 }}>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: AD.ink, marginBottom: 24 }}>
         Créer une annonce
       </h1>
       <Card className="p-7 max-w-2xl hover:translate-y-0">

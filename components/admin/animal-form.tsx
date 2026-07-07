@@ -1,7 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
-import { ADMIN } from '@/lib/admin-tokens'
+import { AD } from '@/lib/admin-tokens'
 
 interface AnimalFormData {
   name?: string
@@ -25,10 +25,10 @@ const fieldStyle: React.CSSProperties = {
   display: 'block',
   width: '100%',
   padding: '8px 12px',
-  border: `1px solid ${ADMIN.border}`,
+  border: `1px solid ${AD.border}`,
   borderRadius: 6,
   fontSize: 14,
-  color: ADMIN.ink,
+  color: AD.ink,
   background: '#fff',
   boxSizing: 'border-box',
 }
@@ -37,7 +37,7 @@ const labelStyle: React.CSSProperties = {
   display: 'block',
   fontSize: 13,
   fontWeight: 600,
-  color: ADMIN.ink,
+  color: AD.ink,
   marginBottom: 4,
 }
 
@@ -133,7 +133,7 @@ export default function AnimalForm({ defaultValues = {}, action }: AnimalFormPro
           ].map(({ name, label, checked }) => (
             <label
               key={name}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, cursor: 'pointer', color: ADMIN.ink }}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, cursor: 'pointer', color: AD.ink }}
             >
               <input type="checkbox" name={name} defaultChecked={!!checked} />
               {label}
@@ -147,7 +147,7 @@ export default function AnimalForm({ defaultValues = {}, action }: AnimalFormPro
         disabled={isPending}
         style={{
           padding: '10px 24px',
-          background: isPending ? '#c4c4c4' : ADMIN.coral,
+          background: isPending ? '#c4c4c4' : AD.coral,
           color: '#fff',
           border: 'none',
           borderRadius: 6,

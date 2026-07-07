@@ -1,5 +1,4 @@
-const STRAPI_URL = process.env.STRAPI_URL ?? 'http://localhost:1337'
-const STRAPI_TOKEN = process.env.STRAPI_TOKEN ?? ''
+import { STRAPI_URL, STRAPI_TOKEN } from './config'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
