@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Field, FieldLabel, FieldGroup } from '@/components/ui/field'
@@ -103,20 +104,22 @@ export default function AnimalForm({ defaultValues = {}, action }: AnimalFormPro
           <Textarea id="description" name="description" rows={4} defaultValue={defaultValues.description ?? ''} placeholder="Décrivez l'animal..." />
         </Field>
 
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium">Compatibilités</p>
-          {[
-            { name: 'ok_with_children', label: 'Compatible enfants', checked: defaultValues.ok_with_children },
-            { name: 'ok_with_dogs',     label: 'Compatible chiens',  checked: defaultValues.ok_with_dogs },
-            { name: 'ok_with_cats',     label: 'Compatible chats',   checked: defaultValues.ok_with_cats },
-            { name: 'indoor_only',      label: 'Intérieur uniquement', checked: defaultValues.indoor_only },
-          ].map(({ name, label, checked }) => (
-            <Label key={name} className="flex cursor-pointer items-center gap-2 font-normal">
-              <input type="checkbox" name={name} defaultChecked={!!checked} className="size-4 rounded" />
-              {label}
-            </Label>
-          ))}
-        </div>
+        <Field>
+          <FieldLabel>Compatibilités</FieldLabel>
+          <div className="flex flex-col gap-2">
+            {[
+              { name: 'ok_with_children', label: 'Compatible enfants', checked: defaultValues.ok_with_children },
+              { name: 'ok_with_dogs',     label: 'Compatible chiens',  checked: defaultValues.ok_with_dogs },
+              { name: 'ok_with_cats',     label: 'Compatible chats',   checked: defaultValues.ok_with_cats },
+              { name: 'indoor_only',      label: 'Intérieur uniquement', checked: defaultValues.indoor_only },
+            ].map(({ name, label, checked }) => (
+              <Label key={name} htmlFor={name} className="flex cursor-pointer items-center gap-2 font-normal">
+                <Checkbox id={name} name={name} defaultChecked={!!checked} />
+                {label}
+              </Label>
+            ))}
+          </div>
+        </Field>
 
         <FormError message={error} />
         <SubmitButton label="Enregistrer" pending={isPending} />

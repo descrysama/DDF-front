@@ -1,6 +1,7 @@
 'use client'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldLabel, FieldGroup } from '@/components/ui/field'
 import { FormError } from '@/components/ui/form-error'
 import SubmitButton from '@/components/admin/submit-button'
@@ -28,19 +29,21 @@ export default function FosterFamilyForm({ defaultValues = {}, action }: FosterF
           <FieldLabel htmlFor="max_capacity">Capacité maximale</FieldLabel>
           <Input id="max_capacity" name="max_capacity" type="number" required min={1} defaultValue={defaultValues.max_capacity ?? 1} />
         </Field>
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium">Présence dans le foyer</p>
-          {[
-            { name: 'has_children', label: 'Enfants présents', checked: defaultValues.has_children },
-            { name: 'has_dogs',     label: 'Chiens présents',  checked: defaultValues.has_dogs },
-            { name: 'has_cats',     label: 'Chats présents',   checked: defaultValues.has_cats },
-          ].map(({ name, label, checked }) => (
-            <Label key={name} className="flex cursor-pointer items-center gap-2 font-normal">
-              <input type="checkbox" name={name} defaultChecked={!!checked} className="size-4 rounded" />
-              {label}
-            </Label>
-          ))}
-        </div>
+        <Field>
+          <FieldLabel>Présence dans le foyer</FieldLabel>
+          <div className="flex flex-col gap-2">
+            {[
+              { name: 'has_children', label: 'Enfants présents', checked: defaultValues.has_children },
+              { name: 'has_dogs',     label: 'Chiens présents',  checked: defaultValues.has_dogs },
+              { name: 'has_cats',     label: 'Chats présents',   checked: defaultValues.has_cats },
+            ].map(({ name, label, checked }) => (
+              <Label key={name} htmlFor={name} className="flex cursor-pointer items-center gap-2 font-normal">
+                <Checkbox id={name} name={name} defaultChecked={!!checked} />
+                {label}
+              </Label>
+            ))}
+          </div>
+        </Field>
         <FormError message={error} />
         <SubmitButton label="Enregistrer" pending={isPending} />
       </FieldGroup>
