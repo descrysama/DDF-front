@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { Heart, X, ArrowRight, Lock, CheckCircle2, AlertCircle } from "lucide-react"
-import type { PlaceholderCat } from "@/lib/placeholder-cats"
+import type { CardAnimal } from "@/lib/strapi"
 import { submitAdoptionRequest, type AdoptionFormData } from "@/lib/actions/adoption"
 
 // ── Primitives ───────────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ const COMMITMENTS: { text: string; required: boolean }[] = [
 
 type Errors = Partial<Record<string, string>>
 
-function AdoptionFormInner({ cat, onClose }: { cat: PlaceholderCat; onClose: () => void }) {
+function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => void }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading]     = useState(false)
@@ -422,7 +422,7 @@ function AdoptionFormInner({ cat, onClose }: { cat: PlaceholderCat; onClose: () 
 
 // ── Public component ─────────────────────────────────────────────────────────
 
-export function AdoptModal({ cat }: { cat: PlaceholderCat }) {
+export function AdoptModal({ cat }: { cat: CardAnimal }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -466,7 +466,7 @@ export function AdoptModal({ cat }: { cat: PlaceholderCat }) {
                   <DialogPrimitive.Title className="text-[22px] font-semibold tracking-[-0.02em] m-0 leading-[1.1] text-white">
                     Adopter {cat.name}
                   </DialogPrimitive.Title>
-                  <div className="text-xs text-white/85 mt-0.5">{cat.age} · {cat.sex} · {cat.location ?? "Lyon"}</div>
+                  <div className="text-xs text-white/85 mt-0.5">{cat.age} · {cat.sex}</div>
                 </div>
               </div>
 

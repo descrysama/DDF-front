@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react"
 import { Search } from "lucide-react"
 import { CatCard } from "@/components/cat-card"
-import { type PlaceholderCat, type CatTag } from "@/lib/placeholder-cats"
+import { type CardAnimal, type CatTag } from "@/lib/strapi"
 
 type FilterKey = 'Tous' | 'Chaton' | 'Adulte' | 'Senior' | 'Duo' | 'Cas particulier'
 
@@ -23,7 +23,7 @@ function tagMatchesFilter(tag: CatTag, filter: FilterKey): boolean {
 }
 
 interface Props {
-  cats: PlaceholderCat[]
+  cats: CardAnimal[]
 }
 
 export function AdoptionFilters({ cats }: Props) {

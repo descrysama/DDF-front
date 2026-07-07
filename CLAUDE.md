@@ -82,7 +82,7 @@ Typed Strapi v5 REST client. Prefer these helpers over raw `fetch`:
 
 ### CMS status
 
-The public cat listing and admin CRUD are wired to Strapi (`fetchAnimals`, admin actions). `lib/placeholder-cats.ts` (`PLACEHOLDER_CATS`, `PlaceholderCat`, `CAT_TINT`) is **still** used by the `adopt-pet` detail/related views and the adoption modal — this dual model (`PlaceholderCat` vs `CardAnimal`) currently breaks `npm run build`; unifying it is item 1 in `docs/REFACTORING.md`.
+The public cat listing, the `adopt-pet` detail view, the adoption modal, and admin CRUD are all wired to Strapi (`fetchAnimals`, `fetchAnimal`, admin actions) via the single `CardAnimal` shape. `lib/placeholder-cats.ts` only still exports `CAT_TINT` (the Tailwind tint-per-tag map); the `PlaceholderCat` type/data is gone.
 
 ### Public assets
 
@@ -90,4 +90,4 @@ The public cat listing and admin CRUD are wired to Strapi (`fetchAnimals`, admin
 
 ## Refactoring backlog
 
-`docs/REFACTORING.md` tracks known code-quality debt (auth-in-actions, input validation, form boilerplate, large components, dual cat models, scattered colour maps, missing loading/error states, full admin→Tailwind migration).
+`docs/REFACTORING.md` tracks known code-quality debt (auth-in-actions, input validation, form boilerplate, large components, scattered colour maps, missing loading/error states, full admin→Tailwind migration).
