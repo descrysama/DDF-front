@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { Heart, X, ArrowRight, Lock, CheckCircle2, AlertCircle } from "lucide-react"
+import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field"
 import type { CardAnimal } from "@/lib/strapi"
 import { submitAdoptionRequest, type AdoptionFormData } from "@/lib/actions/adoption"
 
@@ -13,43 +14,6 @@ const REQUIRED_COMMITMENTS = [0, 1, 3]
 const inputBase = "w-full box-border px-3 py-2.5 rounded-lg border text-xs font-[inherit] text-ink outline-none bg-white transition-colors"
 const inputOk   = "border-border focus:border-ink/40"
 const inputErr  = "border-red-400 bg-red-50 focus:border-red-500"
-
-function FField({
-  id,
-  label,
-  optional,
-  full,
-  hint,
-  errorMsg,
-  children,
-}: {
-  id?: string
-  label: string
-  optional?: boolean
-  full?: boolean
-  hint?: string
-  errorMsg?: string
-  children: React.ReactNode
-}) {
-  return (
-    <div id={id} className={full ? "col-span-2" : ""}>
-      <div className="flex justify-between items-baseline mb-1.5">
-        <span className="text-xs font-semibold text-ink">{label}</span>
-        {optional && <span className="text-[11px] text-ink-subtle">facultatif</span>}
-      </div>
-      {children}
-      {hint && !errorMsg && (
-        <div className="text-[11px] text-ink-muted mt-1 leading-[1.4]">{hint}</div>
-      )}
-      {errorMsg && (
-        <div className="flex items-center gap-1 text-[11px] text-red-500 mt-1">
-          <AlertCircle size={11} className="shrink-0" />
-          {errorMsg}
-        </div>
-      )}
-    </div>
-  )
-}
 
 function ChipGroup({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) {
   return (
@@ -223,50 +187,64 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
         <div className="px-7 py-[22px] border-b border-border">
           <FSectionHeader num={1} title="Faisons connaissance" subtitle="Vos coordonnées pour qu'on puisse vous recontacter." tintClass="bg-pink" />
           <div className="grid grid-cols-2 gap-3">
-            <FField id="field-prenom" label="Prénom" errorMsg={errors["prenom"]}>
+            <Field id="field-prenom">
+              <FieldLabel>Prénom</FieldLabel>
               <input
                 data-error={errors["prenom"] ? "true" : undefined}
                 placeholder="Élodie" value={prenom}
                 onChange={(e) => { setPrenom(e.target.value); clearError("prenom") }}
                 className={inp(!!errors["prenom"])}
               />
-            </FField>
-            <FField id="field-nom" label="Nom" errorMsg={errors["nom"]}>
+              <FieldError>{errors["prenom"]}</FieldError>
+            </Field>
+            <Field id="field-nom">
+              <FieldLabel>Nom</FieldLabel>
               <input
                 data-error={errors["nom"] ? "true" : undefined}
                 placeholder="Mercier" value={nom}
                 onChange={(e) => { setNom(e.target.value); clearError("nom") }}
                 className={inp(!!errors["nom"])}
               />
-            </FField>
-            <FField id="field-email" label="Adresse email" errorMsg={errors["email"]}>
+              <FieldError>{errors["nom"]}</FieldError>
+            </Field>
+            <Field id="field-email">
+              <FieldLabel>Adresse email</FieldLabel>
               <input
                 data-error={errors["email"] ? "true" : undefined}
                 type="email" placeholder="vous@exemple.fr" value={email}
                 onChange={(e) => { setEmail(e.target.value); clearError("email") }}
                 className={inp(!!errors["email"])}
               />
-            </FField>
-            <FField id="field-telephone" label="Téléphone" errorMsg={errors["telephone"]}>
+              <FieldError>{errors["email"]}</FieldError>
+            </Field>
+            <Field id="field-telephone">
+              <FieldLabel>Téléphone</FieldLabel>
               <input
                 data-error={errors["telephone"] ? "true" : undefined}
                 placeholder="06 12 34 56 78" value={telephone}
                 onChange={(e) => { setTelephone(e.target.value); clearError("telephone") }}
                 className={inp(!!errors["telephone"])}
               />
-            </FField>
-            <FField label="Code postal">
+              <FieldError>{errors["telephone"]}</FieldError>
+            </Field>
+            <Field>
+              <FieldLabel>Code postal</FieldLabel>
               <input placeholder="69007" value={codePostal} onChange={(e) => setCodePostal(e.target.value)} className={inp(false)} />
-            </FField>
-            <FField label="Ville">
+            </Field>
+            <Field>
+              <FieldLabel>Ville</FieldLabel>
               <input placeholder="Lyon 7e" value={ville} onChange={(e) => setVille(e.target.value)} className={inp(false)} />
-            </FField>
-            <FField label="Âge" optional>
+            </Field>
+            <Field>
+              <FieldLabel>Âge</FieldLabel>
               <input placeholder="34 ans" value={age} onChange={(e) => setAge(e.target.value)} className={inp(false)} />
-            </FField>
-            <FField label="Profession" optional>
+              <FieldDescription>Facultatif</FieldDescription>
+            </Field>
+            <Field>
+              <FieldLabel>Profession</FieldLabel>
               <input placeholder="Designer · télétravail 80%" value={profession} onChange={(e) => setProfession(e.target.value)} className={inp(false)} />
-            </FField>
+              <FieldDescription>Facultatif</FieldDescription>
+            </Field>
           </div>
         </div>
 
@@ -274,31 +252,38 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
         <div className="px-7 py-[22px] border-b border-border">
           <FSectionHeader num={2} title="Votre foyer" subtitle={`Pour s'assurer que l'environnement convient à ${cat.name}.`} tintClass="bg-peach" />
           <div className="grid grid-cols-2 gap-4">
-            <FField label="Type de logement" full>
+            <Field className="col-span-2">
+              <FieldLabel>Type de logement</FieldLabel>
               <ChipGroup options={["Appartement", "Maison", "Studio", "Colocation"]} value={typeLogement} onChange={setTypeLogement} />
-            </FField>
-            <FField label="Surface">
+            </Field>
+            <Field>
+              <FieldLabel>Surface</FieldLabel>
               <input placeholder="60 m²" value={surface} onChange={(e) => setSurface(e.target.value)} className={inp(false)} />
-            </FField>
-            <FField label="Accès extérieur">
+            </Field>
+            <Field>
+              <FieldLabel>Accès extérieur</FieldLabel>
               <ChipGroup options={["Aucun", "Balcon sécurisé", "Jardin clos", "Jardin libre"]} value={accesExterieur} onChange={setAccesExterieur} />
-            </FField>
-            <FField label="Composition du foyer" full>
+            </Field>
+            <Field className="col-span-2">
+              <FieldLabel>Composition du foyer</FieldLabel>
               <ChipGroup options={["Seul·e", "En couple", "Avec enfant(s)", "Colocation"]} value={compositionFoyer} onChange={setCompositionFoyer} />
-            </FField>
-            <FField label="Avez-vous d'autres animaux ?" full>
+            </Field>
+            <Field className="col-span-2">
+              <FieldLabel>Avez-vous d&apos;autres animaux ?</FieldLabel>
               <ChipGroup options={["Aucun", "Un chat", "Plusieurs chats", "Chien", "Autres"]} value={autresAnimaux} onChange={setAutresAnimaux} />
-            </FField>
-            <FField label="Statut du logement">
+            </Field>
+            <Field>
+              <FieldLabel>Statut du logement</FieldLabel>
               <select value={statutLogement} onChange={(e) => setStatutLogement(e.target.value)} className={inp(false) + " appearance-none"}>
                 <option value="proprietaire">Propriétaire</option>
                 <option value="locataire">Locataire (animaux autorisés)</option>
                 <option value="autre">Autre</option>
               </select>
-            </FField>
-            <FField label="Personnes au foyer">
+            </Field>
+            <Field>
+              <FieldLabel>Personnes au foyer</FieldLabel>
               <input placeholder="1 adulte" value={personnesFoyer} onChange={(e) => setPersonnesFoyer(e.target.value)} className={inp(false)} />
-            </FField>
+            </Field>
           </div>
         </div>
 
@@ -306,15 +291,12 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
         <div className="px-7 py-[22px] border-b border-border">
           <FSectionHeader num={3} title={`Pourquoi ${cat.name} ?`} subtitle="Ce qui compte le plus pour nous." tintClass="bg-lilac" />
           <div className="grid gap-4">
-            <FField label="Avez-vous déjà eu un chat ?">
+            <Field>
+              <FieldLabel>Avez-vous déjà eu un chat ?</FieldLabel>
               <ChipGroup options={["Oui, plusieurs fois", "Oui, une fois", "Jamais"]} value={experienceChat} onChange={setExperienceChat} />
-            </FField>
-            <FField
-              id="field-pourquoiCeChat"
-              label={`Pourquoi avoir choisi ${cat.name} ?`}
-              hint="Quelques phrases suffisent. Pas besoin de bien écrire."
-              errorMsg={errors["pourquoiCeChat"]}
-            >
+            </Field>
+            <Field id="field-pourquoiCeChat">
+              <FieldLabel>Pourquoi avoir choisi {cat.name} ?</FieldLabel>
               <textarea
                 data-error={errors["pourquoiCeChat"] ? "true" : undefined}
                 rows={4}
@@ -323,13 +305,20 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
                 onChange={(e) => { setPourquoiCeChat(e.target.value); clearError("pourquoiCeChat") }}
                 className={inp(!!errors["pourquoiCeChat"]) + " resize-y leading-[1.55]"}
               />
-            </FField>
-            <FField label="Vétérinaire de référence" optional hint="Si vous en avez déjà un, ça nous simplifie le suivi.">
+              {!errors["pourquoiCeChat"] && (
+                <FieldDescription>Quelques phrases suffisent. Pas besoin de bien écrire.</FieldDescription>
+              )}
+              <FieldError>{errors["pourquoiCeChat"]}</FieldError>
+            </Field>
+            <Field>
+              <FieldLabel>Vétérinaire de référence</FieldLabel>
               <input placeholder="Clinique vétérinaire des Brotteaux, Lyon 6e" value={veterinaire} onChange={(e) => setVeterinaire(e.target.value)} className={inp(false)} />
-            </FField>
-            <FField label="Quand seriez-vous disponible pour une rencontre ?">
+              <FieldDescription>Facultatif · Si vous en avez déjà un, ça nous simplifie le suivi.</FieldDescription>
+            </Field>
+            <Field>
+              <FieldLabel>Quand seriez-vous disponible pour une rencontre ?</FieldLabel>
               <ChipGroup options={["Cette semaine", "Le week-end", "Sous 2 semaines", "Plus tard"]} value={disponibilite} onChange={setDisponibilite} />
-            </FField>
+            </Field>
           </div>
         </div>
 
