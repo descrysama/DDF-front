@@ -1,5 +1,4 @@
-const STRAPI_URL = process.env.STRAPI_URL ?? 'http://localhost:1337'
-const STRAPI_TOKEN = process.env.STRAPI_TOKEN ?? ''
+import { STRAPI_URL, STRAPI_TOKEN } from './config'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -77,6 +76,12 @@ export interface CardAnimal {
   tones: [string, string]
   status: AnimalStatus
   photoUrl: string | null
+  breed: string | null
+  activityLevel: AnimalActivity | null
+  okWithChildren: boolean
+  okWithDogs: boolean
+  okWithCats: boolean
+  indoorOnly: boolean
 }
 
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
@@ -130,6 +135,12 @@ function toCardAnimal(a: StrapiAnimalRaw): CardAnimal {
     tones: TONES[a.id % TONES.length],
     status: a.status,
     photoUrl: imageUrl ? `${STRAPI_URL}${imageUrl}` : null,
+    breed: a.breed?.name ?? null,
+    activityLevel: a.activity_level ?? null,
+    okWithChildren: a.ok_with_children,
+    okWithDogs: a.ok_with_dogs,
+    okWithCats: a.ok_with_cats,
+    indoorOnly: a.indoor_only,
   }
 }
 
@@ -164,6 +175,21 @@ export async function fetchAnimals(opts?: {
     animals: data.map(toCardAnimal),
     total: meta.pagination.total,
   }
+}
+
+export async function fetchAnimal(documentId: string): Promise<CardAnimal | null> {
+  const res = await fetch(
+    `${STRAPI_URL}/api/animals/${documentId}?populate[0]=breed&populate[1]=bonded_with&populate[medias][populate]=image`,
+    {
+      headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+      next: { revalidate: 60 },
+    }
+  )
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`Strapi ${res.status}: /api/animals/${documentId}`)
+
+  const { data } = (await res.json()) as { data: StrapiAnimalRaw }
+  return toCardAnimal(data)
 }
 
 // ─── Admin types ──────────────────────────────────────────────────────────────

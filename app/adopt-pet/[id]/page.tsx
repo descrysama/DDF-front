@@ -3,7 +3,8 @@ import { notFound } from "next/navigation"
 import { ArrowRight, Heart } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
-import { PLACEHOLDER_CATS, CAT_TINT } from "@/lib/placeholder-cats"
+import { CAT_TINT } from "@/lib/placeholder-cats"
+import { fetchAnimal, fetchAnimals, type CardAnimal, type AnimalActivity } from "@/lib/strapi"
 import { CatCard } from "@/components/cat-card"
 import { AdoptModal } from "./_components/adopt-modal"
 
@@ -18,14 +19,32 @@ const ADOPTION_STEPS = [
   { title: 'Contrat & arrivée', desc: 'Signature, frais d\'adoption, et le grand jour !', tintClass: 'bg-mint' },
 ]
 
+const ACTIVITY_LABEL: Record<AnimalActivity, string> = {
+  low: 'Calme',
+  medium: 'Modéré',
+  high: 'Très actif',
+}
+
+function enteneLabel(cat: CardAnimal): string {
+  const compat = [
+    cat.okWithChildren && 'les enfants',
+    cat.okWithDogs && 'les chiens',
+    cat.okWithCats && 'les chats',
+  ].filter((v): v is string => Boolean(v))
+  if (compat.length === 0) return 'Préfère un foyer calme, sans autres animaux'
+  return `S'entend bien avec ${compat.join(', ')}`
+}
+
 export default async function CatPage({ params }: Props) {
   const { id } = await params
-  const cat = PLACEHOLDER_CATS.find((c) => c.id === id)
+  const cat = await fetchAnimal(id)
   if (!cat) notFound()
 
-  const others = PLACEHOLDER_CATS.filter((c) => c.id !== cat.id).slice(0, 4)
+  const { animals } = await fetchAnimals({ limit: 8 })
+  const others = animals.filter((c) => c.documentId !== cat.documentId).slice(0, 4)
   const tintClass = CAT_TINT[cat.tag]
   const tagClass = cat.tagStyle === 'coral' ? 'bg-coral' : 'bg-ink'
+  const storyParagraphs = cat.blurb.split('\n').map((p) => p.trim()).filter(Boolean)
 
   return (
     <div className="min-h-screen bg-bg">
@@ -97,7 +116,7 @@ export default async function CatPage({ params }: Props) {
                 {cat.name}
               </h1>
               <div className="text-sm text-ink-muted mb-[18px]">
-                {cat.age} · {cat.sex} · {cat.location ?? 'Lyon'}
+                {cat.age} · {cat.sex}
               </div>
 
               <p className="text-sm leading-[1.55] text-ink m-0 mb-5">
@@ -107,10 +126,10 @@ export default async function CatPage({ params }: Props) {
               {/* Key facts */}
               <div className="bg-white/60 rounded-lg px-3 mb-[18px]">
                 {[
-                  ['Né(e) le', cat.born],
-                  ['Appartement', cat.appartement],
-                  ['Santé', cat.sterilise],
-                  ['Entente', cat.entente],
+                  ['Race', cat.breed],
+                  ['Niveau d\'énergie', cat.activityLevel ? ACTIVITY_LABEL[cat.activityLevel] : null],
+                  ['Mode de vie', cat.indoorOnly ? 'Intérieur strict' : 'Accès extérieur possible'],
+                  ['Entente', enteneLabel(cat)],
                 ]
                   .filter(([, v]) => Boolean(v))
                   .map(([k, v], i, arr) => (
@@ -150,7 +169,7 @@ export default async function CatPage({ params }: Props) {
                 Faire connaissance avec {cat.name}.
               </h2>
               <div className="text-sm leading-[1.65] text-ink grid gap-3">
-                {(cat.story ?? [cat.blurb]).map((para, i) => (
+                {storyParagraphs.map((para, i) => (
                   <p key={i} className="m-0">{para}</p>
                 ))}
               </div>
@@ -213,8 +232,4 @@ export default async function CatPage({ params }: Props) {
       <Footer />
     </div>
   )
-}
-
-export function generateStaticParams() {
-  return PLACEHOLDER_CATS.map((cat) => ({ id: cat.id }))
 }

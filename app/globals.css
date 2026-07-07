@@ -71,23 +71,22 @@
 
   /* ── SCF Tokens ──────────────────────────────────────── */
 
-  /* Colors → bg-*, text-*, border-*, from-*, to-* */
-  --color-bg:            #FBFAF7;
-  --color-surface:       #FFFFFF;
-  --color-surface-alt:   #F4F1EB;
-  --color-ink:           #252840;
-  --color-ink-muted:     #6A6C7A;
-  --color-ink-subtle:    #A6A6AE;
-  --color-border-strong: #D8D3C8;
-  --color-coral:         #F76C70;
-  --color-coral-soft:    #FEE6E5;
-  --color-coral-ink:     #B43A3F;
-  --color-magenta:       #E84A77;
-  --color-pink:          #FEE6E5;
-  --color-peach:         #FCE9D9;
-  --color-mint:          #E0F0E8;
-  --color-lilac:         #E8E5F4;
-  --color-rose:          #FDE2EC;
+  --color-bg:            var(--scf-bg);
+  --color-surface:       var(--scf-surface);
+  --color-surface-alt:   var(--scf-surface-alt);
+  --color-ink:           var(--scf-ink);
+  --color-ink-muted:     var(--scf-ink-muted);
+  --color-ink-subtle:    var(--scf-ink-subtle);
+  --color-border-strong: var(--scf-border-strong);
+  --color-coral:         var(--scf-coral);
+  --color-coral-soft:    var(--scf-coral-soft);
+  --color-coral-ink:     var(--scf-coral-ink);
+  --color-magenta:       var(--scf-magenta);
+  --color-pink:          var(--scf-pink);
+  --color-peach:         var(--scf-peach);
+  --color-mint:          var(--scf-mint);
+  --color-lilac:         var(--scf-lilac);
+  --color-rose:          var(--scf-rose);
 
   /* Custom shadows → shadow-card, shadow-photo */
   --shadow-card:  0 18px 50px rgba(37,40,64,0.18);

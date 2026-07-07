@@ -5,7 +5,7 @@ import type { StrapiAdoptionRequestRaw } from '@/lib/strapi'
 import { updateAdoptionRequest, deleteAdoptionRequest } from '../actions'
 import StatusBadge from '@/components/admin/status-badge'
 import SubmitButton from '@/components/admin/submit-button'
-import { ADMIN } from '@/lib/admin-tokens'
+import { AD } from '@/lib/admin-tokens'
 import { fieldStyle, labelStyle, metaRowStyle } from '@/lib/admin-styles'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -43,17 +43,17 @@ export default async function AdoptionRequestDetailPage({
       <div style={{ marginBottom: 20 }}>
         <Link
           href="/admin/adoption-requests"
-          style={{ fontSize: 13, color: ADMIN.inkMuted, textDecoration: 'none' }}
+          style={{ fontSize: 13, color: AD.inkMuted, textDecoration: 'none' }}
         >
           ← Retour aux demandes
         </Link>
       </div>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 4 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: AD.ink, marginBottom: 4 }}>
             Demande d&apos;adoption
           </h1>
-          <p style={{ fontSize: 14, color: ADMIN.inkMuted }}>
+          <p style={{ fontSize: 14, color: AD.inkMuted }}>
             {request.announcement?.title ?? 'Annonce inconnue'}
           </p>
         </div>
@@ -67,16 +67,16 @@ export default async function AdoptionRequestDetailPage({
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         {/* Informations en lecture seule */}
         <Card className="p-6 hover:translate-y-0">
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: ADMIN.ink, marginBottom: 14 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: AD.ink, marginBottom: 14 }}>
             Informations
           </h2>
           <div>
             <div style={metaRowStyle}>
-              <span style={{ color: ADMIN.inkMuted }}>Statut actuel</span>
+              <span style={{ color: AD.inkMuted }}>Statut actuel</span>
               <StatusBadge status={request.status} />
             </div>
             <div style={metaRowStyle}>
-              <span style={{ color: ADMIN.inkMuted }}>Adoptant</span>
+              <span style={{ color: AD.inkMuted }}>Adoptant</span>
               <span style={{ fontWeight: 500 }}>
                 {request.adopter
                   ? `${request.adopter.username} (${request.adopter.email})`
@@ -84,11 +84,11 @@ export default async function AdoptionRequestDetailPage({
               </span>
             </div>
             <div style={metaRowStyle}>
-              <span style={{ color: ADMIN.inkMuted }}>Référent</span>
+              <span style={{ color: AD.inkMuted }}>Référent</span>
               <span>{request.referent?.username ?? '—'}</span>
             </div>
             <div style={{ ...metaRowStyle, borderBottom: 'none' }}>
-              <span style={{ color: ADMIN.inkMuted }}>Score de correspondance</span>
+              <span style={{ color: AD.inkMuted }}>Score de correspondance</span>
               <span style={{ fontWeight: 700 }}>
                 {request.match_score != null ? `${request.match_score}%` : '—'}
               </span>
@@ -101,7 +101,7 @@ export default async function AdoptionRequestDetailPage({
               <p
                 style={{
                   fontSize: 14,
-                  color: ADMIN.ink,
+                  color: AD.ink,
                   lineHeight: 1.6,
                   background: '#f8f9fa',
                   padding: 14,
@@ -117,7 +117,7 @@ export default async function AdoptionRequestDetailPage({
 
         {/* Formulaire d'édition complet */}
         <Card className="p-6 hover:translate-y-0">
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: ADMIN.ink, marginBottom: 14 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: AD.ink, marginBottom: 14 }}>
             Modifier la demande
           </h2>
           <form action={boundUpdate}>

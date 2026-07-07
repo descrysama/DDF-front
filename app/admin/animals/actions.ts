@@ -4,11 +4,9 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { strapiPost, strapiPut, strapiDelete } from '@/lib/strapi'
 import type { StrapiMedia } from '@/lib/strapi'
+import { STRAPI_URL, strapiAuthHeaders } from '@/lib/config'
 
-const STRAPI_URL = process.env.STRAPI_URL ?? 'http://localhost:1337'
-const STRAPI_TOKEN = process.env.STRAPI_TOKEN ?? ''
-
-const AUTH = { Authorization: `Bearer ${STRAPI_TOKEN}` }
+const AUTH = strapiAuthHeaders()
 const JSON_HEADERS = { ...AUTH, 'Content-Type': 'application/json' }
 
 function parseAnimalFormData(formData: FormData) {

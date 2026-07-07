@@ -1,7 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-
-const STRAPI_URL = process.env.STRAPI_URL ?? 'http://localhost:1337'
-const AUTH_COOKIE = 'ddf_jwt'
+import { STRAPI_URL, AUTH_COOKIE } from '@/lib/config'
 
 export async function middleware(req: NextRequest) {
   const jwt = req.cookies.get(AUTH_COOKIE)?.value

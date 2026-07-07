@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { fetchAnnouncements, fetchUsers } from '@/lib/strapi'
 import { createAdoptionRequest } from '../actions'
-import { ADMIN } from '@/lib/admin-tokens'
+import { AD } from '@/lib/admin-tokens'
 import { fieldStyle, labelStyle } from '@/lib/admin-styles'
 import SubmitButton from '@/components/admin/submit-button'
 import { Card } from '@/components/ui/card'
@@ -17,12 +17,12 @@ export default async function NewAdoptionRequestPage() {
       <div style={{ marginBottom: 20 }}>
         <Link
           href="/admin/adoption-requests"
-          style={{ fontSize: 13, color: ADMIN.inkMuted, textDecoration: 'none' }}
+          style={{ fontSize: 13, color: AD.inkMuted, textDecoration: 'none' }}
         >
           ← Retour aux demandes
         </Link>
       </div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 24 }}>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: AD.ink, marginBottom: 24 }}>
         Nouvelle demande d&apos;adoption
       </h1>
 
