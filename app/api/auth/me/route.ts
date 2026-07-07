@@ -1,7 +1,48 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
+import { cookies } from 'next/headers'
+import { getCurrentUser, AUTH_COOKIE } from '@/lib/auth'
+
+const STRAPI_URL = process.env.STRAPI_URL ?? 'http://localhost:1337'
 
 export async function GET() {
   const user = await getCurrentUser()
   return NextResponse.json({ user })
+}
+
+export async function PUT(req: Request) {
+  const jar = await cookies()
+  const jwt = jar.get(AUTH_COOKIE)?.value
+  if (!jwt) {
+    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+  }
+
+  const user = await getCurrentUser()
+  if (!user) {
+    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+  }
+
+  const body = await req.json()
+  const allowed: Record<string, string> = {}
+  if (body.username) allowed.username = body.username
+  if (body.email) allowed.email = body.email
+
+  const res = await fetch(`${STRAPI_URL}/api/users/${user.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${jwt}`,
+    },
+    body: JSON.stringify(allowed),
+  })
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    return NextResponse.json(
+      { error: data?.error?.message ?? 'Erreur lors de la mise à jour' },
+      { status: res.status },
+    )
+  }
+
+  const updated = await getCurrentUser()
+  return NextResponse.json({ user: updated })
 }

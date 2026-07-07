@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { Menu, X, User, Heart, LogOut, Shield } from "lucide-react"
 import { useUserStore, useIsAdmin } from "@/lib/stores/user-store"
@@ -17,11 +17,25 @@ const NAV_LINKS = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const user = useUserStore((s) => s.user)
   const clear = useUserStore((s) => s.clear)
   const isAdmin = useIsAdmin()
   const pathname = usePathname()
   const router = useRouter()
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [dropdownOpen])
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' })
@@ -78,28 +92,56 @@ export default function Header() {
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-2">
             {user ? (
-              <>
-                {isAdmin && (
-                  <Link
-                    href="/admin/animals"
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-ink text-white text-sm font-semibold no-underline"
-                  >
-                    <Shield size={13} />
-                    Admin
-                  </Link>
-                )}
-                <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-ink">
-                  <User size={13} />
-                  {user.username}
-                </span>
+              <div className="relative" ref={dropdownRef}>
                 <button
-                  onClick={handleLogout}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-border-strong text-sm font-semibold text-ink bg-transparent cursor-pointer"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-coral-soft text-coral border-0 cursor-pointer transition-colors hover:bg-coral hover:text-white"
+                  aria-label="Menu utilisateur"
                 >
-                  <LogOut size={13} />
-                  Déconnexion
+                  <User size={18} />
                 </button>
-              </>
+                {dropdownOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-56 rounded-lg border border-border bg-white shadow-lg"
+                    style={{ zIndex: 60 }}
+                  >
+                    <div className="px-4 py-3 border-b border-border">
+                      <p className="text-sm font-semibold text-ink m-0">{user.username}</p>
+                      <p className="text-xs text-ink-muted m-0 mt-0.5">{user.email}</p>
+                    </div>
+                    <div className="py-1">
+                      <Link
+                        href="/profile"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-ink no-underline hover:bg-surface-alt"
+                      >
+                        <User size={14} />
+                        Mon profil
+                      </Link>
+                      {isAdmin && (
+                        <Link
+                          href="/admin/animals"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-ink no-underline hover:bg-surface-alt"
+                        >
+                          <Shield size={14} />
+                          Administration
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => {
+                          setDropdownOpen(false)
+                          handleLogout()
+                        }}
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-ink bg-transparent border-0 cursor-pointer hover:bg-surface-alt"
+                      >
+                        <LogOut size={14} />
+                        Déconnexion
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <Link
                 href="/login"
@@ -147,6 +189,13 @@ export default function Header() {
             <div className="flex flex-col gap-2 mt-3.5">
               {user ? (
                 <>
+                  <Link
+                    href="/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className="px-4 py-2.5 rounded-md bg-surface-alt text-ink font-semibold text-sm no-underline text-center"
+                  >
+                    Mon profil
+                  </Link>
                   {isAdmin && (
                     <Link
                       href="/admin/animals"
