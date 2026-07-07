@@ -1,8 +1,7 @@
 import { cookies } from 'next/headers'
+import { STRAPI_URL, AUTH_COOKIE } from './config'
 
-const STRAPI_URL = process.env.STRAPI_URL ?? 'http://localhost:1337'
-
-export const AUTH_COOKIE = 'ddf_jwt'
+export { AUTH_COOKIE }
 
 export interface AuthUser {
   id: number

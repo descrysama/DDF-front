@@ -1,7 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
-import { ADMIN } from '@/lib/admin-tokens'
+import { AD } from '@/lib/admin-tokens'
 import { addMediaToAnimal, deleteMedia, setCoverMedia } from '@/app/admin/animals/actions'
 import type { StrapiMedia } from '@/lib/strapi'
 
@@ -37,12 +37,12 @@ export default function AnimalMediaGallery({
 
   return (
     <div>
-      <p style={{ fontSize: 13, fontWeight: 600, color: ADMIN.ink, marginBottom: 12, marginTop: 0 }}>
+      <p style={{ fontSize: 13, fontWeight: 600, color: AD.ink, marginBottom: 12, marginTop: 0 }}>
         Photos ({medias.length})
       </p>
 
       {medias.length === 0 ? (
-        <p style={{ fontSize: 13, color: ADMIN.inkMuted, marginBottom: 16 }}>
+        <p style={{ fontSize: 13, color: AD.inkMuted, marginBottom: 16 }}>
           Aucune photo pour l&apos;instant.
         </p>
       ) : (
@@ -69,10 +69,10 @@ export default function AnimalMediaGallery({
               <div
                 key={media.id}
                 style={{
-                  border: `2px solid ${isCover ? ADMIN.coral : ADMIN.border}`,
+                  border: `2px solid ${isCover ? AD.coral : AD.border}`,
                   borderRadius: 8,
                   overflow: 'hidden',
-                  background: ADMIN.surfaceAlt,
+                  background: AD.surfaceAlt,
                 }}
               >
                 <div style={{ position: 'relative', aspectRatio: '1 / 1' }}>
@@ -93,7 +93,7 @@ export default function AnimalMediaGallery({
                         justifyContent: 'center',
                       }}
                     >
-                      <span style={{ fontSize: 11, color: ADMIN.inkMuted }}>Sans image</span>
+                      <span style={{ fontSize: 11, color: AD.inkMuted }}>Sans image</span>
                     </div>
                   )}
                   {isCover && (
@@ -102,7 +102,7 @@ export default function AnimalMediaGallery({
                         position: 'absolute',
                         top: 6,
                         left: 6,
-                        background: ADMIN.coral,
+                        background: AD.coral,
                         color: '#fff',
                         fontSize: 10,
                         fontWeight: 700,
@@ -125,8 +125,8 @@ export default function AnimalMediaGallery({
                         flex: 1,
                         padding: '4px 0',
                         fontSize: 11,
-                        background: ADMIN.coralSoft,
-                        color: ADMIN.coralInk,
+                        background: AD.coralSoft,
+                        color: AD.coralInk,
                         border: 'none',
                         borderRadius: 4,
                         cursor: isPending ? 'not-allowed' : 'pointer',
@@ -144,7 +144,7 @@ export default function AnimalMediaGallery({
                       padding: '4px 10px',
                       fontSize: 11,
                       background: '#FEE6E5',
-                      color: ADMIN.coralInk,
+                      color: AD.coralInk,
                       border: 'none',
                       borderRadius: 4,
                       cursor: isPending ? 'not-allowed' : 'pointer',
@@ -171,10 +171,10 @@ export default function AnimalMediaGallery({
             flex: 1,
             minWidth: 0,
             padding: '6px 10px',
-            border: `1px solid ${ADMIN.border}`,
+            border: `1px solid ${AD.border}`,
             borderRadius: 6,
             fontSize: 13,
-            color: ADMIN.ink,
+            color: AD.ink,
             background: '#fff',
             cursor: 'pointer',
           }}
@@ -184,7 +184,7 @@ export default function AnimalMediaGallery({
           disabled={isPending}
           style={{
             padding: '7px 18px',
-            background: isPending ? ADMIN.border : ADMIN.coral,
+            background: isPending ? AD.border : AD.coral,
             color: '#fff',
             border: 'none',
             borderRadius: 6,
@@ -197,7 +197,7 @@ export default function AnimalMediaGallery({
           {isPending ? 'En cours…' : '+ Ajouter'}
         </button>
       </form>
-      <p style={{ fontSize: 11, color: ADMIN.inkSubtle, marginTop: 5, marginBottom: 0 }}>
+      <p style={{ fontSize: 11, color: AD.inkSubtle, marginTop: 5, marginBottom: 0 }}>
         JPG, PNG, WebP — max 5 Mo
       </p>
     </div>

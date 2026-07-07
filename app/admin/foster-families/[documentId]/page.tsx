@@ -4,7 +4,7 @@ import FosterFamilyForm from '@/components/admin/foster-family-form'
 import { fetchResource } from '@/lib/strapi'
 import type { StrapiFosterFamilyRaw } from '@/lib/strapi'
 import { updateFosterFamily } from '../actions'
-import { ADMIN } from '@/lib/admin-tokens'
+import { AD } from '@/lib/admin-tokens'
 import { Card } from '@/components/ui/card'
 
 export default async function EditFosterFamilyPage({
@@ -31,16 +31,16 @@ export default async function EditFosterFamilyPage({
       <div style={{ marginBottom: 20 }}>
         <Link
           href="/admin/foster-families"
-          style={{ fontSize: 13, color: ADMIN.inkMuted, textDecoration: 'none' }}
+          style={{ fontSize: 13, color: AD.inkMuted, textDecoration: 'none' }}
         >
           ← Retour aux familles d&apos;accueil
         </Link>
       </div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: ADMIN.ink, marginBottom: 4 }}>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: AD.ink, marginBottom: 4 }}>
         Modifier la famille
       </h1>
       {family.user && (
-        <p style={{ fontSize: 14, color: ADMIN.inkMuted, marginBottom: 24 }}>
+        <p style={{ fontSize: 14, color: AD.inkMuted, marginBottom: 24 }}>
           {family.user.username} — {family.user.email}
         </p>
       )}
@@ -53,7 +53,7 @@ export default async function EditFosterFamilyPage({
 
         {/* Foster assignments */}
         <Card className="p-6 hover:translate-y-0">
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: ADMIN.ink, marginBottom: 14 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: AD.ink, marginBottom: 14 }}>
             Hébergements en cours
           </h2>
           {family.foster_assignments && family.foster_assignments.length > 0 ? (
@@ -67,7 +67,7 @@ export default async function EditFosterFamilyPage({
                     borderRadius: 6,
                     marginBottom: 8,
                     fontSize: 13,
-                    color: ADMIN.inkMuted,
+                    color: AD.inkMuted,
                     fontFamily: 'Geist Mono, ui-monospace, monospace',
                   }}
                 >
@@ -76,7 +76,7 @@ export default async function EditFosterFamilyPage({
               ))}
             </ul>
           ) : (
-            <p style={{ color: ADMIN.inkMuted, fontSize: 14 }}>
+            <p style={{ color: AD.inkMuted, fontSize: 14 }}>
               Aucun hébergement en cours.
             </p>
           )}

@@ -1,10 +1,12 @@
 import Link from "next/link"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
-import { PLACEHOLDER_CATS } from "@/lib/placeholder-cats"
+import { fetchAnimals } from "@/lib/strapi"
 import { AdoptionFilters } from "./_components/adoption-filters"
 
-export default function AdoptionPage() {
+export default async function AdoptionPage() {
+  const { animals, total } = await fetchAnimals({ limit: 100 })
+
   return (
     <div className="min-h-screen bg-bg">
       <Header />
@@ -23,13 +25,13 @@ export default function AdoptionPage() {
               <span className="text-coral">compagnon</span>.
             </h1>
             <div className="text-sm text-ink-muted">
-              <span className="font-semibold text-ink">{PLACEHOLDER_CATS.length} chats</span>{" "}
+              <span className="font-semibold text-ink">{total} chats</span>{" "}
               disponibles · mis à jour aujourd&apos;hui
             </div>
           </div>
         </section>
 
-        <AdoptionFilters cats={PLACEHOLDER_CATS} />
+        <AdoptionFilters cats={animals} />
       </main>
       <Footer />
     </div>
