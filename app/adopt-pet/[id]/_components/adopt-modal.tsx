@@ -3,6 +3,13 @@
 import { useRef, useState } from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { Heart, X, ArrowRight, Lock, CheckCircle2, AlertCircle } from "lucide-react"
+import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogTrigger, DialogPortal, DialogClose } from "@/components/ui/dialog"
 import type { CardAnimal } from "@/lib/strapi"
 import { submitAdoptionRequest, type AdoptionFormData } from "@/lib/actions/adoption"
 
@@ -13,43 +20,6 @@ const REQUIRED_COMMITMENTS = [0, 1, 3]
 const inputBase = "w-full box-border px-3 py-2.5 rounded-lg border text-xs font-[inherit] text-ink outline-none bg-white transition-colors"
 const inputOk   = "border-border focus:border-ink/40"
 const inputErr  = "border-red-400 bg-red-50 focus:border-red-500"
-
-function FField({
-  id,
-  label,
-  optional,
-  full,
-  hint,
-  errorMsg,
-  children,
-}: {
-  id?: string
-  label: string
-  optional?: boolean
-  full?: boolean
-  hint?: string
-  errorMsg?: string
-  children: React.ReactNode
-}) {
-  return (
-    <div id={id} className={full ? "col-span-2" : ""}>
-      <div className="flex justify-between items-baseline mb-1.5">
-        <span className="text-xs font-semibold text-ink">{label}</span>
-        {optional && <span className="text-[11px] text-ink-subtle">facultatif</span>}
-      </div>
-      {children}
-      {hint && !errorMsg && (
-        <div className="text-[11px] text-ink-muted mt-1 leading-[1.4]">{hint}</div>
-      )}
-      {errorMsg && (
-        <div className="flex items-center gap-1 text-[11px] text-red-500 mt-1">
-          <AlertCircle size={11} className="shrink-0" />
-          {errorMsg}
-        </div>
-      )}
-    </div>
-  )
-}
 
 function ChipGroup({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) {
   return (
@@ -201,13 +171,13 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
           Merci pour votre intérêt pour {cat.name}. Notre équipe bénévole reviendra vers vous sous
           48h pour un premier échange.
         </p>
-        <button
+        <Button
           type="button"
           onClick={onClose}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-coral text-white text-sm font-semibold border-none cursor-pointer font-[inherit]"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-coral text-white text-sm font-semibold border-none cursor-pointer font-[inherit] hover:bg-coral/90"
         >
           Fermer <X size={14} />
-        </button>
+        </Button>
       </div>
     )
   }
@@ -223,50 +193,64 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
         <div className="px-7 py-[22px] border-b border-border">
           <FSectionHeader num={1} title="Faisons connaissance" subtitle="Vos coordonnées pour qu'on puisse vous recontacter." tintClass="bg-pink" />
           <div className="grid grid-cols-2 gap-3">
-            <FField id="field-prenom" label="Prénom" errorMsg={errors["prenom"]}>
-              <input
+            <Field id="field-prenom">
+              <FieldLabel>Prénom</FieldLabel>
+              <Input
                 data-error={errors["prenom"] ? "true" : undefined}
                 placeholder="Élodie" value={prenom}
                 onChange={(e) => { setPrenom(e.target.value); clearError("prenom") }}
                 className={inp(!!errors["prenom"])}
               />
-            </FField>
-            <FField id="field-nom" label="Nom" errorMsg={errors["nom"]}>
-              <input
+              <FieldError>{errors["prenom"]}</FieldError>
+            </Field>
+            <Field id="field-nom">
+              <FieldLabel>Nom</FieldLabel>
+              <Input
                 data-error={errors["nom"] ? "true" : undefined}
                 placeholder="Mercier" value={nom}
                 onChange={(e) => { setNom(e.target.value); clearError("nom") }}
                 className={inp(!!errors["nom"])}
               />
-            </FField>
-            <FField id="field-email" label="Adresse email" errorMsg={errors["email"]}>
-              <input
+              <FieldError>{errors["nom"]}</FieldError>
+            </Field>
+            <Field id="field-email">
+              <FieldLabel>Adresse email</FieldLabel>
+              <Input
                 data-error={errors["email"] ? "true" : undefined}
                 type="email" placeholder="vous@exemple.fr" value={email}
                 onChange={(e) => { setEmail(e.target.value); clearError("email") }}
                 className={inp(!!errors["email"])}
               />
-            </FField>
-            <FField id="field-telephone" label="Téléphone" errorMsg={errors["telephone"]}>
-              <input
+              <FieldError>{errors["email"]}</FieldError>
+            </Field>
+            <Field id="field-telephone">
+              <FieldLabel>Téléphone</FieldLabel>
+              <Input
                 data-error={errors["telephone"] ? "true" : undefined}
                 placeholder="06 12 34 56 78" value={telephone}
                 onChange={(e) => { setTelephone(e.target.value); clearError("telephone") }}
                 className={inp(!!errors["telephone"])}
               />
-            </FField>
-            <FField label="Code postal">
-              <input placeholder="69007" value={codePostal} onChange={(e) => setCodePostal(e.target.value)} className={inp(false)} />
-            </FField>
-            <FField label="Ville">
-              <input placeholder="Lyon 7e" value={ville} onChange={(e) => setVille(e.target.value)} className={inp(false)} />
-            </FField>
-            <FField label="Âge" optional>
-              <input placeholder="34 ans" value={age} onChange={(e) => setAge(e.target.value)} className={inp(false)} />
-            </FField>
-            <FField label="Profession" optional>
-              <input placeholder="Designer · télétravail 80%" value={profession} onChange={(e) => setProfession(e.target.value)} className={inp(false)} />
-            </FField>
+              <FieldError>{errors["telephone"]}</FieldError>
+            </Field>
+            <Field>
+              <FieldLabel>Code postal</FieldLabel>
+              <Input placeholder="69007" value={codePostal} onChange={(e) => setCodePostal(e.target.value)} className={inp(false)} />
+            </Field>
+            <Field>
+              <FieldLabel>Ville</FieldLabel>
+              <Input placeholder="Lyon 7e" value={ville} onChange={(e) => setVille(e.target.value)} className={inp(false)} />
+            </Field>
+            <Field>
+              <FieldLabel>Âge</FieldLabel>
+              <Input placeholder="34 ans" value={age} onChange={(e) => setAge(e.target.value)} className={inp(false)} />
+              <FieldDescription>Facultatif</FieldDescription>
+            </Field>
+            <Field>
+              <FieldLabel>Profession</FieldLabel>
+              <Input placeholder="Designer · télétravail 80%" value={profession} onChange={(e) => setProfession(e.target.value)} className={inp(false)} />
+              <FieldDescription>Facultatif</FieldDescription>
+            </Field>
           </div>
         </div>
 
@@ -274,31 +258,43 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
         <div className="px-7 py-[22px] border-b border-border">
           <FSectionHeader num={2} title="Votre foyer" subtitle={`Pour s'assurer que l'environnement convient à ${cat.name}.`} tintClass="bg-peach" />
           <div className="grid grid-cols-2 gap-4">
-            <FField label="Type de logement" full>
+            <Field className="col-span-2">
+              <FieldLabel>Type de logement</FieldLabel>
               <ChipGroup options={["Appartement", "Maison", "Studio", "Colocation"]} value={typeLogement} onChange={setTypeLogement} />
-            </FField>
-            <FField label="Surface">
-              <input placeholder="60 m²" value={surface} onChange={(e) => setSurface(e.target.value)} className={inp(false)} />
-            </FField>
-            <FField label="Accès extérieur">
+            </Field>
+            <Field>
+              <FieldLabel>Surface</FieldLabel>
+              <Input placeholder="60 m²" value={surface} onChange={(e) => setSurface(e.target.value)} className={inp(false)} />
+            </Field>
+            <Field>
+              <FieldLabel>Accès extérieur</FieldLabel>
               <ChipGroup options={["Aucun", "Balcon sécurisé", "Jardin clos", "Jardin libre"]} value={accesExterieur} onChange={setAccesExterieur} />
-            </FField>
-            <FField label="Composition du foyer" full>
+            </Field>
+            <Field className="col-span-2">
+              <FieldLabel>Composition du foyer</FieldLabel>
               <ChipGroup options={["Seul·e", "En couple", "Avec enfant(s)", "Colocation"]} value={compositionFoyer} onChange={setCompositionFoyer} />
-            </FField>
-            <FField label="Avez-vous d'autres animaux ?" full>
+            </Field>
+            <Field className="col-span-2">
+              <FieldLabel>Avez-vous d&apos;autres animaux ?</FieldLabel>
               <ChipGroup options={["Aucun", "Un chat", "Plusieurs chats", "Chien", "Autres"]} value={autresAnimaux} onChange={setAutresAnimaux} />
-            </FField>
-            <FField label="Statut du logement">
-              <select value={statutLogement} onChange={(e) => setStatutLogement(e.target.value)} className={inp(false) + " appearance-none"}>
-                <option value="proprietaire">Propriétaire</option>
-                <option value="locataire">Locataire (animaux autorisés)</option>
-                <option value="autre">Autre</option>
-              </select>
-            </FField>
-            <FField label="Personnes au foyer">
-              <input placeholder="1 adulte" value={personnesFoyer} onChange={(e) => setPersonnesFoyer(e.target.value)} className={inp(false)} />
-            </FField>
+            </Field>
+            <Field>
+              <FieldLabel>Statut du logement</FieldLabel>
+              <Select value={statutLogement} onValueChange={(v) => v && setStatutLogement(v)}>
+                <SelectTrigger className={inp(false) + " w-full justify-between h-auto"}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="proprietaire">Propriétaire</SelectItem>
+                  <SelectItem value="locataire">Locataire (animaux autorisés)</SelectItem>
+                  <SelectItem value="autre">Autre</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field>
+              <FieldLabel>Personnes au foyer</FieldLabel>
+              <Input placeholder="1 adulte" value={personnesFoyer} onChange={(e) => setPersonnesFoyer(e.target.value)} className={inp(false)} />
+            </Field>
           </div>
         </div>
 
@@ -306,16 +302,13 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
         <div className="px-7 py-[22px] border-b border-border">
           <FSectionHeader num={3} title={`Pourquoi ${cat.name} ?`} subtitle="Ce qui compte le plus pour nous." tintClass="bg-lilac" />
           <div className="grid gap-4">
-            <FField label="Avez-vous déjà eu un chat ?">
+            <Field>
+              <FieldLabel>Avez-vous déjà eu un chat ?</FieldLabel>
               <ChipGroup options={["Oui, plusieurs fois", "Oui, une fois", "Jamais"]} value={experienceChat} onChange={setExperienceChat} />
-            </FField>
-            <FField
-              id="field-pourquoiCeChat"
-              label={`Pourquoi avoir choisi ${cat.name} ?`}
-              hint="Quelques phrases suffisent. Pas besoin de bien écrire."
-              errorMsg={errors["pourquoiCeChat"]}
-            >
-              <textarea
+            </Field>
+            <Field id="field-pourquoiCeChat">
+              <FieldLabel>Pourquoi avoir choisi {cat.name} ?</FieldLabel>
+              <Textarea
                 data-error={errors["pourquoiCeChat"] ? "true" : undefined}
                 rows={4}
                 placeholder={`J'ai craqué pour ${cat.name} parce que…`}
@@ -323,13 +316,20 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
                 onChange={(e) => { setPourquoiCeChat(e.target.value); clearError("pourquoiCeChat") }}
                 className={inp(!!errors["pourquoiCeChat"]) + " resize-y leading-[1.55]"}
               />
-            </FField>
-            <FField label="Vétérinaire de référence" optional hint="Si vous en avez déjà un, ça nous simplifie le suivi.">
-              <input placeholder="Clinique vétérinaire des Brotteaux, Lyon 6e" value={veterinaire} onChange={(e) => setVeterinaire(e.target.value)} className={inp(false)} />
-            </FField>
-            <FField label="Quand seriez-vous disponible pour une rencontre ?">
+              {!errors["pourquoiCeChat"] && (
+                <FieldDescription>Quelques phrases suffisent. Pas besoin de bien écrire.</FieldDescription>
+              )}
+              <FieldError>{errors["pourquoiCeChat"]}</FieldError>
+            </Field>
+            <Field>
+              <FieldLabel>Vétérinaire de référence</FieldLabel>
+              <Input placeholder="Clinique vétérinaire des Brotteaux, Lyon 6e" value={veterinaire} onChange={(e) => setVeterinaire(e.target.value)} className={inp(false)} />
+              <FieldDescription>Facultatif · Si vous en avez déjà un, ça nous simplifie le suivi.</FieldDescription>
+            </Field>
+            <Field>
+              <FieldLabel>Quand seriez-vous disponible pour une rencontre ?</FieldLabel>
               <ChipGroup options={["Cette semaine", "Le week-end", "Sous 2 semaines", "Plus tard"]} value={disponibilite} onChange={setDisponibilite} />
-            </FField>
+            </Field>
           </div>
         </div>
 
@@ -401,18 +401,25 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
             <span>Vos réponses sont strictement confidentielles.</span>
           </div>
           <div className="flex gap-2 shrink-0">
-            <DialogPrimitive.Close className="px-4 py-2.5 rounded-lg bg-white text-ink border border-border-strong text-xs font-semibold cursor-pointer font-[inherit]">
+            <DialogClose
+              render={
+                <Button
+                  variant="outline"
+                  className="px-4 py-2.5 rounded-lg bg-white text-ink border border-border-strong text-xs font-semibold cursor-pointer font-[inherit] h-auto"
+                />
+              }
+            >
               Annuler
-            </DialogPrimitive.Close>
-            <button
+            </DialogClose>
+            <Button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center gap-2 px-[18px] py-2.5 rounded-lg text-white text-xs font-semibold border-none cursor-pointer font-[inherit] disabled:opacity-60"
+              className="inline-flex items-center gap-2 px-[18px] py-2.5 rounded-lg text-white text-xs font-semibold border-none cursor-pointer font-[inherit] disabled:opacity-60 h-auto"
               style={{ background: "linear-gradient(90deg, #F76C70 0%, #E84A77 100%)" }}
             >
               {loading ? "Envoi…" : "Envoyer ma demande"}
               {!loading && <ArrowRight size={13} />}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -426,13 +433,13 @@ export function AdoptModal({ cat }: { cat: CardAnimal }) {
   const [open, setOpen] = useState(false)
 
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
-      <DialogPrimitive.Trigger className="inline-flex items-center justify-center gap-2 w-full px-[18px] py-3 rounded-md bg-coral text-white text-sm font-semibold border-none cursor-pointer font-[inherit]">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger className="inline-flex items-center justify-center gap-2 w-full px-[18px] py-3 rounded-md bg-coral text-white text-sm font-semibold border-none cursor-pointer font-[inherit]">
         <Heart size={13} />
         Adopter {cat.name}
-      </DialogPrimitive.Trigger>
+      </DialogTrigger>
 
-      <DialogPrimitive.Portal>
+      <DialogPortal>
         <DialogPrimitive.Backdrop
           className="fixed inset-0 z-50 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
           style={{ background: "rgba(20,22,38,0.55)", backdropFilter: "blur(6px)" }}
@@ -448,13 +455,19 @@ export function AdoptModal({ cat }: { cat: CardAnimal }) {
               className="relative px-7 pt-5 pb-4 text-white overflow-hidden shrink-0"
               style={{ background: "linear-gradient(135deg, #F76C70 0%, #E84A77 100%)" }}
             >
-              <DialogPrimitive.Close
-                className="absolute top-4 right-[18px] w-[30px] h-[30px] rounded-full flex items-center justify-center border-none cursor-pointer text-white"
-                style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.30)" }}
+              <DialogClose
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="absolute top-4 right-[18px] w-[30px] h-[30px] rounded-full flex items-center justify-center border-none cursor-pointer text-white hover:bg-white/25 hover:text-white"
+                    style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.30)" }}
+                  />
+                }
               >
                 <X size={13} />
                 <span className="sr-only">Fermer</span>
-              </DialogPrimitive.Close>
+              </DialogClose>
 
               <div className="flex items-center gap-3.5 relative">
                 <div
@@ -471,9 +484,9 @@ export function AdoptModal({ cat }: { cat: CardAnimal }) {
               </div>
 
               <div className="flex items-center gap-2 text-xs text-white/85 mt-4">
-                <span className="px-2.5 py-1 rounded-full font-semibold" style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.30)" }}>
+                <Badge className="bg-white/[0.18] border border-white/30 text-white/85 h-auto px-2.5 py-1 rounded-full font-semibold text-xs">
                   ~ 8 minutes
-                </span>
+                </Badge>
                 <span>·</span>
                 <span>Vos réponses sont sauvegardées au fur et à mesure.</span>
               </div>
@@ -482,7 +495,7 @@ export function AdoptModal({ cat }: { cat: CardAnimal }) {
             <AdoptionFormInner cat={cat} onClose={() => setOpen(false)} />
           </div>
         </DialogPrimitive.Popup>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+      </DialogPortal>
+    </Dialog>
   )
 }

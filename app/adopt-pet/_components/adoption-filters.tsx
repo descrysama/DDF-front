@@ -3,6 +3,9 @@
 import { useState, useMemo } from "react"
 import { Search } from "lucide-react"
 import { CatCard } from "@/components/cat-card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import { type CardAnimal, type CatTag } from "@/lib/strapi"
 
 type FilterKey = 'Tous' | 'Chaton' | 'Adulte' | 'Senior' | 'Duo' | 'Cas particulier'
@@ -60,30 +63,32 @@ export function AdoptionFilters({ cats }: Props) {
               const isActive = f.label === active
               const tintClass = isActive ? 'bg-ink text-white border-ink' : FILTER_TINT[f.label] + ' border-transparent'
               return (
-                <button
+                <Button
                   key={f.label}
                   onClick={() => setActive(f.label)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs font-semibold cursor-pointer font-[inherit] ${tintClass}`}
+                  variant="ghost"
+                  className={`h-auto items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs font-semibold cursor-pointer font-[inherit] ${tintClass}`}
                 >
                   {f.label}
-                  <span
-                    className={`text-[10px] font-medium px-1.5 py-px rounded-full ${isActive ? 'bg-white/15' : 'bg-ink/10'}`}
+                  <Badge
+                    variant="ghost"
+                    className={`h-auto text-[10px] font-medium px-1.5 py-px rounded-full ${isActive ? 'bg-white/15' : 'bg-ink/10'}`}
                   >
                     {f.count}
-                  </span>
-                </button>
+                  </Badge>
+                </Button>
               )
             })}
           </div>
 
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-surface">
             <Search size={13} className="text-ink-muted shrink-0" />
-            <input
+            <Input
               type="search"
               placeholder="Rechercher un nom"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="border-none outline-none bg-transparent text-xs font-[inherit] text-ink w-36"
+              className="h-auto border-none outline-none bg-transparent text-xs md:text-xs font-[inherit] text-ink w-36 shadow-none px-0 py-0 focus-visible:ring-0 focus-visible:border-none dark:bg-transparent"
             />
           </div>
         </div>
