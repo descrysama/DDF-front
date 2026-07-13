@@ -429,8 +429,8 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
 
 // ── Public component ─────────────────────────────────────────────────────────
 
-export function AdoptModal({ cat }: { cat: CardAnimal }) {
-  const [open, setOpen] = useState(false)
+export function AdoptModal({ cat, defaultOpen = false }: { cat: CardAnimal; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

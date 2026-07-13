@@ -12,6 +12,7 @@ function parseFosterFamilyFormData(formData: FormData) {
     has_children: formData.get('has_children') === 'on',
     has_dogs:     formData.get('has_dogs') === 'on',
     has_cats:     formData.get('has_cats') === 'on',
+    is_available: formData.get('is_available') === 'on',
   }
 }
 

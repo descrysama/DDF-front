@@ -9,6 +9,8 @@ export interface AuthUser {
   documentId?: string
   username: string
   email: string
+  is_absent?: boolean
+  absent_until?: string | null
   role: {
     id: number
     name: string

@@ -1,8 +1,16 @@
 import { notFound } from 'next/navigation'
-import { fetchResource } from '@/lib/strapi'
-import type { StrapiMedia } from '@/lib/strapi'
+import { fetchResource, fetchUsers } from '@/lib/strapi'
+import type { StrapiMedia, StrapiMedicalEvent, StrapiUser } from '@/lib/strapi'
 import AnimalEditClient from './edit-client'
 import { STRAPI_URL } from '@/lib/config'
+
+interface FosterAssignment {
+  id: number
+  documentId: string
+  status: string
+  start_date: string | null
+  foster_family?: { id: number; documentId: string; address: string } | null
+}
 
 interface AnimalDetail {
   id: number
@@ -18,6 +26,12 @@ interface AnimalDetail {
   ok_with_cats: boolean
   indoor_only: boolean
   medias?: StrapiMedia[]
+  video_url?: string | null
+  trap_date?: string | null
+  medical_history?: StrapiMedicalEvent[]
+  referent?: StrapiUser | null
+  backup_referents?: StrapiUser[]
+  foster_assignments?: FosterAssignment[]
 }
 
 export default async function EditAnimalPage({
@@ -30,12 +44,20 @@ export default async function EditAnimalPage({
   let animal: AnimalDetail
   try {
     const res = await fetchResource<AnimalDetail>(
-      `/api/animals/${documentId}?populate[0]=breed&populate[medias][populate]=image`
+      `/api/animals/${documentId}` +
+        '?populate[0]=breed' +
+        '&populate[medias][populate]=image' +
+        '&populate[medical_history]=true' +
+        '&populate[foster_assignments][populate]=foster_family' +
+        '&populate[referent]=true' +
+        '&populate[backup_referents]=true'
     )
     animal = res.data
   } catch {
     notFound()
   }
 
-  return <AnimalEditClient animal={animal} strapiUrl={STRAPI_URL} />
+  const users = await fetchUsers()
+
+  return <AnimalEditClient animal={animal} strapiUrl={STRAPI_URL} users={users} />
 }

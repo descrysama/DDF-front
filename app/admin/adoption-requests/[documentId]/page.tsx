@@ -154,6 +154,22 @@ export default async function AdoptionRequestDetailPage({
             </div>
 
             <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>Référent</label>
+              <select
+                name="referent_id"
+                defaultValue={users.find(u => u.username === request.referent?.username)?.id ?? ''}
+                style={fieldStyle}
+              >
+                <option value="">— Aucun —</option>
+                {users.map(u => (
+                  <option key={u.id} value={u.id}>
+                    {u.username} ({u.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
               <label style={labelStyle}>Statut</label>
               <select name="status" defaultValue={request.status} style={fieldStyle}>
                 <option value="pending">En attente</option>

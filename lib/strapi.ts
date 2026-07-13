@@ -45,6 +45,16 @@ export interface StrapiMedia {
   image: StrapiImageFile | null
 }
 
+export type MedicalEventType = 'vaccination' | 'sterilisation' | 'consultation' | 'traitement' | 'autre'
+
+export interface StrapiMedicalEvent {
+  id: number
+  event_date: string
+  event_type: MedicalEventType
+  note: string | null
+  veterinarian: string | null
+}
+
 interface StrapiAnimalRaw {
   id: number
   documentId: string
@@ -61,6 +71,13 @@ interface StrapiAnimalRaw {
   breed: StrapiBreed | null
   bonded_with: StrapiAnimalRaw | null
   medias?: StrapiMedia[]
+  video_url?: string | null
+  trap_date?: string | null
+}
+
+export interface CardAnimalMedia {
+  url: string
+  isCover: boolean
 }
 
 /** Shape consumed by UI components */
@@ -76,6 +93,9 @@ export interface CardAnimal {
   tones: [string, string]
   status: AnimalStatus
   photoUrl: string | null
+  medias: CardAnimalMedia[]
+  videoUrl: string | null
+  trapDate: string | null
   breed: string | null
   activityLevel: AnimalActivity | null
   okWithChildren: boolean
@@ -119,10 +139,17 @@ function formatSex(a: StrapiAnimalRaw): string {
   return a.gender === 'male' ? 'Mâle' : 'Femelle'
 }
 
+function mediaUrl(image: StrapiImageFile | null | undefined): string | null {
+  const relPath = image?.formats?.medium?.url ?? image?.formats?.small?.url ?? image?.url ?? null
+  return relPath ? `${STRAPI_URL}${relPath}` : null
+}
+
 function toCardAnimal(a: StrapiAnimalRaw): CardAnimal {
   const tag = deriveTag(a)
-  const cover = a.medias?.find(m => m.is_cover) ?? a.medias?.[0]
-  const imageUrl = cover?.image?.formats?.small?.url ?? cover?.image?.url ?? null
+  const medias = (a.medias ?? [])
+    .map((m) => ({ url: mediaUrl(m.image), isCover: m.is_cover }))
+    .filter((m): m is CardAnimalMedia => Boolean(m.url))
+  const cover = medias.find((m) => m.isCover) ?? medias[0] ?? null
   return {
     id: a.documentId,
     documentId: a.documentId,
@@ -134,7 +161,10 @@ function toCardAnimal(a: StrapiAnimalRaw): CardAnimal {
     tagStyle: tag === 'Senior' || tag === 'Cas particulier' ? 'ink' : 'coral',
     tones: TONES[a.id % TONES.length],
     status: a.status,
-    photoUrl: imageUrl ? `${STRAPI_URL}${imageUrl}` : null,
+    photoUrl: cover?.url ?? null,
+    medias,
+    videoUrl: a.video_url ? `${STRAPI_URL}${a.video_url}` : null,
+    trapDate: a.trap_date ?? null,
     breed: a.breed?.name ?? null,
     activityLevel: a.activity_level ?? null,
     okWithChildren: a.ok_with_children,
@@ -215,6 +245,7 @@ export interface StrapiFosterFamilyRaw {
   has_dogs: boolean
   has_cats: boolean
   max_capacity: number
+  is_available: boolean
   user?: { username: string; email: string }
   foster_assignments?: { id: number; documentId: string }[]
 }
@@ -227,8 +258,84 @@ export interface StrapiAdoptionRequestRaw {
   match_score: number | null
   request_date: string | null
   announcement?: { id: number; documentId: string; title: string }
+  animal?: { id: number; documentId: string; name: string }
   adopter?: { username: string; email: string }
   referent?: { username: string }
+}
+
+// ─── Adopter profile ────────────────────────────────────────────────────────
+
+export type AdopterHousingType = 'house' | 'apartment'
+export type AdopterExperience = 'none' | 'some' | 'experienced'
+export type AdopterAgePreference = 'chaton' | 'adulte' | 'senior' | 'peu_importe'
+
+export interface StrapiAdopterProfileRaw {
+  id: number
+  documentId: string
+  housing_type: AdopterHousingType | null
+  has_garden: boolean
+  has_children: boolean
+  has_dogs: boolean
+  has_cats: boolean
+  experience_level: AdopterExperience
+  age_preference: AdopterAgePreference
+  motivation: string | null
+}
+
+export async function fetchAdopterProfile(userId: number): Promise<StrapiAdopterProfileRaw | null> {
+  const { data } = await strapiGet<{ data: StrapiAdopterProfileRaw[] }>(
+    `/api/adopter-profiles?filters[user][id][$eq]=${userId}`
+  )
+  return data[0] ?? null
+}
+
+// ─── Swipe / compatibility ("Tinder" discovery) ─────────────────────────────
+
+export type SwipeDirection = 'like' | 'pass'
+
+export interface DiscoverAnimal extends CardAnimal {
+  compatibility: number | null
+}
+
+export async function fetchDiscoverAnimals(
+  userId: number,
+  opts?: { limit?: number }
+): Promise<DiscoverAnimal[]> {
+  const limit = opts?.limit ?? 30
+  const res = await fetch(
+    `${STRAPI_URL}/api/animal-discovery?limit=${limit}&user=${userId}`,
+    { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }, cache: 'no-store' }
+  )
+  if (!res.ok) throw new Error(`Strapi ${res.status}: /api/animal-discovery`)
+
+  const { data } = (await res.json()) as {
+    data: (StrapiAnimalRaw & { compatibility: number | null })[]
+  }
+  return data.map((a) => ({ ...toCardAnimal(a), compatibility: a.compatibility }))
+}
+
+export async function postSwipe(
+  userId: number,
+  animalDocumentId: string,
+  direction: SwipeDirection
+): Promise<void> {
+  await strapiPost('/api/swipes', { user: userId, animal: animalDocumentId, direction })
+}
+
+export async function fetchCompatibility(animalDocumentId: string, userId: number): Promise<number | null> {
+  const res = await fetch(
+    `${STRAPI_URL}/api/animals/${animalDocumentId}/compatibility?user=${userId}`,
+    { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }, cache: 'no-store' }
+  )
+  if (!res.ok) return null
+  const { data } = (await res.json()) as { data: { score: number | null } }
+  return data.score
+}
+
+export function compatibilityTone(score: number): 'bg-mint' | 'bg-peach' | 'bg-rose' {
+  if (score >= 75) return 'bg-mint'
+  if (score >= 50) return 'bg-peach'
+  return 'bg-rose'
 }
 
 // ─── Admin mutation helpers ───────────────────────────────────────────────────

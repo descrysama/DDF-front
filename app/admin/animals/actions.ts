@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { strapiPost, strapiPut, strapiDelete } from '@/lib/strapi'
-import type { StrapiMedia } from '@/lib/strapi'
+import type { StrapiMedia, StrapiMedicalEvent } from '@/lib/strapi'
 import { STRAPI_URL, strapiAuthHeaders } from '@/lib/config'
 import { requireAdmin } from '@/lib/auth'
 
@@ -11,6 +11,7 @@ const AUTH = strapiAuthHeaders()
 const JSON_HEADERS = { ...AUTH, 'Content-Type': 'application/json' }
 
 function parseAnimalFormData(formData: FormData) {
+  const trapDate = formData.get('trap_date') as string
   return {
     name:             formData.get('name') as string,
     age:              Number(formData.get('age')),
@@ -22,11 +23,11 @@ function parseAnimalFormData(formData: FormData) {
     ok_with_dogs:     formData.get('ok_with_dogs') === 'on',
     ok_with_cats:     formData.get('ok_with_cats') === 'on',
     indoor_only:      formData.get('indoor_only') === 'on',
+    trap_date:        trapDate || null,
   }
 }
 
-// Upload a file and return its Strapi integer id
-async function uploadFile(file: File): Promise<number> {
+async function uploadFileRaw(file: File): Promise<{ id: number; url: string }> {
   const upload = new FormData()
   upload.append('files', file)
   const res = await fetch(`${STRAPI_URL}/api/upload`, {
@@ -36,7 +37,12 @@ async function uploadFile(file: File): Promise<number> {
   })
   if (!res.ok) throw new Error(`Upload failed: ${res.status}`)
   const [uploaded] = await res.json()
-  return uploaded.id as number
+  return { id: uploaded.id as number, url: uploaded.url as string }
+}
+
+// Upload a file and return its Strapi integer id
+async function uploadFile(file: File): Promise<number> {
+  return (await uploadFileRaw(file)).id
 }
 
 // Fetch current medias for an animal (components, populated with image)
@@ -149,4 +155,90 @@ export async function setCoverMedia(componentId: number, animalDocumentId: strin
 
   revalidatePath(`/admin/animals/${animalDocumentId}`)
   revalidatePath('/')
+}
+
+export async function updateAnimalVideo(animalDocumentId: string, formData: FormData) {
+  await requireAdmin()
+  const file = formData.get('video') as File | null
+  if (!file || file.size === 0) return
+
+  const { url } = await uploadFileRaw(file)
+  await strapiPut(`/api/animals/${animalDocumentId}`, { video_url: url })
+
+  revalidatePath(`/admin/animals/${animalDocumentId}`)
+  revalidatePath('/')
+}
+
+export async function removeAnimalVideo(animalDocumentId: string) {
+  await requireAdmin()
+  await strapiPut(`/api/animals/${animalDocumentId}`, { video_url: null })
+
+  revalidatePath(`/admin/animals/${animalDocumentId}`)
+  revalidatePath('/')
+}
+
+// ─── Suivi médical ──────────────────────────────────────────────────────────
+
+async function fetchMedicalHistory(animalDocumentId: string): Promise<StrapiMedicalEvent[]> {
+  const res = await fetch(
+    `${STRAPI_URL}/api/animals/${animalDocumentId}?populate[medical_history]=true`,
+    { headers: AUTH }
+  )
+  if (!res.ok) throw new Error(`Fetch medical history failed: ${res.status}`)
+  const { data } = await res.json()
+  return (data.medical_history ?? []) as StrapiMedicalEvent[]
+}
+
+// component id must NOT be included in the PUT payload (Strapi v5 rejects it)
+function serializeMedicalHistory(events: StrapiMedicalEvent[]) {
+  return events.map(e => ({
+    event_date: e.event_date,
+    event_type: e.event_type,
+    note: e.note,
+    veterinarian: e.veterinarian,
+  }))
+}
+
+export async function addMedicalEvent(animalDocumentId: string, formData: FormData) {
+  await requireAdmin()
+  const eventDate = formData.get('event_date') as string
+  if (!eventDate) return
+
+  const current = await fetchMedicalHistory(animalDocumentId)
+  const updated = [
+    ...serializeMedicalHistory(current),
+    {
+      event_date: eventDate,
+      event_type: formData.get('event_type') as string,
+      note: (formData.get('note') as string) || null,
+      veterinarian: (formData.get('veterinarian') as string) || null,
+    },
+  ]
+  await strapiPut(`/api/animals/${animalDocumentId}`, { medical_history: updated })
+
+  revalidatePath(`/admin/animals/${animalDocumentId}`)
+}
+
+export async function removeMedicalEvent(componentId: number, animalDocumentId: string) {
+  await requireAdmin()
+  const current = await fetchMedicalHistory(animalDocumentId)
+  const filtered = serializeMedicalHistory(current.filter(e => e.id !== componentId))
+  await strapiPut(`/api/animals/${animalDocumentId}`, { medical_history: filtered })
+
+  revalidatePath(`/admin/animals/${animalDocumentId}`)
+}
+
+// ─── Responsable & backups ──────────────────────────────────────────────────
+
+export async function updateAnimalReferents(animalDocumentId: string, formData: FormData) {
+  await requireAdmin()
+  const referentId = formData.get('referent_id') as string
+  const backupIds = formData.getAll('backup_referent_ids') as string[]
+
+  await strapiPut(`/api/animals/${animalDocumentId}`, {
+    referent: referentId ? Number(referentId) : null,
+    backup_referents: backupIds.map(Number),
+  })
+
+  revalidatePath(`/admin/animals/${animalDocumentId}`)
 }
