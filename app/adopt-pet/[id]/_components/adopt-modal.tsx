@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { Heart, X, ArrowRight, Lock, CheckCircle2, AlertCircle } from "lucide-react"
 import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field"
@@ -10,8 +10,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogTrigger, DialogPortal, DialogClose } from "@/components/ui/dialog"
-import type { CardAnimal } from "@/lib/strapi"
+import type { CardAnimal, StrapiAdopterProfileRaw } from "@/lib/strapi"
 import { submitAdoptionRequest, type AdoptionFormData } from "@/lib/actions/adoption"
+import { useUserStore } from "@/lib/stores/user-store"
+
+// ── Prefill from adopter-profile ────────────────────────────────────────────
+
+function mapHousingType(v: StrapiAdopterProfileRaw["housing_type"]): string | null {
+  if (v === "house") return "Maison"
+  if (v === "apartment") return "Appartement"
+  return null
+}
+
+function mapExperience(v: StrapiAdopterProfileRaw["experience_level"]): string | null {
+  if (v === "none") return "Jamais"
+  if (v === "some") return "Oui, une fois"
+  if (v === "experienced") return "Oui, plusieurs fois"
+  return null
+}
 
 // ── Primitives ───────────────────────────────────────────────────────────────
 
@@ -102,6 +118,32 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
 
   // Section 4
   const [checked, setChecked] = useState([false, false, false, false])
+
+  // Préremplissage depuis le profil adoptant existant (/profile), une fois au montage
+  const user = useUserStore((s) => s.user)
+  useEffect(() => {
+    if (user?.email) setEmail((prev) => prev || user.email)
+
+    fetch("/api/adopter-profile")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((body: { profile: StrapiAdopterProfileRaw | null } | null) => {
+        const profile = body?.profile
+        if (!profile) return
+
+        const housing = mapHousingType(profile.housing_type)
+        if (housing) setTypeLogement(housing)
+
+        if (profile.has_garden) setAccesExterieur("Jardin clos")
+        if (profile.has_children) setCompositionFoyer("Avec enfant(s)")
+        if (profile.has_dogs) setAutresAnimaux("Chien")
+        else if (profile.has_cats) setAutresAnimaux("Un chat")
+
+        const experience = mapExperience(profile.experience_level)
+        if (experience) setExperienceChat(experience)
+      })
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const toggleCheck = (i: number) => {
     setChecked((prev) => prev.map((v, j) => (j === i ? !v : v)))
     if (errors["engagements"]) setErrors((e) => ({ ...e, engagements: undefined }))
@@ -429,8 +471,8 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
 
 // ── Public component ─────────────────────────────────────────────────────────
 
-export function AdoptModal({ cat }: { cat: CardAnimal }) {
-  const [open, setOpen] = useState(false)
+export function AdoptModal({ cat, defaultOpen = false }: { cat: CardAnimal; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

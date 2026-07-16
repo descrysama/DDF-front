@@ -22,9 +22,11 @@ export async function PUT(req: Request) {
   }
 
   const body = await req.json()
-  const allowed: Record<string, string> = {}
+  const allowed: Record<string, string | boolean | null> = {}
   if (body.username) allowed.username = body.username
   if (body.email) allowed.email = body.email
+  if (typeof body.is_absent === 'boolean') allowed.is_absent = body.is_absent
+  if ('absent_until' in body) allowed.absent_until = body.absent_until || null
 
   const res = await fetch(`${STRAPI_URL}/api/users/${user.id}`, {
     method: 'PUT',

@@ -22,18 +22,21 @@ interface AnimalFormData {
   ok_with_dogs?: boolean
   ok_with_cats?: boolean
   indoor_only?: boolean
+  breed_id?: number | null
 }
 
 interface AnimalFormProps {
   defaultValues?: AnimalFormData
   action: (formData: FormData) => Promise<void>
+  breeds?: { id: number; name: string }[]
 }
 
-export default function AnimalForm({ defaultValues = {}, action }: AnimalFormProps) {
+export default function AnimalForm({ defaultValues = {}, action, breeds = [] }: AnimalFormProps) {
   const { error, isPending, handleSubmit } = useServerFormAction(action)
   const [gender, setGender] = useState<string>(defaultValues.gender ?? 'female')
   const [status, setStatus] = useState<string>(defaultValues.status ?? 'available')
   const [activityLevel, setActivityLevel] = useState<string>(defaultValues.activity_level ?? 'medium')
+  const [breedId, setBreedId] = useState<string>(defaultValues.breed_id ? String(defaultValues.breed_id) : '')
 
   function handleGenderChange(value: string | null) {
     if (value !== null) setGender(value)
@@ -83,6 +86,19 @@ export default function AnimalForm({ defaultValues = {}, action }: AnimalFormPro
               </SelectContent>
             </Select>
             <input type="hidden" name="status" value={status} />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="breed_id">Race</FieldLabel>
+            <Select value={breedId} onValueChange={(v) => setBreedId(v ?? '')}>
+              <SelectTrigger id="breed_id" className="w-full"><SelectValue placeholder="Non renseignée" /></SelectTrigger>
+              <SelectContent>
+                {breeds.map((b) => (
+                  <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="breed_id" value={breedId} />
           </Field>
 
           <Field>

@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useRef, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { Menu, X, User, Heart, LogOut, Shield } from "lucide-react"
+import { Menu, X, User, Heart, LogOut, Shield, Cat } from "lucide-react"
 import { useUserStore, useIsAdmin } from "@/lib/stores/user-store"
 import { Button } from "@/components/ui/button"
 
@@ -121,6 +121,14 @@ export default function Header() {
                         <User size={14} />
                         Mon profil
                       </Link>
+                      <Link
+                        href="/matches"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-ink no-underline hover:bg-surface-alt"
+                      >
+                        <Cat size={14} />
+                        Trouver mon match
+                      </Link>
                       {isAdmin && (
                         <Link
                           href="/admin/animals"
@@ -201,6 +209,13 @@ export default function Header() {
                     className="px-4 py-2.5 rounded-md bg-surface-alt text-ink font-semibold text-sm no-underline text-center"
                   >
                     Mon profil
+                  </Link>
+                  <Link
+                    href="/matches"
+                    onClick={() => setMenuOpen(false)}
+                    className="px-4 py-2.5 rounded-md bg-surface-alt text-ink font-semibold text-sm no-underline text-center"
+                  >
+                    Trouver mon match
                   </Link>
                   {isAdmin && (
                     <Link

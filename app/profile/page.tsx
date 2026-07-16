@@ -9,6 +9,8 @@ import { useUserStore } from "@/lib/stores/user-store"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { User, Mail, Shield, Pencil, Check, X, Loader2 } from "lucide-react"
+import { AdopterProfileCard } from "./_components/adopter-profile-card"
+import { AvailabilityCard } from "./_components/availability-card"
 
 export default function ProfilePage() {
   const user = useUserStore((s) => s.user)
@@ -219,6 +221,9 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+
+          <AvailabilityCard />
+          <AdopterProfileCard />
         </div>
       </main>
       <Footer />

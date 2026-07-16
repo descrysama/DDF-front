@@ -3,8 +3,20 @@
 import Link from 'next/link'
 import { useTransition, useState, useRef } from 'react'
 import { AD } from '@/lib/admin-tokens'
-import { updateAnimal, deleteAnimal, addMediaToAnimal, deleteMedia, setCoverMedia } from '../actions'
-import type { StrapiMedia } from '@/lib/strapi'
+import {
+  updateAnimal, deleteAnimal, addMediaToAnimal, deleteMedia, setCoverMedia,
+  updateAnimalVideo, removeAnimalVideo, addMedicalEvent, removeMedicalEvent,
+  updateAnimalReferents,
+} from '../actions'
+import type { StrapiMedia, StrapiMedicalEvent, StrapiUser, StrapiBreed, MedicalEventType } from '@/lib/strapi'
+
+interface FosterAssignment {
+  id: number
+  documentId: string
+  status: string
+  start_date: string | null
+  foster_family?: { id: number; documentId: string; address: string } | null
+}
 
 interface Animal {
   id: number
@@ -19,7 +31,22 @@ interface Animal {
   ok_with_dogs: boolean
   ok_with_cats: boolean
   indoor_only: boolean
+  breed?: StrapiBreed | null
   medias?: StrapiMedia[]
+  video_url?: string | null
+  trap_date?: string | null
+  medical_history?: StrapiMedicalEvent[]
+  referent?: StrapiUser | null
+  backup_referents?: StrapiUser[]
+  foster_assignments?: FosterAssignment[]
+}
+
+const MEDICAL_EVENT_LABEL: Record<MedicalEventType, string> = {
+  vaccination: 'Vaccination',
+  sterilisation: 'Stérilisation',
+  consultation: 'Consultation',
+  traitement: 'Traitement',
+  autre: 'Autre',
 }
 
 const input: React.CSSProperties = {
@@ -67,15 +94,28 @@ const cardHint: React.CSSProperties = {
 export default function AnimalEditClient({
   animal,
   strapiUrl,
+  users,
+  breeds,
 }: {
   animal: Animal
   strapiUrl: string
+  users: StrapiUser[]
+  breeds: StrapiBreed[]
 }) {
   const [isPending, startTransition] = useTransition()
   const [isMediaPending, startMediaTransition] = useTransition()
+  const [isVideoPending, startVideoTransition] = useTransition()
+  const [isMedicalPending, startMedicalTransition] = useTransition()
+  const [isReferentsPending, startReferentsTransition] = useTransition()
   const [gender, setGender] = useState(animal.gender)
+  const [backupIds, setBackupIds] = useState<number[]>((animal.backup_referents ?? []).map(u => u.id))
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const videoInputRef = useRef<HTMLInputElement>(null)
+  const medicalFormRef = useRef<HTMLFormElement>(null)
   const medias = animal.medias ?? []
+  const videoUrl = animal.video_url ? `${strapiUrl}${animal.video_url}` : null
+  const medicalHistory = [...(animal.medical_history ?? [])].sort((a, b) => b.event_date.localeCompare(a.event_date))
+  const activeAssignments = (animal.foster_assignments ?? []).filter(a => a.status === 'active')
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -95,6 +135,42 @@ export default function AnimalEditClient({
     formData.append('photo', file)
     e.target.value = ''
     startMediaTransition(() => addMediaToAnimal(animal.documentId, formData))
+  }
+
+  function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('video', file)
+    e.target.value = ''
+    startVideoTransition(() => updateAnimalVideo(animal.documentId, formData))
+  }
+
+  function handleRemoveVideo() {
+    if (!confirm('Supprimer cette vidéo ?')) return
+    startVideoTransition(() => removeAnimalVideo(animal.documentId))
+  }
+
+  function handleAddMedicalEvent(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    medicalFormRef.current?.reset()
+    startMedicalTransition(() => addMedicalEvent(animal.documentId, formData))
+  }
+
+  function handleRemoveMedicalEvent(eventId: number) {
+    if (!confirm('Supprimer cet événement médical ?')) return
+    startMedicalTransition(() => removeMedicalEvent(eventId, animal.documentId))
+  }
+
+  function toggleBackup(userId: number) {
+    setBackupIds((ids) => (ids.includes(userId) ? ids.filter(id => id !== userId) : [...ids, userId]))
+  }
+
+  function handleSaveReferents(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    startReferentsTransition(() => updateAnimalReferents(animal.documentId, formData))
   }
 
   return (
@@ -163,6 +239,19 @@ export default function AnimalEditClient({
               <div>
                 <span style={label}>Âge (années)</span>
                 <input name="age" type="number" required min={0} defaultValue={animal.age} style={input} />
+              </div>
+              <div>
+                <span style={label}>Date de trappage</span>
+                <input name="trap_date" type="date" defaultValue={animal.trap_date ?? ''} style={input} />
+              </div>
+              <div>
+                <span style={label}>Race</span>
+                <select name="breed_id" defaultValue={animal.breed?.id ?? ''} style={input}>
+                  <option value="">— Non renseignée —</option>
+                  {breeds.map((b) => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
+                  ))}
+                </select>
               </div>
               <div style={{ gridColumn: 'span 2' }}>
                 <span style={label}>Sexe</span>
@@ -370,6 +459,218 @@ export default function AnimalEditClient({
                 Ajouter
               </button>
             </div>
+          </div>
+
+          {/* Vidéo */}
+          <div style={{ ...card, padding: 18, opacity: isVideoPending ? 0.6 : 1, transition: 'opacity 0.15s' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: AD.ink }}>Vidéo</div>
+              {videoUrl && (
+                <button
+                  type="button"
+                  onClick={() => videoInputRef.current?.click()}
+                  disabled={isVideoPending}
+                  style={{
+                    fontSize: 11.5, color: AD.coralInk, fontWeight: 600,
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                  }}
+                >
+                  Remplacer
+                </button>
+              )}
+            </div>
+
+            <input
+              ref={videoInputRef}
+              type="file"
+              accept="video/*"
+              style={{ display: 'none' }}
+              onChange={handleVideoChange}
+            />
+
+            {videoUrl ? (
+              <div>
+                <video
+                  key={videoUrl}
+                  src={videoUrl}
+                  controls
+                  style={{ width: '100%', borderRadius: 8, background: AD.ink, display: 'block', marginBottom: 8 }}
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveVideo}
+                  disabled={isVideoPending}
+                  style={{
+                    width: '100%', padding: '5px 0', fontSize: 11,
+                    background: '#FEE6E5', color: AD.coralInk,
+                    border: 'none', borderRadius: 4, cursor: isVideoPending ? 'not-allowed' : 'pointer', fontWeight: 600,
+                  }}
+                >
+                  Supprimer la vidéo
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => videoInputRef.current?.click()}
+                disabled={isVideoPending}
+                style={{
+                  width: '100%', aspectRatio: '16/9', borderRadius: 8,
+                  border: `1.5px dashed ${AD.borderStrong}`,
+                  background: AD.bg,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  color: AD.inkMuted, fontSize: 11, gap: 4,
+                  cursor: isVideoPending ? 'not-allowed' : 'pointer',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <path d="M8 3V13M3 8H13" />
+                </svg>
+                {isVideoPending ? 'En cours…' : 'Ajouter une vidéo'}
+              </button>
+            )}
+            <p style={{ fontSize: 11, color: AD.inkSubtle, marginTop: 8, marginBottom: 0 }}>
+              MP4, WebM — une vidéo à la fois.
+            </p>
+          </div>
+
+          {/* Famille d'accueil active */}
+          <div style={{ ...card, padding: 18 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: AD.ink, marginBottom: 10 }}>Famille d&apos;accueil</div>
+            {activeAssignments.length > 0 ? (
+              <div style={{ display: 'grid', gap: 8 }}>
+                {activeAssignments.map((a) => (
+                  <div key={a.id} style={{ padding: '8px 10px', background: AD.surfaceAlt, borderRadius: 7 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: AD.ink }}>
+                      {a.foster_family?.address ?? 'Famille inconnue'}
+                    </div>
+                    {a.start_date && (
+                      <div style={{ fontSize: 11, color: AD.inkMuted, marginTop: 2 }}>
+                        Depuis le {new Date(a.start_date).toLocaleDateString('fr-FR')}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: 12.5, color: AD.inkMuted, margin: 0 }}>
+                Aucune affectation en cours.
+              </p>
+            )}
+          </div>
+
+          {/* Responsable & backups */}
+          <form
+            onSubmit={handleSaveReferents}
+            style={{ ...card, padding: 18, opacity: isReferentsPending ? 0.6 : 1, transition: 'opacity 0.15s' }}
+          >
+            <div style={{ fontSize: 12, fontWeight: 600, color: AD.ink, marginBottom: 4 }}>Responsable & backups</div>
+            <div style={cardHint}>Qui est notifié quand une demande d&apos;adoption arrive pour ce chat.</div>
+
+            <div style={{ marginBottom: 12 }}>
+              <span style={label}>Responsable d&apos;adoption</span>
+              <select name="referent_id" defaultValue={animal.referent?.id ?? ''} style={input}>
+                <option value="">— Aucun —</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>{u.username}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <span style={label}>Backups (si le responsable est absent)</span>
+              <div style={{ display: 'grid', gap: 6, maxHeight: 160, overflowY: 'auto' }}>
+                {users.map((u) => (
+                  <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 12.5, color: AD.ink }}>
+                    <input
+                      type="checkbox"
+                      name="backup_referent_ids"
+                      value={u.id}
+                      checked={backupIds.includes(u.id)}
+                      onChange={() => toggleBackup(u.id)}
+                    />
+                    {u.username}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isReferentsPending}
+              style={{
+                width: '100%', padding: '8px 0', fontSize: 12, fontWeight: 600,
+                background: isReferentsPending ? AD.border : AD.coral, color: '#fff',
+                border: 'none', borderRadius: 6, cursor: isReferentsPending ? 'not-allowed' : 'pointer',
+                fontFamily: 'inherit',
+              }}
+            >
+              {isReferentsPending ? 'En cours…' : 'Enregistrer'}
+            </button>
+          </form>
+
+          {/* Suivi médical */}
+          <div style={{ ...card, padding: 18 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: AD.ink, marginBottom: 12 }}>Suivi médical</div>
+
+            <div style={{ display: 'grid', gap: 6, marginBottom: 14, opacity: isMedicalPending ? 0.6 : 1, transition: 'opacity 0.15s' }}>
+              {medicalHistory.length === 0 && (
+                <p style={{ fontSize: 12.5, color: AD.inkMuted, margin: 0 }}>Aucun événement enregistré.</p>
+              )}
+              {medicalHistory.map((event) => (
+                <div key={event.id} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8,
+                  padding: '8px 10px', background: AD.surfaceAlt, borderRadius: 7,
+                }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: AD.ink }}>
+                      {MEDICAL_EVENT_LABEL[event.event_type]} · {new Date(event.event_date).toLocaleDateString('fr-FR')}
+                    </div>
+                    {event.veterinarian && (
+                      <div style={{ fontSize: 11, color: AD.inkMuted, marginTop: 2 }}>{event.veterinarian}</div>
+                    )}
+                    {event.note && (
+                      <div style={{ fontSize: 11.5, color: AD.inkMuted, marginTop: 2 }}>{event.note}</div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveMedicalEvent(event.id)}
+                    disabled={isMedicalPending}
+                    style={{
+                      flexShrink: 0, padding: '3px 7px', fontSize: 10,
+                      background: '#FEE6E5', color: AD.coralInk,
+                      border: 'none', borderRadius: 3, cursor: 'pointer', fontWeight: 600,
+                    }}
+                  >✕</button>
+                </div>
+              ))}
+            </div>
+
+            <form ref={medicalFormRef} onSubmit={handleAddMedicalEvent} style={{ display: 'grid', gap: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <input name="event_date" type="date" required style={{ ...input, fontSize: 12 }} />
+                <select name="event_type" defaultValue="consultation" style={{ ...input, fontSize: 12 }}>
+                  {Object.entries(MEDICAL_EVENT_LABEL).map(([value, entryLabel]) => (
+                    <option key={value} value={value}>{entryLabel}</option>
+                  ))}
+                </select>
+              </div>
+              <input name="veterinarian" placeholder="Vétérinaire (facultatif)" style={{ ...input, fontSize: 12 }} />
+              <input name="note" placeholder="Note (facultatif)" style={{ ...input, fontSize: 12 }} />
+              <button
+                type="submit"
+                disabled={isMedicalPending}
+                style={{
+                  padding: '7px 0', fontSize: 11.5, fontWeight: 600,
+                  background: AD.surfaceAlt, color: AD.coralInk,
+                  border: `1px solid ${AD.border}`, borderRadius: 6, cursor: isMedicalPending ? 'not-allowed' : 'pointer',
+                  fontFamily: 'inherit',
+                }}
+              >
+                + Ajouter un événement
+              </button>
+            </form>
           </div>
 
           {/* Zone sensible */}

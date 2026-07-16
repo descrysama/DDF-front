@@ -8,7 +8,7 @@ import SubmitButton from '@/components/admin/submit-button'
 import { useServerFormAction } from '@/lib/hooks/use-server-form-action'
 import type { StrapiFosterFamilyRaw } from '@/lib/strapi'
 
-type FosterFamilyFormData = Pick<StrapiFosterFamilyRaw, 'address' | 'max_capacity' | 'has_children' | 'has_dogs' | 'has_cats'>
+type FosterFamilyFormData = Pick<StrapiFosterFamilyRaw, 'address' | 'max_capacity' | 'has_children' | 'has_dogs' | 'has_cats' | 'is_available'>
 
 interface FosterFamilyFormProps {
   defaultValues?: Partial<FosterFamilyFormData>
@@ -43,6 +43,12 @@ export default function FosterFamilyForm({ defaultValues = {}, action }: FosterF
               </Label>
             ))}
           </div>
+        </Field>
+        <Field>
+          <Label htmlFor="is_available" className="flex cursor-pointer items-center gap-2 font-normal">
+            <Checkbox id="is_available" name="is_available" defaultChecked={defaultValues.is_available ?? true} />
+            Disponible pour un nouveau placement
+          </Label>
         </Field>
         <FormError message={error} />
         <SubmitButton label="Enregistrer" pending={isPending} />
