@@ -18,9 +18,13 @@ export interface AuthUser {
   } | null
 }
 
-export async function getCurrentUser(): Promise<AuthUser | null> {
+export async function getAuthToken(): Promise<string | null> {
   const jar = await cookies()
-  const jwt = jar.get(AUTH_COOKIE)?.value
+  return jar.get(AUTH_COOKIE)?.value ?? null
+}
+
+export async function getCurrentUser(): Promise<AuthUser | null> {
+  const jwt = await getAuthToken()
   if (!jwt) return null
 
   const res = await fetch(`${STRAPI_URL}/api/users/me?populate=role`, {

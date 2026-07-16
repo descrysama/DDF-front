@@ -301,13 +301,13 @@ export interface DiscoverAnimal extends CardAnimal {
 }
 
 export async function fetchDiscoverAnimals(
-  userId: number,
+  token: string,
   opts?: { limit?: number }
 ): Promise<DiscoverAnimal[]> {
   const limit = opts?.limit ?? 30
   const res = await fetch(
-    `${STRAPI_URL}/api/animal-discovery?limit=${limit}&user=${userId}`,
-    { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }, cache: 'no-store' }
+    `${STRAPI_URL}/api/animal-discovery?limit=${limit}`,
+    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
   )
   if (!res.ok) throw new Error(`Strapi ${res.status}: /api/animal-discovery`)
 
@@ -318,17 +318,22 @@ export async function fetchDiscoverAnimals(
 }
 
 export async function postSwipe(
-  userId: number,
+  token: string,
   animalDocumentId: string,
   direction: SwipeDirection
 ): Promise<void> {
-  await strapiPost('/api/swipes', { user: userId, animal: animalDocumentId, direction })
+  const res = await fetch(`${STRAPI_URL}/api/swipes`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: { animal: animalDocumentId, direction } }),
+  })
+  if (!res.ok) throw new Error(`Strapi ${res.status}: /api/swipes`)
 }
 
-export async function fetchCompatibility(animalDocumentId: string, userId: number): Promise<number | null> {
+export async function fetchCompatibility(animalDocumentId: string, token: string): Promise<number | null> {
   const res = await fetch(
-    `${STRAPI_URL}/api/animals/${animalDocumentId}/compatibility?user=${userId}`,
-    { headers: { Authorization: `Bearer ${STRAPI_TOKEN}` }, cache: 'no-store' }
+    `${STRAPI_URL}/api/animals/${animalDocumentId}/compatibility`,
+    { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
   )
   if (!res.ok) return null
   const { data } = (await res.json()) as { data: { score: number | null } }

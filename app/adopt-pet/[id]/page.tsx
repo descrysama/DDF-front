@@ -6,7 +6,7 @@ import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { CAT_TINT } from "@/lib/placeholder-cats"
 import { fetchAnimal, fetchAnimals, fetchCompatibility, compatibilityTone, type CardAnimal, type AnimalActivity } from "@/lib/strapi"
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser, getAuthToken } from "@/lib/auth"
 import { CatCard } from "@/components/cat-card"
 import { AdoptModal } from "./_components/adopt-modal"
 import { MediaViewer } from "./_components/media-viewer"
@@ -54,7 +54,8 @@ export default async function CatPage({ params, searchParams }: Props) {
   if (!cat) notFound()
 
   const user = await getCurrentUser()
-  const compatibility = user ? await fetchCompatibility(cat.documentId, user.id) : null
+  const token = user ? await getAuthToken() : null
+  const compatibility = user && token ? await fetchCompatibility(cat.documentId, token) : null
 
   const { animals } = await fetchAnimals({ limit: 8 })
   const others = animals.filter((c) => c.documentId !== cat.documentId).slice(0, 4)
