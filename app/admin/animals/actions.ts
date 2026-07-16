@@ -12,6 +12,7 @@ const JSON_HEADERS = { ...AUTH, 'Content-Type': 'application/json' }
 
 function parseAnimalFormData(formData: FormData) {
   const trapDate = formData.get('trap_date') as string
+  const breedId = formData.get('breed_id') as string
   return {
     name:             formData.get('name') as string,
     age:              Number(formData.get('age')),
@@ -24,6 +25,7 @@ function parseAnimalFormData(formData: FormData) {
     ok_with_cats:     formData.get('ok_with_cats') === 'on',
     indoor_only:      formData.get('indoor_only') === 'on',
     trap_date:        trapDate || null,
+    breed:            breedId ? Number(breedId) : null,
   }
 }
 

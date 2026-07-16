@@ -8,7 +8,7 @@ import {
   updateAnimalVideo, removeAnimalVideo, addMedicalEvent, removeMedicalEvent,
   updateAnimalReferents,
 } from '../actions'
-import type { StrapiMedia, StrapiMedicalEvent, StrapiUser, MedicalEventType } from '@/lib/strapi'
+import type { StrapiMedia, StrapiMedicalEvent, StrapiUser, StrapiBreed, MedicalEventType } from '@/lib/strapi'
 
 interface FosterAssignment {
   id: number
@@ -31,6 +31,7 @@ interface Animal {
   ok_with_dogs: boolean
   ok_with_cats: boolean
   indoor_only: boolean
+  breed?: StrapiBreed | null
   medias?: StrapiMedia[]
   video_url?: string | null
   trap_date?: string | null
@@ -94,10 +95,12 @@ export default function AnimalEditClient({
   animal,
   strapiUrl,
   users,
+  breeds,
 }: {
   animal: Animal
   strapiUrl: string
   users: StrapiUser[]
+  breeds: StrapiBreed[]
 }) {
   const [isPending, startTransition] = useTransition()
   const [isMediaPending, startMediaTransition] = useTransition()
@@ -240,6 +243,15 @@ export default function AnimalEditClient({
               <div>
                 <span style={label}>Date de trappage</span>
                 <input name="trap_date" type="date" defaultValue={animal.trap_date ?? ''} style={input} />
+              </div>
+              <div>
+                <span style={label}>Race</span>
+                <select name="breed_id" defaultValue={animal.breed?.id ?? ''} style={input}>
+                  <option value="">— Non renseignée —</option>
+                  {breeds.map((b) => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
+                  ))}
+                </select>
               </div>
               <div style={{ gridColumn: 'span 2' }}>
                 <span style={label}>Sexe</span>

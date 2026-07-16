@@ -29,6 +29,14 @@ const ACTIVITY_LABEL: Record<AnimalActivity, string> = {
   high: 'Très actif',
 }
 
+const MEDICAL_EVENT_LABEL: Record<string, string> = {
+  vaccination: 'Vaccination',
+  sterilisation: 'Stérilisation',
+  consultation: 'Consultation',
+  traitement: 'Traitement',
+  autre: 'Suivi',
+}
+
 function enteneLabel(cat: CardAnimal): string {
   const compat = [
     cat.okWithChildren && 'les enfants',
@@ -181,6 +189,36 @@ export default async function CatPage({ params, searchParams }: Props) {
             </div>
           </div>
         </section>
+
+        {/* Suivi médical */}
+        {cat.medicalHistory.length > 0 && (
+          <section className="max-w-[1200px] mx-auto px-6 pb-14">
+            <div className="text-sm text-coral font-semibold mb-2">Transparence</div>
+            <h2 className="text-[26px] font-semibold tracking-[-0.02em] m-0 mb-4 leading-[1.1] text-ink">
+              Suivi médical de {cat.name}
+            </h2>
+            <div className="bg-surface border border-border rounded-xl p-[22px] grid gap-3">
+              {cat.medicalHistory.map((event) => (
+                <div key={event.id} className="flex items-start justify-between gap-4 py-2 border-b border-border last:border-0 last:pb-0">
+                  <div>
+                    <div className="text-sm font-semibold text-ink">
+                      {MEDICAL_EVENT_LABEL[event.event_type] ?? event.event_type}
+                    </div>
+                    {event.veterinarian && (
+                      <div className="text-xs text-ink-muted mt-0.5">{event.veterinarian}</div>
+                    )}
+                    {event.note && (
+                      <div className="text-xs text-ink-muted mt-0.5">{event.note}</div>
+                    )}
+                  </div>
+                  <div className="text-xs text-ink-muted shrink-0">
+                    {new Date(event.event_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Other cats */}
         {others.length > 0 && (

@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import AnimalForm from '@/components/admin/animal-form'
 import { createAnimal } from '../actions'
+import { fetchBreeds } from '@/lib/strapi'
 import { AD } from '@/lib/admin-tokens'
 
-export default function NewAnimalPage() {
+export default async function NewAnimalPage() {
+  const breeds = await fetchBreeds()
   return (
     <div style={{ padding: 32 }}>
       <div style={{ marginBottom: 20 }}>
@@ -25,7 +27,7 @@ export default function NewAnimalPage() {
           padding: 28,
         }}
       >
-        <AnimalForm action={createAnimal} />
+        <AnimalForm action={createAnimal} breeds={breeds} />
       </div>
     </div>
   )

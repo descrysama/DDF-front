@@ -56,6 +56,7 @@ export default async function NewAdoptionRequestPage() {
             <label style={labelStyle}>Statut</label>
             <select name="status" defaultValue="pending" style={fieldStyle}>
               <option value="pending">En attente</option>
+              <option value="in_progress">En cours</option>
               <option value="approved">Approuvé</option>
               <option value="rejected">Rejeté</option>
             </select>

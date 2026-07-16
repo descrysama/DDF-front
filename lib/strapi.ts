@@ -23,7 +23,7 @@ export const CAT_TINT: Record<CatTag, string> = {
   'Cas particulier': '#FDE2EC',
 }
 
-interface StrapiBreed {
+export interface StrapiBreed {
   id: number
   documentId: string
   name: string
@@ -73,6 +73,7 @@ interface StrapiAnimalRaw {
   medias?: StrapiMedia[]
   video_url?: string | null
   trap_date?: string | null
+  medical_history?: StrapiMedicalEvent[]
 }
 
 export interface CardAnimalMedia {
@@ -102,6 +103,7 @@ export interface CardAnimal {
   okWithDogs: boolean
   okWithCats: boolean
   indoorOnly: boolean
+  medicalHistory: StrapiMedicalEvent[]
 }
 
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
@@ -171,6 +173,7 @@ function toCardAnimal(a: StrapiAnimalRaw): CardAnimal {
     okWithDogs: a.ok_with_dogs,
     okWithCats: a.ok_with_cats,
     indoorOnly: a.indoor_only,
+    medicalHistory: [...(a.medical_history ?? [])].sort((x, y) => y.event_date.localeCompare(x.event_date)),
   }
 }
 
@@ -209,7 +212,7 @@ export async function fetchAnimals(opts?: {
 
 export async function fetchAnimal(documentId: string): Promise<CardAnimal | null> {
   const res = await fetch(
-    `${STRAPI_URL}/api/animals/${documentId}?populate[0]=breed&populate[1]=bonded_with&populate[medias][populate]=image`,
+    `${STRAPI_URL}/api/animals/${documentId}?populate[0]=breed&populate[1]=bonded_with&populate[medias][populate]=image&populate[medical_history]=true`,
     {
       headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
       next: { revalidate: 60 },
@@ -225,7 +228,7 @@ export async function fetchAnimal(documentId: string): Promise<CardAnimal | null
 // ─── Admin types ──────────────────────────────────────────────────────────────
 
 export type AnnouncementStatus = 'open' | 'closed' | 'draft'
-export type AdoptionRequestStatus = 'pending' | 'approved' | 'rejected'
+export type AdoptionRequestStatus = 'pending' | 'in_progress' | 'approved' | 'rejected'
 
 export interface StrapiAnnouncementRaw {
   id: number
@@ -416,4 +419,9 @@ export interface StrapiUser {
 
 export async function fetchUsers(): Promise<StrapiUser[]> {
   return strapiGet<StrapiUser[]>('/api/users')
+}
+
+export async function fetchBreeds(): Promise<StrapiBreed[]> {
+  const { data } = await strapiGet<{ data: StrapiBreed[] }>('/api/breeds?pagination[pageSize]=200')
+  return data
 }
