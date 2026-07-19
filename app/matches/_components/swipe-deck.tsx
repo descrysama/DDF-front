@@ -4,7 +4,7 @@ import { useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
-import { Heart, X, ArrowRight, Sparkles } from "lucide-react"
+import { Heart, X, ArrowRight, Sparkles, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogPortal } from "@/components/ui/dialog"
 import { compatibilityTone, type DiscoverAnimal } from "@/lib/strapi"
@@ -166,14 +166,28 @@ export function SwipeDeck({ initialCats, hasProfile }: { initialCats: DiscoverAn
   const [cats] = useState(initialCats)
   const [index, setIndex] = useState(0)
   const [matched, setMatched] = useState<DiscoverAnimal | null>(null)
+  const [unsaved, setUnsaved] = useState<string[]>([])
 
   const visible = cats.slice(index, index + 3)
   const current = cats[index]
 
+  /**
+   * The card leaves immediately — waiting on the round-trip would make every
+   * swipe feel laggy. But a swipe that never reached Strapi is a swipe the
+   * deck will serve again tomorrow, so a silent failure gets surfaced rather
+   * than swallowed.
+   */
   function handleCommit(direction: "like" | "pass") {
     if (!current) return
-    recordSwipe(current.documentId, direction)
-    if (direction === "like") setMatched(current)
+    const cat = current
+
+    recordSwipe(cat.documentId, direction)
+      .then(({ success }) => {
+        if (!success) setUnsaved((names) => [...names, cat.name])
+      })
+      .catch(() => setUnsaved((names) => [...names, cat.name]))
+
+    if (direction === "like") setMatched(cat)
     setIndex((i) => i + 1)
   }
 
@@ -192,6 +206,21 @@ export function SwipeDeck({ initialCats, hasProfile }: { initialCats: DiscoverAn
           <Sparkles size={14} className="shrink-0" />
           Complétez votre profil adoptant pour voir votre compatibilité avec chaque chat.
         </Link>
+      )}
+
+      {unsaved.length > 0 && (
+        <div
+          role="status"
+          className="flex items-start gap-2.5 mb-5 px-4 py-3 rounded-lg bg-rose text-ink text-xs font-medium"
+        >
+          <AlertCircle size={14} className="shrink-0 mt-px" />
+          <span>
+            {unsaved.length === 1
+              ? `Votre swipe sur ${unsaved[0]} n'a pas pu être enregistré.`
+              : `${unsaved.length} swipes n'ont pas pu être enregistrés.`}{" "}
+            Rechargez la page pour les revoir.
+          </span>
+        </div>
       )}
 
       <div className="relative aspect-[3/4] mb-6">
