@@ -89,7 +89,9 @@ export default function BlogPostForm({ defaultValues = {}, action }: BlogPostFor
   const { error, isPending, handleSubmit } = useServerFormAction(action)
   const [title, setTitle] = useState(defaultValues.title ?? '')
   const [slug, setSlug] = useState(defaultValues.slug ?? '')
-  const slugTouched = useRef(!!defaultValues.slug)
+  const isEdit = !!(defaultValues.title && defaultValues.slug)
+  const slugMatchedTitle = isEdit && defaultValues.slug === slugify(defaultValues.title ?? '')
+  const slugTouched = useRef(isEdit && !slugMatchedTitle)
   const [coverPreview, setCoverPreview] = useState<string | null>(defaultValues.coverUrl ?? null)
   const [content, setContent] = useState(defaultValues.content ?? '')
   const contentRef = useRef<HTMLTextAreaElement>(null)
@@ -174,11 +176,17 @@ export default function BlogPostForm({ defaultValues = {}, action }: BlogPostFor
     setSlug(e.target.value)
   }
 
+  const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif']
+
   function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (file) {
-      setCoverPreview(URL.createObjectURL(file))
+    if (!file) return
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      e.target.value = ''
+      alert('Format non supporté. Formats acceptés : PNG, JPG, WebP, GIF, AVIF.')
+      return
     }
+    setCoverPreview(URL.createObjectURL(file))
   }
 
   return (
@@ -245,8 +253,8 @@ export default function BlogPostForm({ defaultValues = {}, action }: BlogPostFor
 
         <Field>
           <FieldLabel htmlFor="cover">Image de couverture</FieldLabel>
-          {coverPreview && (
-            <div style={{ marginBottom: 8, borderRadius: 8, overflow: 'hidden', position: 'relative', width: '100%', aspectRatio: '16/9', maxWidth: 400 }}>
+          {coverPreview ? (
+            <div style={{ marginBottom: 8, borderRadius: 8, overflow: 'hidden', position: 'relative', width: 180, aspectRatio: '16/9' }}>
               <Image
                 src={coverPreview}
                 alt="Aperçu couverture"
@@ -255,14 +263,23 @@ export default function BlogPostForm({ defaultValues = {}, action }: BlogPostFor
                 style={{ objectFit: 'cover' }}
               />
             </div>
+          ) : (
+            <p style={{ fontSize: 12, color: AD.inkMuted, margin: '4px 0 8px' }}>
+              Aucune image sélectionnée
+            </p>
           )}
           <Input
             id="cover"
             name="cover"
             type="file"
-            accept="image/*"
+            accept=".png,.jpg,.jpeg,.webp,.gif,.avif"
             onChange={handleCoverChange}
           />
+          {coverPreview && (
+            <p style={{ fontSize: 11, color: AD.inkMuted, marginTop: 4 }}>
+              Sélectionne un nouveau fichier pour remplacer l&apos;image actuelle.
+            </p>
+          )}
         </Field>
 
         <Field>

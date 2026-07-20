@@ -187,6 +187,9 @@ body {
   color: var(--scf-ink);
   margin: 2.25em 0 0.75em;
 }
+.prose-scf > :first-child {
+  margin-top: 0;
+}
 .prose-scf h3 {
   font-size: 1.125rem;
   font-weight: 600;
