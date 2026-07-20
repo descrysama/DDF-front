@@ -14,6 +14,7 @@ import {
   Megaphone,
 } from 'lucide-react'
 import { AD } from '@/lib/admin-tokens'
+import type { StrapiDistributionRaw } from '@/lib/strapi'
 
 type NavItem = {
   key: string
@@ -30,7 +31,7 @@ const GESTION_ITEMS: NavItem[] = [
   { key: 'annonces',  label: 'Annonces',                href: '/admin/announcements',      icon: Megaphone },
   { key: 'demandes',  label: "Demandes d'adoption",    href: '/admin/adoption-requests',  icon: Heart,   badge: null, badgeHighlight: true },
   { key: 'fa',        label: "Familles d'accueil",     href: '/admin/foster-families',    icon: Smile },
-  { key: 'distrib',   label: 'Distributions',          href: '#',                         icon: Calendar },
+  { key: 'distrib',   label: 'Distributions',          href: '/admin/distributions',       icon: Calendar },
   { key: 'dons',      label: 'Dons & finances',        href: '#',                         icon: Shield },
   { key: 'blog',      label: 'Blog & actualités',      href: '/admin/blog',               icon: FileText },
 ]
@@ -50,7 +51,11 @@ const SECTION_LABEL_STYLE: React.CSSProperties = {
   marginBottom: 4,
 }
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+  nextDistribution: StrapiDistributionRaw | null
+}
+
+export default function AdminSidebar({ nextDistribution }: AdminSidebarProps) {
   const pathname = usePathname()
 
   function isActive(item: NavItem) {
@@ -204,21 +209,40 @@ export default function AdminSidebar() {
               marginBottom: 4,
             }}
           >
-            Distribution du 22/05
+            {nextDistribution
+              ? `Distribution du ${new Date(nextDistribution.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}`
+              : 'Aucune distribution prévue'}
           </p>
           <p style={{ fontSize: 11.5, color: AD.inkMuted, marginBottom: 8, lineHeight: 1.5 }}>
-            12 inscriptions confirmées
+            {nextDistribution
+              ? `${nextDistribution.volunteers?.length ?? 0} inscription(s) confirmée(s)`
+              : 'Planifiez-en une pour voir apparaître les inscriptions ici.'}
           </p>
-          <span
-            style={{
-              fontSize: 11.5,
-              fontWeight: 600,
-              color: AD.border,
-              cursor: 'default',
-            }}
-          >
-            Gérer l&apos;événement → Bientôt
-          </span>
+          {nextDistribution ? (
+            <Link
+              href={`/admin/distributions/${nextDistribution.documentId}`}
+              style={{
+                fontSize: 11.5,
+                fontWeight: 600,
+                color: AD.coral,
+                textDecoration: 'none',
+              }}
+            >
+              Gérer l&apos;événement →
+            </Link>
+          ) : (
+            <Link
+              href="/admin/distributions/new"
+              style={{
+                fontSize: 11.5,
+                fontWeight: 600,
+                color: AD.coral,
+                textDecoration: 'none',
+              }}
+            >
+              Planifier une distribution →
+            </Link>
+          )}
         </div>
       </div>
     </aside>

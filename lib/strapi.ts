@@ -546,3 +546,37 @@ export async function fetchBreeds(): Promise<StrapiBreed[]> {
   const { data } = await strapiGet<{ data: StrapiBreed[] }>('/api/breeds?pagination[pageSize]=200')
   return data
 }
+
+// ─── Distributions ────────────────────────────────────────────────────────────
+
+export type DistributionStatus = 'planned' | 'completed' | 'cancelled'
+
+export interface StrapiDistributionRaw {
+  id: number
+  documentId: string
+  date: string
+  location: string
+  status: DistributionStatus
+  notes: string | null
+  volunteers?: StrapiUser[]
+}
+
+export async function fetchDistributions(opts?: {
+  limit?: number
+}): Promise<{ distributions: StrapiDistributionRaw[]; total: number }> {
+  const limit = opts?.limit ?? 100
+  const { data, meta } = await strapiGet<StrapiListResponse<StrapiDistributionRaw>>(
+    `/api/distributions?populate[0]=volunteers&sort=date:desc&pagination[pageSize]=${limit}`
+  )
+  return { distributions: data, total: meta.pagination.total }
+}
+
+export async function fetchNextDistribution(): Promise<StrapiDistributionRaw | null> {
+  // UTC date, not local — near midnight in France this can be off by one day.
+  // Acceptable for a "what's next" sidebar widget at this app's scale.
+  const today = new Date().toISOString().slice(0, 10)
+  const { data } = await strapiGet<StrapiListResponse<StrapiDistributionRaw>>(
+    `/api/distributions?filters[status][$eq]=planned&filters[date][$gte]=${today}&sort=date:asc&populate[0]=volunteers&pagination[pageSize]=1`
+  )
+  return data[0] ?? null
+}

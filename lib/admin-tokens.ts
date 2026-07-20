@@ -29,6 +29,7 @@ export type StatusKey =
   | 'open' | 'closed' | 'draft'
   | 'pending' | 'in_progress' | 'approved' | 'rejected'
   | 'active'
+  | 'planned' | 'completed' | 'cancelled'
 
 export const STATUS_META: Record<StatusKey, { label: string; tint: string; dot: string; ink: string }> = {
   available: { label: 'Publié',     tint: '#E0F0E8', dot: '#3FA66E', ink: '#1E6B43' },
@@ -43,4 +44,7 @@ export const STATUS_META: Record<StatusKey, { label: string; tint: string; dot: 
   approved:  { label: 'Validée',    tint: '#E0F0E8', dot: '#3FA66E', ink: '#1E6B43' },
   rejected:  { label: 'Refusée',    tint: '#EFEAE2', dot: '#9C9588', ink: '#5C564B' },
   active:    { label: 'Active',     tint: '#E0F0E8', dot: '#3FA66E', ink: '#1E6B43' },
+  planned:   { label: 'Planifiée',  tint: '#E8E5F4', dot: '#7B6CC4', ink: '#4A3F8E' },
+  completed: { label: 'Terminée',   tint: '#E0F0E8', dot: '#3FA66E', ink: '#1E6B43' },
+  cancelled: { label: 'Annulée',    tint: '#EFEAE2', dot: '#9C9588', ink: '#5C564B' },
 }
