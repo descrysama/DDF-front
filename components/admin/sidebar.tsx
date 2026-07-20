@@ -32,7 +32,7 @@ const GESTION_ITEMS: NavItem[] = [
   { key: 'fa',        label: "Familles d'accueil",     href: '/admin/foster-families',    icon: Smile },
   { key: 'distrib',   label: 'Distributions',          href: '#',                         icon: Calendar },
   { key: 'dons',      label: 'Dons & finances',        href: '#',                         icon: Shield },
-  { key: 'blog',      label: 'Blog & actualités',      href: '#',                         icon: FileText },
+  { key: 'blog',      label: 'Blog & actualités',      href: '/admin/blog',               icon: FileText },
 ]
 
 const CONFIG_ITEMS: NavItem[] = [

@@ -18,4 +18,4 @@ export const useUserStore = create<UserState>((set) => ({
 }))
 
 export const useIsAdmin = () =>
-  useUserStore((s) => s.user?.role?.type === 'admin')
+  useUserStore((s) => s.user?.role?.name?.toLowerCase() === 'admin')

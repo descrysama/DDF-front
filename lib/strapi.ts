@@ -231,6 +231,114 @@ export async function fetchAnimal(documentId: string): Promise<CardAnimal | null
   return toCardAnimal(data)
 }
 
+// ─── Blog types ──────────────────────────────────────────────────────────
+
+export interface StrapiBlogPostRaw {
+  id: number
+  documentId: string
+  title: string
+  slug: string
+  content: string
+  excerpt: string | null
+  author_name: string | null
+  published_date: string | null
+  cover: StrapiImageFile | null
+  tags?: { id: number; name: string }[]
+}
+
+export interface BlogPostCard {
+  documentId: string
+  title: string
+  slug: string
+  excerpt: string | null
+  authorName: string
+  publishedDate: string | null
+  coverUrl: string | null
+  tags: string[]
+}
+
+export interface BlogPostFull extends BlogPostCard {
+  content: string
+}
+
+function toBlogPostCard(raw: StrapiBlogPostRaw): BlogPostCard {
+  return {
+    documentId: raw.documentId,
+    title: raw.title,
+    slug: raw.slug,
+    excerpt: raw.excerpt,
+    authorName: raw.author_name ?? 'Sans Croquettes Fixes',
+    publishedDate: raw.published_date,
+    coverUrl: mediaUrl(raw.cover),
+    tags: (raw.tags ?? []).map((t) => t.name),
+  }
+}
+
+function toBlogPostFull(raw: StrapiBlogPostRaw): BlogPostFull {
+  return {
+    ...toBlogPostCard(raw),
+    content: raw.content,
+  }
+}
+
+export async function fetchBlogPosts(opts?: {
+  limit?: number
+}): Promise<{ posts: BlogPostCard[]; total: number }> {
+  const limit = opts?.limit ?? 25
+  const { data, meta } = await strapiGet<StrapiListResponse<StrapiBlogPostRaw>>(
+    `/api/blog-posts?populate=cover&populate=tags&sort=published_date:desc&pagination[pageSize]=${limit}`
+  )
+  return {
+    posts: data.map(toBlogPostCard),
+    total: meta.pagination.total,
+  }
+}
+
+export async function fetchBlogPostBySlug(slug: string): Promise<BlogPostFull | null> {
+  const { data } = await strapiGet<StrapiListResponse<StrapiBlogPostRaw>>(
+    `/api/blog-posts?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=cover&populate=tags`
+  )
+  if (data.length === 0) return null
+  return toBlogPostFull(data[0])
+}
+
+export async function fetchBlogPostsAdmin(opts?: {
+  limit?: number
+}): Promise<{ posts: BlogPostCard[]; total: number }> {
+  const limit = opts?.limit ?? 100
+  const { data, meta } = await strapiGet<StrapiListResponse<StrapiBlogPostRaw>>(
+    `/api/blog-posts?populate=cover&populate=tags&sort=published_date:desc&pagination[pageSize]=${limit}&status=draft`
+  )
+  const { data: pubData, meta: pubMeta } = await strapiGet<StrapiListResponse<StrapiBlogPostRaw>>(
+    `/api/blog-posts?populate=cover&populate=tags&sort=published_date:desc&pagination[pageSize]=${limit}`
+  )
+  const allMap = new Map<string, StrapiBlogPostRaw>()
+  for (const p of [...pubData, ...data]) allMap.set(p.documentId, p)
+  const all = Array.from(allMap.values())
+  return {
+    posts: all.map(toBlogPostCard),
+    total: all.length,
+  }
+}
+
+export async function fetchBlogPostAdmin(documentId: string): Promise<StrapiBlogPostRaw | null> {
+  try {
+    const { data } = await strapiGet<{ data: StrapiBlogPostRaw }>(
+      `/api/blog-posts/${documentId}?populate=cover&populate=tags&status=draft`
+    )
+    return data
+  } catch {
+    try {
+      const { data } = await strapiGet<{ data: StrapiBlogPostRaw }>(
+        `/api/blog-posts/${documentId}?populate=cover&populate=tags`
+      )
+      return data
+    } catch {
+      return null
+    }
+  }
+}
+
 // ─── Admin types ──────────────────────────────────────────────────────────────
 
 export type AnnouncementStatus = 'open' | 'closed' | 'draft'

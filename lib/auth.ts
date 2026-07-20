@@ -36,7 +36,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 }
 
 export function isAdmin(user: AuthUser | null): boolean {
-  return user?.role?.type === 'admin'
+  return user?.role?.name?.toLowerCase() === 'admin'
 }
 
 export async function requireAdmin(): Promise<AuthUser> {
