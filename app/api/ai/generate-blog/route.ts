@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
   }
 
-  const { title, slug, excerpt } = await req.json()
+  const { title, slug, excerpt, instructions } = await req.json()
   if (!title || typeof title !== 'string') {
     return NextResponse.json({ error: 'Titre requis' }, { status: 400 })
   }
@@ -43,12 +43,14 @@ export async function POST(req: NextRequest) {
     },
     body: JSON.stringify({
       model: 'gpt-5.4-2',
+      stream: true,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: [
           `Rédige un article de blog avec le titre suivant : "${title}"`,
           slug ? `Le slug de l'article est : ${slug}` : '',
           excerpt ? `Voici le brief / résumé souhaité pour orienter le contenu :\n"${excerpt}"` : '',
+          instructions ? `Instructions supplémentaires de l'auteur :\n"${instructions}"` : '',
         ].filter(Boolean).join('\n\n') },
       ],
       temperature: 0.7,
@@ -62,8 +64,52 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Erreur IA: ${res.status}` }, { status: 502 })
   }
 
-  const data = await res.json()
-  const content = data.choices?.[0]?.message?.content ?? ''
+  const encoder = new TextEncoder()
+  const stream = new ReadableStream({
+    async start(controller) {
+      const reader = res.body!.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
 
-  return NextResponse.json({ content })
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() ?? ''
+
+          for (const line of lines) {
+            const trimmed = line.trim()
+            if (!trimmed.startsWith('data: ')) continue
+            const payload = trimmed.slice(6)
+            if (payload === '[DONE]') {
+              controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+              continue
+            }
+            try {
+              const json = JSON.parse(payload)
+              const token = json.choices?.[0]?.delta?.content
+              if (token) {
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ token })}\n\n`))
+              }
+            } catch {
+              // skip malformed chunks
+            }
+          }
+        }
+      } finally {
+        controller.close()
+      }
+    },
+  })
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  })
 }

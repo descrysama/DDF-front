@@ -95,6 +95,7 @@ export default function BlogPostForm({ defaultValues = {}, action }: BlogPostFor
   const contentRef = useRef<HTMLTextAreaElement>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
+  const [aiInstructions, setAiInstructions] = useState('')
 
   const handleToolbarAction = useCallback((mdAction: MarkdownAction) => {
     if (contentRef.current) {
@@ -109,6 +110,7 @@ export default function BlogPostForm({ defaultValues = {}, action }: BlogPostFor
     }
     setAiLoading(true)
     setAiError(null)
+    setContent('')
     try {
       const res = await fetch('/api/ai/generate-blog', {
         method: 'POST',
@@ -117,14 +119,43 @@ export default function BlogPostForm({ defaultValues = {}, action }: BlogPostFor
           title: title.trim(),
           slug: slug.trim() || undefined,
           excerpt: (document.getElementById('excerpt') as HTMLTextAreaElement)?.value?.trim() || undefined,
+          instructions: aiInstructions.trim() || undefined,
         }),
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
         throw new Error(data.error ?? `Erreur ${res.status}`)
       }
-      const { content: generated } = await res.json()
-      setContent(generated)
+
+      const reader = res.body!.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let accumulated = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+
+        for (const line of lines) {
+          const trimmed = line.trim()
+          if (!trimmed.startsWith('data: ')) continue
+          const payload = trimmed.slice(6)
+          if (payload === '[DONE]') continue
+          try {
+            const { token } = JSON.parse(payload)
+            if (token) {
+              accumulated += token
+              setContent(accumulated)
+            }
+          } catch {
+            // skip
+          }
+        }
+      }
     } catch (err) {
       setAiError(err instanceof Error ? err.message : 'Erreur lors de la génération')
     } finally {
@@ -235,8 +266,36 @@ export default function BlogPostForm({ defaultValues = {}, action }: BlogPostFor
         </Field>
 
         <Field>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-            <FieldLabel htmlFor="content" style={{ margin: 0 }}>Contenu (Markdown)</FieldLabel>
+          <FieldLabel htmlFor="content">Contenu (Markdown)</FieldLabel>
+          <div
+            style={{
+              display: 'flex',
+              gap: 8,
+              alignItems: 'flex-end',
+              marginBottom: 8,
+              padding: '10px 12px',
+              background: 'linear-gradient(135deg, rgba(247,108,112,0.06) 0%, rgba(232,74,119,0.06) 100%)',
+              border: `1px solid ${AD.border}`,
+              borderRadius: 8,
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              <label
+                htmlFor="ai_instructions"
+                style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 600, color: AD.ink, marginBottom: 4 }}
+              >
+                <Sparkles size={12} style={{ color: '#F76C70' }} />
+                Instructions CroketAI
+              </label>
+              <Textarea
+                id="ai_instructions"
+                rows={2}
+                value={aiInstructions}
+                onChange={(e) => setAiInstructions(e.target.value)}
+                placeholder="Ex: Fais 3 parties, mentionne les croquettes Royal Canin, ton humoristique..."
+                style={{ fontSize: 12.5, lineHeight: 1.5, resize: 'none' }}
+              />
+            </div>
             <button
               type="button"
               onClick={handleGenerate}
@@ -245,7 +304,7 @@ export default function BlogPostForm({ defaultValues = {}, action }: BlogPostFor
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
-                padding: '5px 12px',
+                padding: '8px 14px',
                 borderRadius: 6,
                 border: 'none',
                 background: 'linear-gradient(135deg, #F76C70 0%, #E84A77 100%)',
@@ -255,10 +314,12 @@ export default function BlogPostForm({ defaultValues = {}, action }: BlogPostFor
                 cursor: aiLoading ? 'wait' : 'pointer',
                 opacity: aiLoading ? 0.7 : 1,
                 transition: 'opacity 0.15s',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               {aiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-              {aiLoading ? 'Génération...' : 'Générer avec CroketAI'}
+              {aiLoading ? 'Génération...' : 'Générer'}
             </button>
           </div>
           {aiError && (
