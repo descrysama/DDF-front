@@ -7,11 +7,11 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import type { AdopterAgePreference, AdopterExperience, AdopterHousingType, StrapiAdopterProfileRaw } from "@/lib/strapi"
+import { ACTIVITY_LABEL, type AdopterActivityPreference, type AdopterAgePreference, type AdopterExperience, type AdopterHousingType, type StrapiAdopterProfileRaw } from "@/lib/strapi"
 
 type FormState = Pick<
   StrapiAdopterProfileRaw,
-  'housing_type' | 'has_garden' | 'has_children' | 'has_dogs' | 'has_cats' | 'experience_level' | 'age_preference' | 'motivation'
+  'housing_type' | 'has_garden' | 'has_children' | 'has_dogs' | 'has_cats' | 'experience_level' | 'age_preference' | 'activity_level_preference' | 'motivation'
 >
 
 const DEFAULT_STATE: FormState = {
@@ -22,6 +22,7 @@ const DEFAULT_STATE: FormState = {
   has_cats: false,
   experience_level: 'none',
   age_preference: 'peu_importe',
+  activity_level_preference: 'peu_importe',
   motivation: '',
 }
 
@@ -37,8 +38,8 @@ export function AdopterProfileCard() {
       .then((res) => res.json())
       .then((data: { profile: StrapiAdopterProfileRaw | null }) => {
         if (data.profile) {
-          const { housing_type, has_garden, has_children, has_dogs, has_cats, experience_level, age_preference, motivation } = data.profile
-          setForm({ housing_type, has_garden, has_children, has_dogs, has_cats, experience_level, age_preference, motivation })
+          const { housing_type, has_garden, has_children, has_dogs, has_cats, experience_level, age_preference, activity_level_preference, motivation } = data.profile
+          setForm({ housing_type, has_garden, has_children, has_dogs, has_cats, experience_level, age_preference, activity_level_preference, motivation })
         }
       })
       .finally(() => setLoading(false))
@@ -122,6 +123,19 @@ export function AdopterProfileCard() {
               <SelectItem value="chaton">Chaton</SelectItem>
               <SelectItem value="adulte">Adulte</SelectItem>
               <SelectItem value="senior">Senior</SelectItem>
+              <SelectItem value="peu_importe">Peu importe</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label className="text-xs text-ink-muted mb-1.5 block">Préférence d&apos;énergie</Label>
+          <Select value={form.activity_level_preference} onValueChange={(v) => v && patch('activity_level_preference', v as AdopterActivityPreference)}>
+            <SelectTrigger className="w-full h-auto py-2 text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">{ACTIVITY_LABEL.low}</SelectItem>
+              <SelectItem value="medium">{ACTIVITY_LABEL.medium}</SelectItem>
+              <SelectItem value="high">{ACTIVITY_LABEL.high}</SelectItem>
               <SelectItem value="peu_importe">Peu importe</SelectItem>
             </SelectContent>
           </Select>

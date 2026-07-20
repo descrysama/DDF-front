@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { STRAPI_URL, STRAPI_TOKEN } from '@/lib/config'
-import type { AdopterExperience, AdopterHousingType, StrapiAdopterProfileRaw } from '@/lib/strapi'
+import type { AdopterActivityPreference, AdopterExperience, AdopterHousingType, StrapiAdopterProfileRaw } from '@/lib/strapi'
 
 async function getProfile(userId: number): Promise<StrapiAdopterProfileRaw | null> {
   const res = await fetch(`${STRAPI_URL}/api/adopter-profiles?filters[user][id][$eq]=${userId}`, {
@@ -34,6 +34,7 @@ export async function PUT(req: Request) {
     has_cats: Boolean(body.has_cats),
     experience_level: body.experience_level as AdopterExperience,
     age_preference: body.age_preference,
+    activity_level_preference: body.activity_level_preference as AdopterActivityPreference,
     motivation: (body.motivation as string) ?? '',
   }
 

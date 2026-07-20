@@ -6,7 +6,8 @@ import { CatCard } from "@/components/cat-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { type CardAnimal, type CatTag } from "@/lib/strapi"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { ACTIVITY_LABEL, type CardAnimal, type CatTag, type AnimalStatus, type AnimalActivity } from "@/lib/strapi"
 
 type FilterKey = 'Tous' | 'Chaton' | 'Adulte' | 'Senior' | 'Duo' | 'Cas particulier'
 
@@ -18,6 +19,17 @@ const FILTER_TINT: Record<FilterKey, string> = {
   'Duo':              'bg-mint text-ink',
   'Cas particulier':  'bg-rose text-ink',
 }
+
+const STATUS_LABEL: Record<AnimalStatus, string> = {
+  available: 'Disponible',
+  in_foster: "En famille d'accueil",
+  reserved: 'Réservé',
+  adopted: 'Adopté',
+}
+
+const ALL_BREEDS = 'all-breeds'
+const ALL_STATUSES = 'all-statuses'
+const ALL_ENERGY = 'all-energy'
 
 function tagMatchesFilter(tag: CatTag, filter: FilterKey): boolean {
   if (filter === 'Tous') return true
@@ -32,6 +44,9 @@ interface Props {
 export function AdoptionFilters({ cats }: Props) {
   const [active, setActive] = useState<FilterKey>('Tous')
   const [query, setQuery] = useState('')
+  const [breed, setBreed] = useState<string>(ALL_BREEDS)
+  const [status, setStatus] = useState<AnimalStatus | typeof ALL_STATUSES>(ALL_STATUSES)
+  const [energy, setEnergy] = useState<AnimalActivity | typeof ALL_ENERGY>(ALL_ENERGY)
 
   const filters: { label: FilterKey; count: number }[] = useMemo(() => {
     const all: { label: FilterKey; count: number }[] = [
@@ -45,13 +60,21 @@ export function AdoptionFilters({ cats }: Props) {
     return all.filter((f) => f.count > 0 || f.label === 'Tous')
   }, [cats])
 
+  const breeds = useMemo(() => {
+    const names = cats.map((c) => c.breed).filter((b): b is string => Boolean(b))
+    return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b))
+  }, [cats])
+
   const visible = useMemo(() => {
     return cats.filter((c) => {
       const matchFilter = tagMatchesFilter(c.tag, active)
       const matchSearch = query.trim() === '' || c.name.toLowerCase().includes(query.toLowerCase())
-      return matchFilter && matchSearch
+      const matchBreed = breed === ALL_BREEDS || c.breed === breed
+      const matchStatus = status === ALL_STATUSES || c.status === status
+      const matchEnergy = energy === ALL_ENERGY || c.activityLevel === energy
+      return matchFilter && matchSearch && matchBreed && matchStatus && matchEnergy
     })
-  }, [cats, active, query])
+  }, [cats, active, query, breed, status, energy])
 
   return (
     <>
@@ -81,15 +104,47 @@ export function AdoptionFilters({ cats }: Props) {
             })}
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-surface">
-            <Search size={13} className="text-ink-muted shrink-0" />
-            <Input
-              type="search"
-              placeholder="Rechercher un nom"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="h-auto border-none outline-none bg-transparent text-xs md:text-xs font-[inherit] text-ink w-36 shadow-none px-0 py-0 focus-visible:ring-0 focus-visible:border-none dark:bg-transparent"
-            />
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={breed} onValueChange={(v) => v && setBreed(v)}>
+              <SelectTrigger className="h-auto py-1.5 text-xs w-auto"><SelectValue placeholder="Race" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_BREEDS}>Toutes les races</SelectItem>
+                {breeds.map((b) => (
+                  <SelectItem key={b} value={b}>{b}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={status} onValueChange={(v) => v && setStatus(v as AnimalStatus | typeof ALL_STATUSES)}>
+              <SelectTrigger className="h-auto py-1.5 text-xs w-auto"><SelectValue placeholder="Statut" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_STATUSES}>Tous les statuts</SelectItem>
+                {(Object.keys(STATUS_LABEL) as AnimalStatus[]).map((s) => (
+                  <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={energy} onValueChange={(v) => v && setEnergy(v as AnimalActivity | typeof ALL_ENERGY)}>
+              <SelectTrigger className="h-auto py-1.5 text-xs w-auto"><SelectValue placeholder="Énergie" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_ENERGY}>Tous niveaux</SelectItem>
+                {(Object.keys(ACTIVITY_LABEL) as AnimalActivity[]).map((a) => (
+                  <SelectItem key={a} value={a}>{ACTIVITY_LABEL[a]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-surface">
+              <Search size={13} className="text-ink-muted shrink-0" />
+              <Input
+                type="search"
+                placeholder="Rechercher un nom"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="h-auto border-none outline-none bg-transparent text-xs md:text-xs font-[inherit] text-ink w-36 shadow-none px-0 py-0 focus-visible:ring-0 focus-visible:border-none dark:bg-transparent"
+              />
+            </div>
           </div>
         </div>
       </section>

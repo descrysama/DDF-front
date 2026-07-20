@@ -5,7 +5,7 @@ import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { CAT_TINT } from "@/lib/placeholder-cats"
-import { fetchAnimal, fetchAnimals, fetchCompatibility, compatibilityTone, type CardAnimal, type AnimalActivity } from "@/lib/strapi"
+import { fetchAnimal, fetchAnimals, fetchCompatibility, compatibilityTone, ACTIVITY_LABEL, type CardAnimal, type AnimalActivity } from "@/lib/strapi"
 import { getCurrentUser, getAuthToken } from "@/lib/auth"
 import { CatCard } from "@/components/cat-card"
 import { AdoptModal } from "./_components/adopt-modal"
@@ -22,12 +22,6 @@ const ADOPTION_STEPS = [
   { title: 'Visite & rencontre', desc: 'Vous rencontrez le chat chez sa famille d\'accueil à Lyon.', tintClass: 'bg-pink' },
   { title: 'Contrat & arrivée', desc: 'Signature, frais d\'adoption, et le grand jour !', tintClass: 'bg-mint' },
 ]
-
-const ACTIVITY_LABEL: Record<AnimalActivity, string> = {
-  low: 'Calme',
-  medium: 'Modéré',
-  high: 'Très actif',
-}
 
 const MEDICAL_EVENT_LABEL: Record<string, string> = {
   vaccination: 'Vaccination',

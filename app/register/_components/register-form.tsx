@@ -42,7 +42,7 @@ export default function RegisterForm() {
       return
     }
     setUser(data.user)
-    router.push('/')
+    router.push('/onboarding')
     router.refresh()
   }
 

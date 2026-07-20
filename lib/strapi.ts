@@ -6,6 +6,12 @@ export type AnimalStatus = 'available' | 'in_foster' | 'reserved' | 'adopted'
 export type AnimalGender = 'male' | 'female'
 export type AnimalActivity = 'low' | 'medium' | 'high'
 
+export const ACTIVITY_LABEL: Record<AnimalActivity, string> = {
+  low: 'Calme',
+  medium: 'Modéré',
+  high: 'Très actif',
+}
+
 export type CatTag =
   | 'Chaton'
   | 'Adulte mâle'
@@ -271,6 +277,7 @@ export interface StrapiAdoptionRequestRaw {
 export type AdopterHousingType = 'house' | 'apartment'
 export type AdopterExperience = 'none' | 'some' | 'experienced'
 export type AdopterAgePreference = 'chaton' | 'adulte' | 'senior' | 'peu_importe'
+export type AdopterActivityPreference = AnimalActivity | 'peu_importe'
 
 export interface StrapiAdopterProfileRaw {
   id: number
@@ -282,6 +289,7 @@ export interface StrapiAdopterProfileRaw {
   has_cats: boolean
   experience_level: AdopterExperience
   age_preference: AdopterAgePreference
+  activity_level_preference: AdopterActivityPreference
   motivation: string | null
 }
 
