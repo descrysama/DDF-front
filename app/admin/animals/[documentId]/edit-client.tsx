@@ -6,9 +6,10 @@ import { AD } from '@/lib/admin-tokens'
 import {
   updateAnimal, deleteAnimal, addMediaToAnimal, deleteMedia, setCoverMedia,
   updateAnimalVideo, removeAnimalVideo, addMedicalEvent, removeMedicalEvent,
-  updateAnimalReferents,
+  updateAnimalReferents, updateAnimalFosterFamily,
 } from '../actions'
-import type { StrapiMedia, StrapiMedicalEvent, StrapiUser, StrapiBreed, MedicalEventType } from '@/lib/strapi'
+import { Combobox, ComboboxInputGroup, ComboboxInput, ComboboxTrigger, ComboboxContent, ComboboxItem } from '@/components/ui/combobox'
+import type { StrapiMedia, StrapiMedicalEvent, StrapiUser, StrapiBreed, StrapiFosterFamilyRaw, MedicalEventType } from '@/lib/strapi'
 
 interface FosterAssignment {
   id: number
@@ -16,6 +17,11 @@ interface FosterAssignment {
   status: string
   start_date: string | null
   foster_family?: { id: number; documentId: string; address: string } | null
+}
+
+interface FosterFamilyOption {
+  value: number
+  label: string
 }
 
 interface Animal {
@@ -96,17 +102,20 @@ export default function AnimalEditClient({
   strapiUrl,
   users,
   breeds,
+  fosterFamilies,
 }: {
   animal: Animal
   strapiUrl: string
   users: StrapiUser[]
   breeds: StrapiBreed[]
+  fosterFamilies: StrapiFosterFamilyRaw[]
 }) {
   const [isPending, startTransition] = useTransition()
   const [isMediaPending, startMediaTransition] = useTransition()
   const [isVideoPending, startVideoTransition] = useTransition()
   const [isMedicalPending, startMedicalTransition] = useTransition()
   const [isReferentsPending, startReferentsTransition] = useTransition()
+  const [isFosterFamilyPending, startFosterFamilyTransition] = useTransition()
   const [gender, setGender] = useState(animal.gender)
   const [backupIds, setBackupIds] = useState<number[]>((animal.backup_referents ?? []).map(u => u.id))
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -116,6 +125,15 @@ export default function AnimalEditClient({
   const videoUrl = animal.video_url ? `${strapiUrl}${animal.video_url}` : null
   const medicalHistory = [...(animal.medical_history ?? [])].sort((a, b) => b.event_date.localeCompare(a.event_date))
   const activeAssignments = (animal.foster_assignments ?? []).filter(a => a.status === 'active')
+  const currentFosterFamily = activeAssignments[0]?.foster_family ?? null
+
+  const fosterFamilyOptions: FosterFamilyOption[] = fosterFamilies.map((f) => ({
+    value: f.id,
+    label: f.user ? `${f.address} — ${f.user.username}` : f.address,
+  }))
+  const [selectedFosterFamily, setSelectedFosterFamily] = useState<FosterFamilyOption | null>(
+    currentFosterFamily ? fosterFamilyOptions.find((o) => o.value === currentFosterFamily.id) ?? null : null
+  )
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -171,6 +189,12 @@ export default function AnimalEditClient({
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     startReferentsTransition(() => updateAnimalReferents(animal.documentId, formData))
+  }
+
+  function handleSaveFosterFamily(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    startFosterFamilyTransition(() => updateAnimalFosterFamily(animal.documentId, formData))
   }
 
   return (
@@ -534,30 +558,44 @@ export default function AnimalEditClient({
             </p>
           </div>
 
-          {/* Famille d'accueil active */}
-          <div style={{ ...card, padding: 18 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: AD.ink, marginBottom: 10 }}>Famille d&apos;accueil</div>
-            {activeAssignments.length > 0 ? (
-              <div style={{ display: 'grid', gap: 8 }}>
-                {activeAssignments.map((a) => (
-                  <div key={a.id} style={{ padding: '8px 10px', background: AD.surfaceAlt, borderRadius: 7 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 600, color: AD.ink }}>
-                      {a.foster_family?.address ?? 'Famille inconnue'}
-                    </div>
-                    {a.start_date && (
-                      <div style={{ fontSize: 11, color: AD.inkMuted, marginTop: 2 }}>
-                        Depuis le {new Date(a.start_date).toLocaleDateString('fr-FR')}
-                      </div>
-                    )}
-                  </div>
-                ))}
+          {/* Famille d'accueil */}
+          <form
+            onSubmit={handleSaveFosterFamily}
+            style={{ ...card, padding: 18, opacity: isFosterFamilyPending ? 0.6 : 1, transition: 'opacity 0.15s' }}
+          >
+            <div style={{ fontSize: 12, fontWeight: 600, color: AD.ink, marginBottom: 4 }}>Famille d&apos;accueil</div>
+            {activeAssignments[0]?.start_date && (
+              <div style={cardHint}>
+                Depuis le {new Date(activeAssignments[0].start_date).toLocaleDateString('fr-FR')}
               </div>
-            ) : (
-              <p style={{ fontSize: 12.5, color: AD.inkMuted, margin: 0 }}>
-                Aucune affectation en cours.
-              </p>
             )}
-          </div>
+            <Combobox items={fosterFamilyOptions} value={selectedFosterFamily} onValueChange={setSelectedFosterFamily}>
+              <ComboboxInputGroup>
+                <ComboboxInput placeholder="Rechercher une famille…" />
+                <ComboboxTrigger />
+              </ComboboxInputGroup>
+              <ComboboxContent emptyMessage="Aucune famille trouvée.">
+                {(item: FosterFamilyOption) => (
+                  <ComboboxItem key={item.value} value={item}>
+                    {item.label}
+                  </ComboboxItem>
+                )}
+              </ComboboxContent>
+            </Combobox>
+            <input type="hidden" name="foster_family_id" value={selectedFosterFamily?.value ?? ''} />
+            <button
+              type="submit"
+              disabled={isFosterFamilyPending}
+              style={{
+                width: '100%', marginTop: 10, padding: '8px 0', fontSize: 12, fontWeight: 600,
+                background: isFosterFamilyPending ? AD.border : AD.coral, color: '#fff',
+                border: 'none', borderRadius: 6, cursor: isFosterFamilyPending ? 'not-allowed' : 'pointer',
+                fontFamily: 'inherit',
+              }}
+            >
+              {isFosterFamilyPending ? 'En cours…' : 'Enregistrer'}
+            </button>
+          </form>
 
           {/* Responsable & backups */}
           <form

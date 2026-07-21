@@ -1,10 +1,16 @@
 import Link from 'next/link'
 import FosterFamilyForm from '@/components/admin/foster-family-form'
 import { createFosterFamily } from '../actions'
+import { fetchAnimalsForFosterPicker, fetchUsersForFosterPicker } from '@/lib/strapi'
 import { AD } from '@/lib/admin-tokens'
 import { cardStyle } from '@/lib/admin-styles'
 
-export default function NewFosterFamilyPage() {
+export default async function NewFosterFamilyPage() {
+  const [animals, users] = await Promise.all([
+    fetchAnimalsForFosterPicker(),
+    fetchUsersForFosterPicker(),
+  ])
+
   return (
     <div style={{ padding: 32 }}>
       <div style={{ marginBottom: 20 }}>
@@ -19,7 +25,7 @@ export default function NewFosterFamilyPage() {
         Nouvelle famille d&apos;accueil
       </h1>
       <div style={{ ...cardStyle, padding: 28, maxWidth: 600 }}>
-        <FosterFamilyForm action={createFosterFamily} />
+        <FosterFamilyForm animals={animals} users={users} action={createFosterFamily} />
       </div>
     </div>
   )

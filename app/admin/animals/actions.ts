@@ -244,3 +244,62 @@ export async function updateAnimalReferents(animalDocumentId: string, formData: 
 
   revalidatePath(`/admin/animals/${animalDocumentId}`)
 }
+
+// ─── Famille d'accueil ──────────────────────────────────────────────────────
+
+async function fetchAnimalStatus(animalDocumentId: string): Promise<{ id: number; status: string }> {
+  const res = await fetch(`${STRAPI_URL}/api/animals/${animalDocumentId}?fields[0]=status`, { headers: AUTH })
+  if (!res.ok) throw new Error(`Fetch animal failed: ${res.status}`)
+  const { data } = await res.json()
+  return { id: data.id, status: data.status }
+}
+
+async function fetchActiveFosterAssignments(
+  animalDocumentId: string
+): Promise<{ documentId: string; foster_family: { id: number } | null }[]> {
+  const res = await fetch(
+    `${STRAPI_URL}/api/foster-assignments?filters[animal][documentId][$eq]=${animalDocumentId}` +
+      '&filters[status][$eq]=active&populate[0]=foster_family&pagination[pageSize]=10',
+    { headers: AUTH }
+  )
+  if (!res.ok) throw new Error(`Fetch active foster assignments failed: ${res.status}`)
+  const { data } = await res.json()
+  return data
+}
+
+export async function updateAnimalFosterFamily(animalDocumentId: string, formData: FormData) {
+  await requireAdmin()
+  const fosterFamilyIdRaw = formData.get('foster_family_id') as string
+  const fosterFamilyId = fosterFamilyIdRaw ? Number(fosterFamilyIdRaw) : null
+
+  const [{ id: animalId, status }, activeAssignments] = await Promise.all([
+    fetchAnimalStatus(animalDocumentId),
+    fetchActiveFosterAssignments(animalDocumentId),
+  ])
+
+  const alreadyLinked = activeAssignments.some((a) => a.foster_family?.id === fosterFamilyId)
+  if (!alreadyLinked) {
+    for (const assignment of activeAssignments) {
+      await strapiPut(`/api/foster-assignments/${assignment.documentId}`, {
+        status: 'completed',
+        end_date: new Date().toISOString().slice(0, 10),
+      })
+    }
+
+    if (fosterFamilyId) {
+      await strapiPost('/api/foster-assignments', {
+        animal: animalId,
+        foster_family: fosterFamilyId,
+        status: 'active',
+        start_date: new Date().toISOString().slice(0, 10),
+      })
+    }
+
+    if (status !== 'reserved' && status !== 'adopted') {
+      await strapiPut(`/api/animals/${animalDocumentId}`, { status: fosterFamilyId ? 'in_foster' : 'available' })
+    }
+  }
+
+  revalidatePath(`/admin/animals/${animalDocumentId}`)
+  revalidatePath('/admin/animals')
+}

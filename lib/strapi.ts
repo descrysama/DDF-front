@@ -428,6 +428,15 @@ export interface StrapiAnnouncementRaw {
   tags?: { id: number; name: string }[]
 }
 
+export interface StrapiFosterAssignmentRaw {
+  id: number
+  documentId: string
+  status: 'active' | 'completed'
+  start_date: string | null
+  end_date: string | null
+  animal: { id: number; documentId: string; name: string; status: AnimalStatus } | null
+}
+
 export interface StrapiFosterFamilyRaw {
   id: number
   documentId: string
@@ -437,8 +446,8 @@ export interface StrapiFosterFamilyRaw {
   has_cats: boolean
   max_capacity: number
   is_available: boolean
-  user?: { username: string; email: string }
-  foster_assignments?: { id: number; documentId: string }[]
+  user?: { id: number; username: string; email: string }
+  foster_assignments?: StrapiFosterAssignmentRaw[]
 }
 
 export interface StrapiAdoptionRequestRaw {
@@ -586,6 +595,37 @@ export async function fetchAnnouncements(opts?: {
   return { announcements: data, total: meta.pagination.total }
 }
 
+export interface FosterPickerAnimal {
+  id: number
+  documentId: string
+  name: string
+  status: AnimalStatus
+}
+
+export async function fetchAnimalsForFosterPicker(
+  excludeFamilyDocumentId?: string
+): Promise<FosterPickerAnimal[]> {
+  const { data: animals } = await strapiGet<{ data: FosterPickerAnimal[] }>(
+    '/api/animals?filters[status][$in][0]=available&filters[status][$in][1]=in_foster' +
+      '&fields[0]=name&fields[1]=status&pagination[pageSize]=200'
+  )
+
+  const { data: activeAssignments } = await strapiGet<{
+    data: { animal: { id: number } | null; foster_family: { documentId: string } | null }[]
+  }>(
+    '/api/foster-assignments?filters[status][$eq]=active' +
+      '&populate[0]=animal&populate[1]=foster_family&pagination[pageSize]=200'
+  )
+
+  const hostedElsewhere = new Set(
+    activeAssignments
+      .filter((a) => a.animal && a.foster_family && a.foster_family.documentId !== excludeFamilyDocumentId)
+      .map((a) => a.animal!.id)
+  )
+
+  return animals.filter((a) => !hostedElsewhere.has(a.id))
+}
+
 export async function fetchFosterFamilies(opts?: {
   limit?: number
 }): Promise<{ fosterFamilies: StrapiFosterFamilyRaw[]; total: number }> {
@@ -650,6 +690,25 @@ export async function updateUserRole(userId: number, roleId: number): Promise<vo
     const detail = await res.text().catch(() => '')
     throw new Error(`Strapi ${res.status} PUT /api/users/${userId}/role: ${detail}`)
   }
+}
+
+// `foster-family.user` is a oneToOne relation: a user already linked to another
+// family must not show up as pickable, or saving would silently steal the link.
+export async function fetchUsersForFosterPicker(excludeFamilyDocumentId?: string): Promise<StrapiUser[]> {
+  const [users, { data: families }] = await Promise.all([
+    strapiGet<StrapiUser[]>('/api/users'),
+    strapiGet<{ data: { documentId: string; user: { id: number } | null }[] }>(
+      '/api/foster-families?populate[0]=user&pagination[pageSize]=200'
+    ),
+  ])
+
+  const linkedElsewhere = new Set(
+    families
+      .filter((f) => f.user && f.documentId !== excludeFamilyDocumentId)
+      .map((f) => f.user!.id)
+  )
+
+  return users.filter((u) => !linkedElsewhere.has(u.id))
 }
 
 export async function fetchBreeds(): Promise<StrapiBreed[]> {

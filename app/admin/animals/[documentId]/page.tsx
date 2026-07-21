@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { fetchResource, fetchUsers, fetchBreeds } from '@/lib/strapi'
+import { fetchResource, fetchUsers, fetchBreeds, fetchFosterFamilies } from '@/lib/strapi'
 import type { StrapiMedia, StrapiMedicalEvent, StrapiUser, StrapiBreed } from '@/lib/strapi'
 import AnimalEditClient from './edit-client'
 import { STRAPI_URL } from '@/lib/config'
@@ -58,7 +58,19 @@ export default async function EditAnimalPage({
     notFound()
   }
 
-  const [users, breeds] = await Promise.all([fetchUsers(), fetchBreeds()])
+  const [users, breeds, { fosterFamilies }] = await Promise.all([
+    fetchUsers(),
+    fetchBreeds(),
+    fetchFosterFamilies({ limit: 200 }),
+  ])
 
-  return <AnimalEditClient animal={animal} strapiUrl={STRAPI_URL} users={users} breeds={breeds} />
+  return (
+    <AnimalEditClient
+      animal={animal}
+      strapiUrl={STRAPI_URL}
+      users={users}
+      breeds={breeds}
+      fosterFamilies={fosterFamilies}
+    />
+  )
 }
