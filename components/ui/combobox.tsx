@@ -4,9 +4,10 @@ import * as React from "react"
 import { Combobox as ComboboxPrimitive } from "@base-ui/react/combobox"
 
 import { cn } from "@/lib/utils"
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
+import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react"
 
 const Combobox = ComboboxPrimitive.Root
+const ComboboxValue = ComboboxPrimitive.Value
 
 function ComboboxInputGroup({
   className,
@@ -95,6 +96,53 @@ function ComboboxContent({
   )
 }
 
+function ComboboxChips({
+  className,
+  ...props
+}: ComboboxPrimitive.Chips.Props) {
+  return (
+    <ComboboxPrimitive.Chips
+      data-slot="combobox-chips"
+      className={cn(
+        "flex w-full flex-wrap items-center gap-1.5 rounded-md border border-input bg-transparent px-2.5 py-1.5 shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-input/30",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function ComboboxChip({ className, ...props }: ComboboxPrimitive.Chip.Props) {
+  return (
+    <ComboboxPrimitive.Chip
+      data-slot="combobox-chip"
+      className={cn(
+        "flex items-center gap-1 rounded-sm bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground data-highlighted:bg-accent/70",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function ComboboxChipRemove({
+  className,
+  ...props
+}: ComboboxPrimitive.ChipRemove.Props) {
+  return (
+    <ComboboxPrimitive.ChipRemove
+      data-slot="combobox-chip-remove"
+      className={cn(
+        "text-muted-foreground outline-none hover:text-foreground",
+        className
+      )}
+      {...props}
+    >
+      <XIcon className="size-3" />
+    </ComboboxPrimitive.ChipRemove>
+  )
+}
+
 function ComboboxItem({
   className,
   children,
@@ -119,9 +167,13 @@ function ComboboxItem({
 
 export {
   Combobox,
+  ComboboxValue,
   ComboboxInputGroup,
   ComboboxInput,
   ComboboxTrigger,
   ComboboxContent,
   ComboboxItem,
+  ComboboxChips,
+  ComboboxChip,
+  ComboboxChipRemove,
 }

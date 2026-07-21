@@ -413,6 +413,33 @@ export async function fetchPartners(): Promise<Partner[]> {
   }))
 }
 
+interface StrapiSocialLinkRaw {
+  id: number
+  documentId: string
+  label: string
+  url: string
+  icon: StrapiImageFile | null
+}
+
+export interface SocialLink {
+  id: string
+  label: string
+  url: string
+  iconUrl: string | null
+}
+
+export async function fetchSocialLinks(): Promise<SocialLink[]> {
+  const { data } = await strapiGet<StrapiListResponse<StrapiSocialLinkRaw>>(
+    '/api/social-links?populate=icon&sort=order:asc'
+  )
+  return data.map((s) => ({
+    id: s.documentId,
+    label: s.label,
+    url: s.url,
+    iconUrl: mediaUrl(s.icon),
+  }))
+}
+
 // ─── Admin types ──────────────────────────────────────────────────────────────
 
 export type AnnouncementStatus = 'open' | 'closed' | 'draft'

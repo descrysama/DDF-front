@@ -1,55 +1,18 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { fetchSocialLinks } from "@/lib/strapi"
 
-const COLUMNS = [
-  {
-    title: 'Association',
-    items: [
-      { label: 'À propos',        href: '/about-us'              },
-      { label: 'Notre histoire',  href: '/about-us#histoire'     },
-      { label: 'Bénévoles',       href: '/about-us#benevoles'    },
-      { label: 'Partenaires',     href: '/about-us#partenaires'  },
-    ],
-  },
-  {
-    title: 'Adopter',
-    items: [
-      { label: 'Chats à l\'adoption', href: '/adopt-pet'               },
-      { label: 'Procédure',           href: '/adopt-pet#procedure'      },
-      { label: 'Famille d\'accueil',  href: '/adopt-pet#famille'        },
-      { label: 'Frais d\'adoption',   href: '/adopt-pet#frais'          },
-    ],
-  },
-  {
-    title: 'Soutenir',
-    items: [
-      { label: 'Faire un don',     href: '/donate'               },
-      { label: 'Don matériel',     href: '/donate#materiel'      },
-      { label: 'Devenir bénévole', href: '/about-us#benevoles'   },
-      { label: 'Mécénat',          href: '/donate#mecenat'       },
-    ],
-  },
-  {
-    title: 'Ressources',
-    items: [
-      { label: 'Distributions', href: '/distribution-de-croquettes' },
-      { label: 'Blog',          href: '/news'                       },
-      { label: 'FAQ',           href: '/faq'                        },
-      { label: 'Presse',        href: '/presse'                     },
-    ],
-  },
+const LINKS = [
+  { label: 'À propos',              href: '/about-us'                    },
+  { label: 'Chats à l\'adoption',   href: '/adopt-pet'                   },
+  { label: 'Faire un don',          href: '/donate'                      },
+  { label: 'Distributions',         href: '/distribution-de-croquettes'  },
+  { label: 'Blog',                  href: '/news'                        },
 ]
 
-const SOCIAL = [
-  { label: 'ig', bgClass: 'bg-rose',  href: 'https://www.instagram.com/sanscroquettesfixes/' },
-  { label: 'fb', bgClass: 'bg-lilac', href: 'https://www.facebook.com/sanscroquettesfixes'   },
-  { label: 'yt', bgClass: 'bg-mint',  href: 'https://www.youtube.com/@SansCroquettesFixes'   },
-]
+export default async function Footer() {
+  const socialLinks = await fetchSocialLinks()
 
-export default function Footer() {
   return (
     <footer
       className="text-ink relative overflow-hidden border-t-[3px] border-t-coral"
@@ -68,78 +31,44 @@ export default function Footer() {
 
       <div className="max-w-[1200px] mx-auto px-6 relative">
 
-        {/* Newsletter strip */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center py-9 pb-7 border-b border-border-strong">
-          <div>
-            <div className="flex items-center gap-2.5 mb-2.5">
-              <div className="relative w-7 h-7 shrink-0">
-                <Image src="/logo.png" alt="" fill className="object-contain" />
-              </div>
-              <span className="text-[15px] font-semibold tracking-[-0.015em]">
-                Sans Croquettes Fixes
-              </span>
+        {/* Brand + links + contact */}
+        <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4 py-5">
+          <Link href="/" className="flex items-center gap-2 no-underline shrink-0">
+            <div className="relative w-6 h-6 shrink-0">
+              <Image src="/logo.png" alt="" fill className="object-contain" />
             </div>
-            <p className="text-sm leading-[1.55] text-ink-muted m-0 max-w-[360px]">
-              Association loi 1901 — Protection animale dans la région lyonnaise depuis 2015.
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-semibold m-0 mb-2">
-              Recevez les nouvelles de l&apos;asso
-            </p>
-            <div className="flex bg-white rounded-lg p-1 border border-border-strong">
-              <Input
-                type="email"
-                placeholder="Votre email"
-                className="h-auto min-w-0 flex-1 rounded-none border-none bg-transparent px-3 py-2 text-sm text-ink shadow-none outline-none focus-visible:border-none focus-visible:ring-0"
-              />
-              <Button
-                type="submit"
-                className="h-auto gap-1.5 rounded-md border-none bg-coral px-4 py-2 text-sm font-semibold text-white hover:bg-coral hover:text-white"
-              >
-                S&apos;abonner <ArrowRight className="size-3" />
-              </Button>
-            </div>
-            <p className="text-2xs text-ink-muted mt-1.5 mb-0">
-              Une newsletter par mois, pas plus — promis.
-            </p>
-          </div>
-        </div>
+            <span className="text-sm font-semibold tracking-[-0.015em] text-ink">
+              Sans Croquettes Fixes
+            </span>
+          </Link>
 
-        {/* Link columns */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-7 py-7 pb-6">
-          {COLUMNS.map(({ title, items }) => (
-            <div key={title}>
-              <div className="text-xs font-semibold text-ink mb-2.5">{title}</div>
-              <ul className="list-none p-0 m-0 grid gap-2">
-                {items.map(({ label, href }) => (
-                  <li key={label}>
-                    <Link href={href} className="text-sm text-ink-muted no-underline">
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <nav className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
+            {LINKS.map(({ label, href }) => (
+              <Link key={href} href={href} className="text-sm text-ink-muted no-underline">
+                {label}
+              </Link>
+            ))}
+          </nav>
 
-          {/* Contact + social */}
-          <div>
-            <div className="text-xs font-semibold text-ink mb-2.5">Contact</div>
-            <div className="grid gap-1.5 text-sm text-ink-muted mb-3.5">
-              <div>contact@sanscroquettesfixes.fr</div>
-              <div>Lyon (69) &amp; alentours</div>
-            </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <a href="mailto:contact@sanscroquettesfixes.fr" className="text-sm text-ink-muted no-underline">
+              contact@sanscroquettesfixes.fr
+            </a>
             <div className="flex gap-1.5">
-              {SOCIAL.map(({ label, bgClass, href }) => (
+              {socialLinks.map(({ id, label, url, iconUrl }) => (
                 <Link
-                  key={label}
-                  href={href}
+                  key={id}
+                  href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`w-8 h-8 rounded-lg ${bgClass} text-ink flex items-center justify-center text-2xs font-semibold no-underline shrink-0 font-[var(--font-geist-mono)]`}
+                  aria-label={label}
+                  className="w-7 h-7 rounded-lg bg-white border border-border-strong flex items-center justify-center shrink-0"
                 >
-                  {label}
+                  {iconUrl && (
+                    <div className="relative w-3.5 h-3.5">
+                      <Image src={iconUrl} alt="" fill className="object-contain" />
+                    </div>
+                  )}
                 </Link>
               ))}
             </div>
@@ -147,16 +76,11 @@ export default function Footer() {
         </div>
 
         {/* Bottom strip */}
-        <div className="flex justify-between items-center py-4 pb-6 text-2xs text-ink-muted border-t border-border flex-wrap gap-3">
+        <div className="flex justify-between items-center py-3 text-2xs text-ink-muted border-t border-border flex-wrap gap-3">
           <span>© 2026 Sans Croquettes Fixes · SIRET 81819530700017</span>
-          <div className="flex gap-[18px]">
-            <Link href="/mentions-legales" className="text-ink-muted no-underline">
-              Mentions légales
-            </Link>
-            <Link href="/confidentialite" className="text-ink-muted no-underline">
-              Confidentialité
-            </Link>
-          </div>
+          <Link href="/mentions-legales" className="text-ink-muted no-underline">
+            Mentions légales
+          </Link>
         </div>
       </div>
     </footer>

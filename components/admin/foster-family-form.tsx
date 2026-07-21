@@ -3,7 +3,18 @@ import { useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Combobox, ComboboxInputGroup, ComboboxInput, ComboboxTrigger, ComboboxContent, ComboboxItem } from '@/components/ui/combobox'
+import {
+  Combobox,
+  ComboboxValue,
+  ComboboxInputGroup,
+  ComboboxInput,
+  ComboboxTrigger,
+  ComboboxContent,
+  ComboboxItem,
+  ComboboxChips,
+  ComboboxChip,
+  ComboboxChipRemove,
+} from '@/components/ui/combobox'
 import { Field, FieldLabel, FieldGroup } from '@/components/ui/field'
 import { FormError } from '@/components/ui/form-error'
 import SubmitButton from '@/components/admin/submit-button'
@@ -16,6 +27,12 @@ type FosterFamilyFormData = Pick<StrapiFosterFamilyRaw, 'address' | 'max_capacit
 interface UserOption {
   value: number
   label: string
+}
+
+interface AnimalOption {
+  value: number
+  label: string
+  status: FosterPickerAnimal['status']
 }
 
 interface FosterFamilyFormProps {
@@ -31,6 +48,10 @@ export default function FosterFamilyForm({ defaultValues = {}, animals = [], use
   const userOptions: UserOption[] = users.map((u) => ({ value: u.id, label: `${u.username} (${u.email})` }))
   const [selectedUser, setSelectedUser] = useState<UserOption | null>(
     userOptions.find((o) => o.value === defaultValues.userId) ?? null
+  )
+  const animalOptions: AnimalOption[] = animals.map((a) => ({ value: a.id, label: a.name, status: a.status }))
+  const [selectedAnimals, setSelectedAnimals] = useState<AnimalOption[]>(
+    animalOptions.filter((o) => linkedAnimalIds.includes(o.value))
   )
 
   return (
@@ -83,26 +104,38 @@ export default function FosterFamilyForm({ defaultValues = {}, animals = [], use
           </Label>
         </Field>
         <Field>
-          <FieldLabel>Chats à héberger</FieldLabel>
-          <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
-            {animals.map((a) => (
-              <Label key={a.id} htmlFor={`animal-${a.id}`} className="flex cursor-pointer items-center justify-between gap-2 font-normal">
-                <span className="flex items-center gap-2">
-                  <Checkbox
-                    id={`animal-${a.id}`}
-                    name="animal_ids"
-                    value={String(a.id)}
-                    defaultChecked={linkedAnimalIds.includes(a.id)}
-                  />
-                  {a.name}
-                </span>
-                <StatusBadge status={a.status} />
-              </Label>
-            ))}
-            {animals.length === 0 && (
-              <p className="text-sm text-muted-foreground">Aucun chat disponible.</p>
-            )}
-          </div>
+          <FieldLabel htmlFor="animal_ids">Chats à héberger</FieldLabel>
+          <Combobox items={animalOptions} multiple value={selectedAnimals} onValueChange={setSelectedAnimals}>
+            <ComboboxChips>
+              <ComboboxValue>
+                {(value: AnimalOption[]) =>
+                  value.map((item) => (
+                    <ComboboxChip key={item.value}>
+                      {item.label}
+                      <ComboboxChipRemove aria-label={`Retirer ${item.label}`} />
+                    </ComboboxChip>
+                  ))
+                }
+              </ComboboxValue>
+              <ComboboxInput id="animal_ids" placeholder="Rechercher un chat…" />
+            </ComboboxChips>
+            <ComboboxContent emptyMessage="Aucun chat trouvé.">
+              {(item: AnimalOption) => (
+                <ComboboxItem key={item.value} value={item}>
+                  <span className="flex flex-1 items-center justify-between gap-2">
+                    {item.label}
+                    <StatusBadge status={item.status} />
+                  </span>
+                </ComboboxItem>
+              )}
+            </ComboboxContent>
+          </Combobox>
+          {selectedAnimals.map((a) => (
+            <input key={a.value} type="hidden" name="animal_ids" value={a.value} />
+          ))}
+          {animalOptions.length === 0 && (
+            <p className="text-sm text-muted-foreground">Aucun chat disponible.</p>
+          )}
         </Field>
         <FormError message={error} />
         <SubmitButton label="Enregistrer" pending={isPending} />
