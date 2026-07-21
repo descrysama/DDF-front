@@ -632,8 +632,13 @@ export async function fetchRoles(): Promise<StrapiRole[]> {
   return roles
 }
 
+// Hits the custom /role endpoint from the backend's users-permissions extension,
+// not the stock PUT /api/users/:id — that one is deliberately scoped to "your own
+// account only", so an admin editing someone else gets a 403. The custom route
+// writes the role relation and nothing else. Flat body: this is a plugin route,
+// so no { data } envelope (which is also why strapiPut can't be reused here).
 export async function updateUserRole(userId: number, roleId: number): Promise<void> {
-  const res = await fetch(`${STRAPI_URL}/api/users/${userId}`, {
+  const res = await fetch(`${STRAPI_URL}/api/users/${userId}/role`, {
     method: 'PUT',
     headers: {
       ...strapiAuthHeaders(),
@@ -641,7 +646,10 @@ export async function updateUserRole(userId: number, roleId: number): Promise<vo
     },
     body: JSON.stringify({ role: roleId }),
   })
-  if (!res.ok) throw new Error(`Strapi ${res.status} PUT: /api/users/${userId}`)
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '')
+    throw new Error(`Strapi ${res.status} PUT /api/users/${userId}/role: ${detail}`)
+  }
 }
 
 export async function fetchBreeds(): Promise<StrapiBreed[]> {
