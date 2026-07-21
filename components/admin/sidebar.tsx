@@ -32,7 +32,6 @@ const GESTION_ITEMS: NavItem[] = [
   { key: 'demandes',  label: "Demandes d'adoption",    href: '/admin/adoption-requests',  icon: Heart,   badge: null, badgeHighlight: true },
   { key: 'fa',        label: "Familles d'accueil",     href: '/admin/foster-families',    icon: Smile },
   { key: 'distrib',   label: 'Distributions',          href: '/admin/distributions',       icon: Calendar },
-  { key: 'dons',      label: 'Dons & finances',        href: '#',                         icon: Shield },
   { key: 'blog',      label: 'Blog & actualités',      href: '/admin/blog',               icon: FileText },
 ]
 
