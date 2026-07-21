@@ -1,6 +1,6 @@
 "use server"
 
-import { STRAPI_URL, STRAPI_TOKEN } from '@/lib/config'
+import { STRAPI_URL, strapiAuthHeaders } from '@/lib/config'
 import { getCurrentUser } from '@/lib/auth'
 
 export interface AdoptionFormData {
@@ -71,7 +71,7 @@ export async function submitAdoptionRequest(data: AdoptionFormData): Promise<Ado
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(STRAPI_TOKEN && { Authorization: `Bearer ${STRAPI_TOKEN}` }),
+      ...strapiAuthHeaders(),
     },
     body: JSON.stringify({
       data: {

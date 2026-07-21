@@ -1,10 +1,7 @@
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowRight } from "lucide-react"
-
-const PARTNERS = [
-  'Ville de Lyon', 'Métropole 69', 'Cabinet Vét. Charpennes', 'Croix-Rousse Vet',
-  'Maxi Zoo Part-Dieu', 'Royal Canin', "30 Millions d'Amis", 'Fondation B. Bardot',
-]
+import type { Partner } from "@/lib/strapi"
 
 const PARTNER_TINT_CLASSES = ['bg-peach', 'bg-lilac', 'bg-mint', 'bg-pink']
 
@@ -15,7 +12,7 @@ const FUNDING = [
   { label: 'Adoptions',         pct: '5%',  width: 5  },
 ]
 
-export function PartnersSection() {
+export function PartnersSection({ partners }: { partners: Partner[] }) {
   return (
     <section className="max-w-[1200px] mx-auto px-6 pb-14">
       <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-5">
@@ -28,14 +25,20 @@ export function PartnersSection() {
             Ils nous soutiennent au quotidien.
           </h3>
           <div className="grid grid-cols-4 gap-2.5">
-            {PARTNERS.map((name, i) => (
-              <div
-                key={name}
-                className={`${PARTNER_TINT_CLASSES[i % 4]} rounded-lg py-3.5 px-3 text-xs font-semibold text-ink text-center leading-[1.3]`}
-              >
-                {name}
-              </div>
-            ))}
+            {partners.map(({ id, name, logoUrl }, i) =>
+              logoUrl ? (
+                <div key={id} className="relative rounded-lg overflow-hidden bg-white aspect-[2/1]">
+                  <Image src={logoUrl} alt={name} fill sizes="150px" className="object-contain p-2" />
+                </div>
+              ) : (
+                <div
+                  key={id}
+                  className={`${PARTNER_TINT_CLASSES[i % 4]} rounded-lg py-3.5 px-3 text-xs font-semibold text-ink text-center leading-[1.3]`}
+                >
+                  {name}
+                </div>
+              )
+            )}
           </div>
         </div>
 

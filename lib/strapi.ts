@@ -339,6 +339,80 @@ export async function fetchBlogPostAdmin(documentId: string): Promise<StrapiBlog
   }
 }
 
+// ─── About page ───────────────────────────────────────────────────────────────
+
+interface StrapiAboutPageRaw {
+  id: number
+  hero_photo: StrapiImageFile | null
+  hero_caption: string | null
+}
+
+export interface AboutPageContent {
+  heroPhotoUrl: string | null
+  heroCaption: string | null
+}
+
+export async function fetchAboutPage(): Promise<AboutPageContent> {
+  const { data } = await strapiGet<{ data: StrapiAboutPageRaw | null }>(
+    '/api/about-page?populate=hero_photo'
+  )
+  return {
+    heroPhotoUrl: mediaUrl(data?.hero_photo),
+    heroCaption: data?.hero_caption ?? null,
+  }
+}
+
+interface StrapiTeamMemberRaw {
+  id: number
+  documentId: string
+  name: string
+  role: string
+  photo: StrapiImageFile | null
+}
+
+export interface TeamMember {
+  id: string
+  name: string
+  role: string
+  photoUrl: string | null
+}
+
+export async function fetchTeamMembers(): Promise<TeamMember[]> {
+  const { data } = await strapiGet<StrapiListResponse<StrapiTeamMemberRaw>>(
+    '/api/team-members?populate=photo&sort=order:asc'
+  )
+  return data.map((m) => ({
+    id: m.documentId,
+    name: m.name,
+    role: m.role,
+    photoUrl: mediaUrl(m.photo),
+  }))
+}
+
+interface StrapiPartnerRaw {
+  id: number
+  documentId: string
+  name: string
+  logo: StrapiImageFile | null
+}
+
+export interface Partner {
+  id: string
+  name: string
+  logoUrl: string | null
+}
+
+export async function fetchPartners(): Promise<Partner[]> {
+  const { data } = await strapiGet<StrapiListResponse<StrapiPartnerRaw>>(
+    '/api/partners?populate=logo&sort=order:asc'
+  )
+  return data.map((p) => ({
+    id: p.documentId,
+    name: p.name,
+    logoUrl: mediaUrl(p.logo),
+  }))
+}
+
 // ─── Admin types ──────────────────────────────────────────────────────────────
 
 export type AnnouncementStatus = 'open' | 'closed' | 'draft'

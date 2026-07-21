@@ -1,4 +1,12 @@
-export function AboutHero() {
+import Image from 'next/image'
+
+export function AboutHero({
+  heroPhotoUrl,
+  heroCaption,
+}: {
+  heroPhotoUrl: string | null
+  heroCaption: string | null
+}) {
   return (
     <section className="relative overflow-hidden">
       <div
@@ -37,16 +45,22 @@ export function AboutHero() {
         </div>
 
         <div className="relative aspect-[5/4] rounded-xl overflow-hidden shadow-photo">
-          <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(135deg, #3C3F4E 0%, #1F2235 100%)' }}
-          />
-          <div
-            className="absolute bottom-3.5 left-3.5 right-3.5 px-3.5 py-2.5 rounded-lg text-xs text-ink leading-[1.5]"
-            style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)' }}
-          >
-            <strong>Pilgrim, 13 ans.</strong> Recueilli en 2024 après l&apos;hospitalisation de son humaine. Il vit désormais en famille d&apos;accueil.
-          </div>
+          {heroPhotoUrl ? (
+            <Image src={heroPhotoUrl} alt="" fill sizes="(min-width: 768px) 40vw, 90vw" className="object-cover" />
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(135deg, #3C3F4E 0%, #1F2235 100%)' }}
+            />
+          )}
+          {heroCaption && (
+            <div
+              className="absolute bottom-3.5 left-3.5 right-3.5 px-3.5 py-2.5 rounded-lg text-xs text-ink leading-[1.5]"
+              style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)' }}
+            >
+              {heroCaption}
+            </div>
+          )}
         </div>
       </div>
     </section>
