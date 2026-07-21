@@ -1,4 +1,4 @@
-import { STRAPI_URL, STRAPI_TOKEN } from './config'
+import { STRAPI_URL, STRAPI_TOKEN, strapiAuthHeaders } from './config'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -606,14 +606,42 @@ export async function fetchAdoptionRequests(opts?: {
   return { adoptionRequests: data, total: meta.pagination.total }
 }
 
+export interface StrapiRole {
+  id: number
+  name: string
+  type: string
+}
+
 export interface StrapiUser {
   id: number
   username: string
   email: string
+  createdAt?: string
+  role?: StrapiRole
 }
 
+// NB: /api/users is the users-permissions controller, not the content API. It
+// ignores `pagination[pageSize]` and honours `start`/`limit` instead — verified
+// against the running Strapi. Using the wrong param silently caps the list at 25.
 export async function fetchUsers(): Promise<StrapiUser[]> {
-  return strapiGet<StrapiUser[]>('/api/users')
+  return strapiGet<StrapiUser[]>('/api/users?populate=role&sort=createdAt:desc&limit=200')
+}
+
+export async function fetchRoles(): Promise<StrapiRole[]> {
+  const { roles } = await strapiGet<{ roles: StrapiRole[] }>('/api/users-permissions/roles')
+  return roles
+}
+
+export async function updateUserRole(userId: number, roleId: number): Promise<void> {
+  const res = await fetch(`${STRAPI_URL}/api/users/${userId}`, {
+    method: 'PUT',
+    headers: {
+      ...strapiAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ role: roleId }),
+  })
+  if (!res.ok) throw new Error(`Strapi ${res.status} PUT: /api/users/${userId}`)
 }
 
 export async function fetchBreeds(): Promise<StrapiBreed[]> {

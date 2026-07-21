@@ -12,6 +12,7 @@ import {
   FileText,
   Settings,
   Megaphone,
+  Users,
 } from 'lucide-react'
 import { AD } from '@/lib/admin-tokens'
 import type { StrapiDistributionRaw } from '@/lib/strapi'
@@ -36,8 +37,8 @@ const GESTION_ITEMS: NavItem[] = [
 ]
 
 const CONFIG_ITEMS: NavItem[] = [
-  { key: 'benevoles',  label: 'Bénévoles',   href: '#', icon: Smile },
-  { key: 'parametres', label: 'Paramètres',  href: '#', icon: Settings },
+  { key: 'utilisateurs', label: 'Utilisateurs', href: '/admin/users', icon: Users },
+  { key: 'parametres',   label: 'Paramètres',   href: '#',            icon: Settings },
 ]
 
 const SECTION_LABEL_STYLE: React.CSSProperties = {
