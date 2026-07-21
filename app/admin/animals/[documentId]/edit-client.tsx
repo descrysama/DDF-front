@@ -37,6 +37,10 @@ interface Animal {
   ok_with_dogs: boolean
   ok_with_cats: boolean
   indoor_only: boolean
+  vaccinated: boolean
+  sterilized: boolean
+  identified: boolean
+  dewormed: boolean
   breed?: StrapiBreed | null
   medias?: StrapiMedia[]
   video_url?: string | null
@@ -329,6 +333,28 @@ export default function AnimalEditClient({
                 { name: 'ok_with_dogs',     label: 'Compatible chiens',  checked: animal.ok_with_dogs },
                 { name: 'ok_with_cats',     label: 'Compatible chats',   checked: animal.ok_with_cats },
                 { name: 'indoor_only',      label: 'Intérieur uniquement', checked: animal.indoor_only },
+              ].map((item) => (
+                <label key={item.name} style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer',
+                  padding: '8px 12px', borderRadius: 7, background: AD.surfaceAlt,
+                }}>
+                  <input type="checkbox" name={item.name} defaultChecked={!!item.checked} style={{ marginTop: 2, flexShrink: 0 }} />
+                  <span style={{ fontSize: 12.5, color: AD.ink }}>{item.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Santé & identification */}
+          <div style={card}>
+            <div style={cardTitle}>Santé & identification</div>
+            <div style={cardHint}>États affichés en pills Actif/Inactif sur la fiche publique.</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {[
+                { name: 'vaccinated', label: 'Vacciné',          checked: animal.vaccinated },
+                { name: 'sterilized', label: 'Stérilisé/castré', checked: animal.sterilized },
+                { name: 'identified', label: 'Identifié',        checked: animal.identified },
+                { name: 'dewormed',   label: 'Déparasité',       checked: animal.dewormed },
               ].map((item) => (
                 <label key={item.name} style={{
                   display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer',

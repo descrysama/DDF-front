@@ -25,6 +25,10 @@ interface AnimalDetail {
   ok_with_dogs: boolean
   ok_with_cats: boolean
   indoor_only: boolean
+  vaccinated: boolean
+  sterilized: boolean
+  identified: boolean
+  dewormed: boolean
   breed?: StrapiBreed | null
   medias?: StrapiMedia[]
   video_url?: string | null

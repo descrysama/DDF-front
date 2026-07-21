@@ -3,7 +3,6 @@ import { notFound } from "next/navigation"
 import { ArrowRight, Sparkles } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
-import { Button } from "@/components/ui/button"
 import { CAT_TINT } from "@/lib/placeholder-cats"
 import { fetchAnimal, fetchAnimals, fetchCompatibility, compatibilityTone, ACTIVITY_LABEL, type CardAnimal, type AnimalActivity } from "@/lib/strapi"
 import { getCurrentUser, getAuthToken } from "@/lib/auth"
@@ -114,26 +113,42 @@ export default async function CatPage({ params, searchParams }: Props) {
                   ['En refuge depuis', cat.trapDate ? new Date(cat.trapDate).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : null],
                 ]
                   .filter(([, v]) => Boolean(v))
-                  .map(([k, v], i, arr) => (
+                  .map(([k, v]) => (
                     <div
                       key={k}
-                      className={`flex justify-between items-start gap-4 py-2.5 text-xs ${i < arr.length - 1 ? 'border-b border-ink/10' : ''}`}
+                      className="flex justify-between items-start gap-4 py-2.5 text-xs border-b border-ink/10"
                     >
                       <span className="text-ink-muted shrink-0">{k}</span>
                       <span className="text-ink font-medium text-right">{v}</span>
                     </div>
                   ))}
+                {(
+                  [
+                    ['Vacciné', cat.vaccinated],
+                    ['Stérilisé/castré', cat.sterilized],
+                    ['Identifié', cat.identified],
+                    ['Déparasité', cat.dewormed],
+                  ] as [string, boolean][]
+                ).map(([k, active], i, arr) => (
+                  <div
+                    key={k}
+                    className={`flex justify-between items-center gap-4 py-2.5 text-xs ${i < arr.length - 1 ? 'border-b border-ink/10' : ''}`}
+                  >
+                    <span className="text-ink-muted shrink-0">{k}</span>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                        active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
+                      }`}
+                    >
+                      {active ? 'Oui' : 'Non'}
+                    </span>
+                  </div>
+                ))}
               </div>
 
               {/* CTAs */}
               <div className="flex flex-col gap-2">
                 <AdoptModal cat={cat} defaultOpen={adopt === "1"} />
-                <Button
-                  variant="outline"
-                  className="w-full h-auto gap-2 px-[18px] py-3 rounded-md bg-white hover:bg-white shadow-none text-ink border border-border-strong text-sm font-semibold"
-                >
-                  Famille d&apos;accueil
-                </Button>
               </div>
 
               {/* Adoption fee note */}

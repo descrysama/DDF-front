@@ -74,6 +74,10 @@ interface StrapiAnimalRaw {
   ok_with_dogs: boolean
   ok_with_cats: boolean
   indoor_only: boolean
+  vaccinated: boolean
+  sterilized: boolean
+  identified: boolean
+  dewormed: boolean
   breed: StrapiBreed | null
   bonded_with: StrapiAnimalRaw | null
   medias?: StrapiMedia[]
@@ -109,6 +113,10 @@ export interface CardAnimal {
   okWithDogs: boolean
   okWithCats: boolean
   indoorOnly: boolean
+  vaccinated: boolean
+  sterilized: boolean
+  identified: boolean
+  dewormed: boolean
   medicalHistory: StrapiMedicalEvent[]
 }
 
@@ -179,6 +187,10 @@ function toCardAnimal(a: StrapiAnimalRaw): CardAnimal {
     okWithDogs: a.ok_with_dogs,
     okWithCats: a.ok_with_cats,
     indoorOnly: a.indoor_only,
+    vaccinated: a.vaccinated,
+    sterilized: a.sterilized,
+    identified: a.identified,
+    dewormed: a.dewormed,
     medicalHistory: [...(a.medical_history ?? [])].sort((x, y) => y.event_date.localeCompare(x.event_date)),
   }
 }

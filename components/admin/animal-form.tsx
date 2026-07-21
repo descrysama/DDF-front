@@ -22,6 +22,10 @@ interface AnimalFormData {
   ok_with_dogs?: boolean
   ok_with_cats?: boolean
   indoor_only?: boolean
+  vaccinated?: boolean
+  sterilized?: boolean
+  identified?: boolean
+  dewormed?: boolean
   breed_id?: number | null
 }
 
@@ -128,6 +132,23 @@ export default function AnimalForm({ defaultValues = {}, action, breeds = [] }: 
               { name: 'ok_with_dogs',     label: 'Compatible chiens',  checked: defaultValues.ok_with_dogs },
               { name: 'ok_with_cats',     label: 'Compatible chats',   checked: defaultValues.ok_with_cats },
               { name: 'indoor_only',      label: 'Intérieur uniquement', checked: defaultValues.indoor_only },
+            ].map(({ name, label, checked }) => (
+              <Label key={name} htmlFor={name} className="flex cursor-pointer items-center gap-2 font-normal">
+                <Checkbox id={name} name={name} defaultChecked={!!checked} />
+                {label}
+              </Label>
+            ))}
+          </div>
+        </Field>
+
+        <Field>
+          <FieldLabel>Santé & identification</FieldLabel>
+          <div className="flex flex-col gap-2">
+            {[
+              { name: 'vaccinated', label: 'Vacciné',           checked: defaultValues.vaccinated },
+              { name: 'sterilized', label: 'Stérilisé/castré',  checked: defaultValues.sterilized },
+              { name: 'identified', label: 'Identifié',         checked: defaultValues.identified },
+              { name: 'dewormed',   label: 'Déparasité',        checked: defaultValues.dewormed },
             ].map(({ name, label, checked }) => (
               <Label key={name} htmlFor={name} className="flex cursor-pointer items-center gap-2 font-normal">
                 <Checkbox id={name} name={name} defaultChecked={!!checked} />

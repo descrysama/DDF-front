@@ -24,6 +24,10 @@ function parseAnimalFormData(formData: FormData) {
     ok_with_dogs:     formData.get('ok_with_dogs') === 'on',
     ok_with_cats:     formData.get('ok_with_cats') === 'on',
     indoor_only:      formData.get('indoor_only') === 'on',
+    vaccinated:       formData.get('vaccinated') === 'on',
+    sterilized:       formData.get('sterilized') === 'on',
+    identified:       formData.get('identified') === 'on',
+    dewormed:         formData.get('dewormed') === 'on',
     trap_date:        trapDate || null,
     breed:            breedId ? Number(breedId) : null,
   }
@@ -100,6 +104,8 @@ export async function updateAnimal(documentId: string, formData: FormData) {
   await requireAdmin()
   await strapiPut(`/api/animals/${documentId}`, parseAnimalFormData(formData))
   revalidatePath('/admin/animals')
+  revalidatePath(`/admin/animals/${documentId}`)
+  revalidatePath(`/adopt-pet/${documentId}`)
   revalidatePath('/')
   redirect('/admin/animals')
 }
