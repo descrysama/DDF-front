@@ -5,7 +5,7 @@ import ActionButtons from '@/components/admin/action-buttons'
 import { AD } from '@/lib/admin-tokens'
 import { Card } from '@/components/ui/card'
 
-const GRID_COLS = '2fr 1fr 0.8fr 110px'
+const GRID_COLS = '2fr 1fr 0.8fr 150px'
 
 export default async function AdminBlogPage() {
   const { posts, total } = await fetchBlogPostsAdmin({ limit: 100 })
@@ -88,6 +88,7 @@ export default async function AdminBlogPage() {
             </span>
 
             <ActionButtons
+              viewHref={`/news/${post.slug}`}
               editHref={`/admin/blog/${post.documentId}`}
               deleteAction={deleteBlogPost.bind(null, post.documentId)}
             />
