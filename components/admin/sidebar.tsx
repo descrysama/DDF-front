@@ -14,6 +14,7 @@ import {
   Megaphone,
 } from 'lucide-react'
 import { AD } from '@/lib/admin-tokens'
+import type { StrapiDistributionRaw } from '@/lib/strapi'
 
 type NavItem = {
   key: string
@@ -30,9 +31,9 @@ const GESTION_ITEMS: NavItem[] = [
   { key: 'annonces',  label: 'Annonces',                href: '/admin/announcements',      icon: Megaphone },
   { key: 'demandes',  label: "Demandes d'adoption",    href: '/admin/adoption-requests',  icon: Heart,   badge: null, badgeHighlight: true },
   { key: 'fa',        label: "Familles d'accueil",     href: '/admin/foster-families',    icon: Smile },
-  { key: 'distrib',   label: 'Distributions',          href: '#',                         icon: Calendar },
+  { key: 'distrib',   label: 'Distributions',          href: '/admin/distributions',       icon: Calendar },
   { key: 'dons',      label: 'Dons & finances',        href: '#',                         icon: Shield },
-  { key: 'blog',      label: 'Blog & actualités',      href: '#',                         icon: FileText },
+  { key: 'blog',      label: 'Blog & actualités',      href: '/admin/blog',               icon: FileText },
 ]
 
 const CONFIG_ITEMS: NavItem[] = [
@@ -50,7 +51,11 @@ const SECTION_LABEL_STYLE: React.CSSProperties = {
   marginBottom: 4,
 }
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+  nextDistribution: StrapiDistributionRaw | null
+}
+
+export default function AdminSidebar({ nextDistribution }: AdminSidebarProps) {
   const pathname = usePathname()
 
   function isActive(item: NavItem) {
@@ -60,29 +65,11 @@ export default function AdminSidebar() {
 
   function renderItem(item: NavItem) {
     const active = isActive(item)
+    const disabled = item.href === '#'
     const Icon = item.icon
 
-    return (
-      <Link
-        key={item.key}
-        href={item.href}
-        style={{
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '8px 10px',
-          borderRadius: 6,
-          marginBottom: 2,
-          fontSize: 13.5,
-          fontWeight: active ? 600 : 400,
-          textDecoration: 'none',
-          background: active ? AD.surfaceAlt : 'transparent',
-          color: active ? AD.ink : AD.inkMuted,
-          transition: 'background 0.12s',
-        }}
-      >
-        {/* Active indicator bar */}
+    const inner = (
+      <>
         {active && (
           <span
             style={{
@@ -100,11 +87,17 @@ export default function AdminSidebar() {
 
         <Icon
           size={16}
-          color={active ? AD.coral : AD.inkSubtle}
+          color={disabled ? AD.border : active ? AD.coral : AD.inkSubtle}
           strokeWidth={active ? 2.2 : 1.8}
         />
 
         <span style={{ flex: 1 }}>{item.label}</span>
+
+        {disabled && (
+          <span style={{ fontSize: 9, color: AD.border, fontWeight: 600 }}>
+            Bientôt
+          </span>
+        )}
 
         {item.badge != null && (
           <span
@@ -121,6 +114,50 @@ export default function AdminSidebar() {
             {item.badge}
           </span>
         )}
+      </>
+    )
+
+    const baseStyle: React.CSSProperties = {
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      padding: '8px 10px',
+      borderRadius: 6,
+      marginBottom: 2,
+      fontSize: 13.5,
+      textDecoration: 'none',
+      transition: 'background 0.12s',
+    }
+
+    if (disabled) {
+      return (
+        <span
+          key={item.key}
+          style={{
+            ...baseStyle,
+            color: AD.border,
+            cursor: 'default',
+            fontWeight: 400,
+          }}
+        >
+          {inner}
+        </span>
+      )
+    }
+
+    return (
+      <Link
+        key={item.key}
+        href={item.href}
+        style={{
+          ...baseStyle,
+          fontWeight: active ? 600 : 400,
+          background: active ? AD.surfaceAlt : 'transparent',
+          color: active ? AD.ink : AD.inkMuted,
+        }}
+      >
+        {inner}
       </Link>
     )
   }
@@ -172,22 +209,40 @@ export default function AdminSidebar() {
               marginBottom: 4,
             }}
           >
-            Distribution du 22/05
+            {nextDistribution
+              ? `Distribution du ${new Date(nextDistribution.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}`
+              : 'Aucune distribution prévue'}
           </p>
           <p style={{ fontSize: 11.5, color: AD.inkMuted, marginBottom: 8, lineHeight: 1.5 }}>
-            12 inscriptions confirmées
+            {nextDistribution
+              ? `${nextDistribution.volunteers?.length ?? 0} inscription(s) confirmée(s)`
+              : 'Planifiez-en une pour voir apparaître les inscriptions ici.'}
           </p>
-          <Link
-            href="#"
-            style={{
-              fontSize: 11.5,
-              fontWeight: 600,
-              color: AD.coralInk,
-              textDecoration: 'none',
-            }}
-          >
-            Gérer l&apos;événement →
-          </Link>
+          {nextDistribution ? (
+            <Link
+              href={`/admin/distributions/${nextDistribution.documentId}`}
+              style={{
+                fontSize: 11.5,
+                fontWeight: 600,
+                color: AD.coral,
+                textDecoration: 'none',
+              }}
+            >
+              Gérer l&apos;événement →
+            </Link>
+          ) : (
+            <Link
+              href="/admin/distributions/new"
+              style={{
+                fontSize: 11.5,
+                fontWeight: 600,
+                color: AD.coral,
+                textDecoration: 'none',
+              }}
+            >
+              Planifier une distribution →
+            </Link>
+          )}
         </div>
       </div>
     </aside>

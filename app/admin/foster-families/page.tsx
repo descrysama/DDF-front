@@ -6,7 +6,7 @@ import ActionButtons from '@/components/admin/action-buttons'
 import { AD, TINT } from '@/lib/admin-tokens'
 import { Card } from '@/components/ui/card'
 
-const GRID_COLS = '1.6fr 1.4fr 80px 80px 80px 80px 80px 110px'
+const GRID_COLS = '1.6fr 1.4fr 80px 80px 80px 90px 80px 90px 110px'
 
 function BoolPill({ value }: { value: boolean }) {
   return (
@@ -41,10 +41,12 @@ export default async function AdminFosterFamiliesPage() {
 
   const withAssignments = fosterFamilies.filter(f => (f.foster_assignments?.length ?? 0) > 0)
   const totalHosted = fosterFamilies.reduce((s, f) => s + (f.foster_assignments?.length ?? 0), 0)
+  const availableCount = fosterFamilies.filter(f => f.is_available).length
 
   const STAT_CARDS = [
     { label: 'Total familles',   count: total,                  dot: '#7B6CC4' },
     { label: 'Familles actives', count: withAssignments.length, dot: '#3FA66E' },
+    { label: 'Disponibles',      count: availableCount,         dot: '#3FA66E' },
     { label: 'Animaux hébergés', count: totalHosted,            dot: '#E0944A' },
   ]
 
@@ -61,7 +63,7 @@ export default async function AdminFosterFamiliesPage() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: 'repeat(4, 1fr)',
           gap: 14,
           marginBottom: 22,
         }}
@@ -85,7 +87,7 @@ export default async function AdminFosterFamiliesPage() {
             borderBottom: `1px solid ${AD.border}`,
           }}
         >
-          {['Famille', 'Adresse', 'Capacité', 'Enfants', 'Chiens', 'Chats', 'Hébergés', 'Actions'].map(col => (
+          {['Famille', 'Adresse', 'Capacité', 'Enfants', 'Chiens', 'Chats', 'Disponible', 'Hébergés', 'Actions'].map(col => (
             <div
               key={col}
               style={{
@@ -143,6 +145,11 @@ export default async function AdminFosterFamiliesPage() {
             {/* Chats */}
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <BoolPill value={family.has_cats} />
+            </div>
+
+            {/* Disponible */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <BoolPill value={family.is_available} />
             </div>
 
             {/* Hébergés */}

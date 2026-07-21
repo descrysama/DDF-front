@@ -9,6 +9,8 @@ export interface AuthUser {
   documentId?: string
   username: string
   email: string
+  is_absent?: boolean
+  absent_until?: string | null
   role: {
     id: number
     name: string
@@ -16,9 +18,13 @@ export interface AuthUser {
   } | null
 }
 
-export async function getCurrentUser(): Promise<AuthUser | null> {
+export async function getAuthToken(): Promise<string | null> {
   const jar = await cookies()
-  const jwt = jar.get(AUTH_COOKIE)?.value
+  return jar.get(AUTH_COOKIE)?.value ?? null
+}
+
+export async function getCurrentUser(): Promise<AuthUser | null> {
+  const jwt = await getAuthToken()
   if (!jwt) return null
 
   const res = await fetch(`${STRAPI_URL}/api/users/me?populate=role`, {
@@ -30,7 +36,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 }
 
 export function isAdmin(user: AuthUser | null): boolean {
-  return user?.role?.type === 'admin'
+  return user?.role?.name?.toLowerCase() === 'admin'
 }
 
 export async function requireAdmin(): Promise<AuthUser> {

@@ -1,6 +1,8 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 const COLUMNS = [
   {
@@ -86,17 +88,17 @@ export default function Footer() {
               Recevez les nouvelles de l&apos;asso
             </p>
             <div className="flex bg-white rounded-lg p-1 border border-border-strong">
-              <input
+              <Input
                 type="email"
                 placeholder="Votre email"
-                className="flex-1 border-none outline-none bg-transparent text-sm text-ink px-3 py-2 font-[inherit]"
+                className="h-auto min-w-0 flex-1 rounded-none border-none bg-transparent px-3 py-2 text-sm text-ink shadow-none outline-none focus-visible:border-none focus-visible:ring-0"
               />
-              <button
+              <Button
                 type="submit"
-                className="px-4 py-2 rounded-md bg-coral text-white border-none cursor-pointer text-sm font-semibold font-[inherit] inline-flex items-center gap-1.5"
+                className="h-auto gap-1.5 rounded-md border-none bg-coral px-4 py-2 text-sm font-semibold text-white hover:bg-coral hover:text-white"
               >
-                S&apos;abonner <ArrowRight size={12} />
-              </button>
+                S&apos;abonner <ArrowRight className="size-3" />
+              </Button>
             </div>
             <p className="text-2xs text-ink-muted mt-1.5 mb-0">
               Une newsletter par mois, pas plus — promis.

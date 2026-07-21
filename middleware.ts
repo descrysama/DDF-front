@@ -17,7 +17,7 @@ export async function middleware(req: NextRequest) {
     })
     if (!res.ok) return NextResponse.redirect(loginUrl)
     const user = await res.json()
-    if (user?.role?.type !== 'admin') {
+    if (user?.role?.name?.toLowerCase() !== 'admin') {
       return NextResponse.redirect(new URL('/', req.url))
     }
   } catch {

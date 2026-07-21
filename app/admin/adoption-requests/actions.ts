@@ -9,6 +9,7 @@ import { requireAdmin } from '@/lib/auth'
 function parseAdoptionFormData(formData: FormData) {
   const announcementId = formData.get('announcement_id') as string
   const adopterId     = formData.get('adopter_id') as string
+  const referentId    = formData.get('referent_id') as string
   const matchScore    = formData.get('match_score') as string
   const requestDate   = formData.get('request_date') as string
   return {
@@ -18,6 +19,7 @@ function parseAdoptionFormData(formData: FormData) {
     request_date: requestDate || null,
     ...(announcementId ? { announcement: announcementId } : {}),
     ...(adopterId     ? { adopter: Number(adopterId) }   : {}),
+    referent: referentId ? Number(referentId) : null,
   }
 }
 

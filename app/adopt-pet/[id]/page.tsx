@@ -1,15 +1,19 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowRight, Heart } from "lucide-react"
+import { ArrowRight, Sparkles } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { Button } from "@/components/ui/button"
 import { CAT_TINT } from "@/lib/placeholder-cats"
-import { fetchAnimal, fetchAnimals, type CardAnimal, type AnimalActivity } from "@/lib/strapi"
+import { fetchAnimal, fetchAnimals, fetchCompatibility, compatibilityTone, ACTIVITY_LABEL, type CardAnimal, type AnimalActivity } from "@/lib/strapi"
+import { getCurrentUser, getAuthToken } from "@/lib/auth"
 import { CatCard } from "@/components/cat-card"
 import { AdoptModal } from "./_components/adopt-modal"
+import { MediaViewer } from "./_components/media-viewer"
 
 interface Props {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ adopt?: string }>
 }
 
 const ADOPTION_STEPS = [
@@ -19,10 +23,12 @@ const ADOPTION_STEPS = [
   { title: 'Contrat & arrivée', desc: 'Signature, frais d\'adoption, et le grand jour !', tintClass: 'bg-mint' },
 ]
 
-const ACTIVITY_LABEL: Record<AnimalActivity, string> = {
-  low: 'Calme',
-  medium: 'Modéré',
-  high: 'Très actif',
+const MEDICAL_EVENT_LABEL: Record<string, string> = {
+  vaccination: 'Vaccination',
+  sterilisation: 'Stérilisation',
+  consultation: 'Consultation',
+  traitement: 'Traitement',
+  autre: 'Suivi',
 }
 
 function enteneLabel(cat: CardAnimal): string {
@@ -35,10 +41,15 @@ function enteneLabel(cat: CardAnimal): string {
   return `S'entend bien avec ${compat.join(', ')}`
 }
 
-export default async function CatPage({ params }: Props) {
+export default async function CatPage({ params, searchParams }: Props) {
   const { id } = await params
+  const { adopt } = await searchParams
   const cat = await fetchAnimal(id)
   if (!cat) notFound()
+
+  const user = await getCurrentUser()
+  const token = user ? await getAuthToken() : null
+  const compatibility = user && token ? await fetchCompatibility(cat.documentId, token) : null
 
   const { animals } = await fetchAnimals({ limit: 8 })
   const others = animals.filter((c) => c.documentId !== cat.documentId).slice(0, 4)
@@ -64,50 +75,14 @@ export default async function CatPage({ params }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] gap-7 items-start">
             {/* Photo column */}
             <div>
-              {/* Main photo placeholder */}
-              <div className="relative rounded-xl overflow-hidden mb-2.5 aspect-[5/4]">
-                <div
-                  className="absolute inset-0"
-                  style={{ background: `linear-gradient(135deg, ${cat.tones[0]} 0%, ${cat.tones[1]} 100%)` }}
-                />
-                <svg
-                  width="100%" height="100%"
-                  className="absolute inset-0 opacity-[0.12] mix-blend-overlay"
-                  preserveAspectRatio="none"
-                >
-                  <defs>
-                    <pattern id={`detail-stripe-${cat.id}`} width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
-                      <line x1="0" y1="0" x2="0" y2="14" stroke="#ffffff" strokeWidth="6" />
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill={`url(#detail-stripe-${cat.id})`} />
-                </svg>
-
-                <div className={`absolute top-3.5 left-3.5 ${tagClass} text-white px-3 py-[5px] rounded text-xs font-semibold`}>
-                  {cat.tag}
-                </div>
-                <button
-                  className="absolute top-3.5 right-3.5 w-[38px] h-[38px] rounded-full bg-white/95 border-none cursor-pointer flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.10)]"
-                  aria-label="Ajouter aux favoris"
-                >
-                  <Heart size={16} className="text-coral" />
-                </button>
-
-                <div className="absolute bottom-0 left-0 right-0 p-4 text-white/90">
-                  <span className="text-2xs font-medium">Photo · {cat.name}</span>
-                </div>
-              </div>
-
-              {/* Thumbnail strip (placeholder) */}
-              <div className="grid grid-cols-4 gap-2">
-                {[0, 1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className={`rounded-md overflow-hidden aspect-square border-2 cursor-pointer ${i === 0 ? 'border-coral' : 'border-transparent'}`}
-                    style={{ background: `linear-gradient(135deg, ${cat.tones[0]} 0%, ${cat.tones[1]} 100%)`, opacity: i === 0 ? 1 : 0.6 }}
-                  />
-                ))}
-              </div>
+              <MediaViewer
+                name={cat.name}
+                tones={cat.tones}
+                tag={cat.tag}
+                tagClass={tagClass}
+                medias={cat.medias}
+                videoUrl={cat.videoUrl}
+              />
             </div>
 
             {/* Identity card */}
@@ -115,8 +90,14 @@ export default async function CatPage({ params }: Props) {
               <h1 className="text-[38px] font-semibold tracking-[-0.03em] m-0 mb-1 leading-none text-ink">
                 {cat.name}
               </h1>
-              <div className="text-sm text-ink-muted mb-[18px]">
-                {cat.age} · {cat.sex}
+              <div className="flex items-center gap-2 text-sm text-ink-muted mb-[18px]">
+                <span>{cat.age} · {cat.sex}</span>
+                {compatibility !== null && (
+                  <span className={`inline-flex items-center gap-1 ${compatibilityTone(compatibility)} text-ink px-2.5 py-0.5 rounded-full text-xs font-semibold`}>
+                    <Sparkles size={11} />
+                    {compatibility}% compatible
+                  </span>
+                )}
               </div>
 
               <p className="text-sm leading-[1.55] text-ink m-0 mb-5">
@@ -130,6 +111,7 @@ export default async function CatPage({ params }: Props) {
                   ['Niveau d\'énergie', cat.activityLevel ? ACTIVITY_LABEL[cat.activityLevel] : null],
                   ['Mode de vie', cat.indoorOnly ? 'Intérieur strict' : 'Accès extérieur possible'],
                   ['Entente', enteneLabel(cat)],
+                  ['En refuge depuis', cat.trapDate ? new Date(cat.trapDate).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : null],
                 ]
                   .filter(([, v]) => Boolean(v))
                   .map(([k, v], i, arr) => (
@@ -145,10 +127,13 @@ export default async function CatPage({ params }: Props) {
 
               {/* CTAs */}
               <div className="flex flex-col gap-2">
-                <AdoptModal cat={cat} />
-                <button className="inline-flex items-center justify-center gap-2 px-[18px] py-3 rounded-md bg-white text-ink border border-border-strong text-sm font-semibold cursor-pointer font-[inherit] w-full">
+                <AdoptModal cat={cat} defaultOpen={adopt === "1"} />
+                <Button
+                  variant="outline"
+                  className="w-full h-auto gap-2 px-[18px] py-3 rounded-md bg-white hover:bg-white shadow-none text-ink border border-border-strong text-sm font-semibold"
+                >
                   Famille d&apos;accueil
-                </button>
+                </Button>
               </div>
 
               {/* Adoption fee note */}
@@ -199,6 +184,36 @@ export default async function CatPage({ params }: Props) {
             </div>
           </div>
         </section>
+
+        {/* Suivi médical */}
+        {cat.medicalHistory.length > 0 && (
+          <section className="max-w-[1200px] mx-auto px-6 pb-14">
+            <div className="text-sm text-coral font-semibold mb-2">Transparence</div>
+            <h2 className="text-[26px] font-semibold tracking-[-0.02em] m-0 mb-4 leading-[1.1] text-ink">
+              Suivi médical de {cat.name}
+            </h2>
+            <div className="bg-surface border border-border rounded-xl p-[22px] grid gap-3">
+              {cat.medicalHistory.map((event) => (
+                <div key={event.id} className="flex items-start justify-between gap-4 py-2 border-b border-border last:border-0 last:pb-0">
+                  <div>
+                    <div className="text-sm font-semibold text-ink">
+                      {MEDICAL_EVENT_LABEL[event.event_type] ?? event.event_type}
+                    </div>
+                    {event.veterinarian && (
+                      <div className="text-xs text-ink-muted mt-0.5">{event.veterinarian}</div>
+                    )}
+                    {event.note && (
+                      <div className="text-xs text-ink-muted mt-0.5">{event.note}</div>
+                    )}
+                  </div>
+                  <div className="text-xs text-ink-muted shrink-0">
+                    {new Date(event.event_date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Other cats */}
         {others.length > 0 && (

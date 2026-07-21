@@ -3,6 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUserStore } from '@/lib/stores/user-store'
+import { Input } from '@/components/ui/input'
+import { Field, FieldLabel, FieldGroup } from '@/components/ui/field'
+import { FormError } from '@/components/ui/form-error'
+import { Button } from '@/components/ui/button'
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -38,71 +42,69 @@ export default function RegisterForm() {
       return
     }
     setUser(data.user)
-    router.push('/')
+    router.push('/onboarding')
     router.refresh()
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-ink">Nom d'utilisateur</span>
-        <input
-          type="text"
-          required
-          minLength={3}
-          autoComplete="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="rounded-md border border-border px-3 py-2 text-sm text-ink outline-none focus:border-coral"
-        />
-      </label>
-      <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-ink">Email</span>
-        <input
-          type="email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="rounded-md border border-border px-3 py-2 text-sm text-ink outline-none focus:border-coral"
-        />
-      </label>
-      <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-ink">Mot de passe</span>
-        <input
-          type="password"
-          required
-          minLength={8}
-          autoComplete="new-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="rounded-md border border-border px-3 py-2 text-sm text-ink outline-none focus:border-coral"
-        />
-      </label>
-      <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-ink">Confirmer le mot de passe</span>
-        <input
-          type="password"
-          required
-          minLength={8}
-          autoComplete="new-password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          className="rounded-md border border-border px-3 py-2 text-sm text-ink outline-none focus:border-coral"
-        />
-      </label>
-      {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
-          {error}
-        </div>
-      )}
-      <button
-        type="submit"
-        disabled={loading}
-        className="mt-2 rounded-md bg-coral px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-      >
-        {loading ? 'Création…' : 'Créer mon compte'}
-      </button>
+    <form onSubmit={onSubmit}>
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="username">Nom d&apos;utilisateur</FieldLabel>
+          <Input
+            id="username"
+            type="text"
+            required
+            minLength={3}
+            autoComplete="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <Input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
+          <Input
+            id="password"
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="confirm">Confirmer le mot de passe</FieldLabel>
+          <Input
+            id="confirm"
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+          />
+        </Field>
+        <FormError message={error} />
+        <Button
+          type="submit"
+          disabled={loading}
+          className="mt-2 h-auto rounded-md bg-coral px-4 py-2.5 text-sm font-semibold text-white hover:bg-coral disabled:opacity-60"
+        >
+          {loading ? 'Création…' : 'Créer mon compte'}
+        </Button>
+      </FieldGroup>
     </form>
   )
 }

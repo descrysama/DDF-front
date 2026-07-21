@@ -2,10 +2,15 @@
 
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import { useUserStore } from "@/lib/stores/user-store"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { User, Mail, Shield, Pencil, Check, X, Loader2 } from "lucide-react"
+import { AdopterProfileCard } from "./_components/adopter-profile-card"
+import { AvailabilityCard } from "./_components/availability-card"
 
 export default function ProfilePage() {
   const user = useUserStore((s) => s.user)
@@ -114,10 +119,10 @@ export default function ProfilePage() {
               <User size={36} className="text-white" />
             </div>
             <h1 className="text-2xl font-semibold text-ink m-0">{user.username}</h1>
-            <span className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-coral-soft text-coral text-xs font-semibold">
+            <Badge className="h-auto mt-2 gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-coral-soft text-coral">
               <Shield size={12} />
               {roleName}
-            </span>
+            </Badge>
           </div>
 
           {success && (
@@ -137,31 +142,31 @@ export default function ProfilePage() {
                 Informations du compte
               </h2>
               {!editing ? (
-                <button
+                <Button
                   onClick={startEditing}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-coral bg-coral-soft border-0 cursor-pointer hover:bg-coral hover:text-white transition-colors"
+                  className="h-auto gap-1.5 px-3 py-1.5 border-0 text-xs font-semibold text-coral bg-coral-soft hover:bg-coral hover:text-white"
                 >
                   <Pencil size={12} />
                   Modifier
-                </button>
+                </Button>
               ) : (
                 <div className="flex items-center gap-1.5">
-                  <button
+                  <Button
                     onClick={handleSave}
                     disabled={saving}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-coral border-0 cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50"
+                    className="h-auto gap-1 px-3 py-1.5 border-0 text-xs font-semibold text-white bg-coral hover:bg-coral hover:opacity-90"
                   >
                     {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
                     Enregistrer
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={cancelEditing}
                     disabled={saving}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold text-ink bg-surface-alt border-0 cursor-pointer hover:bg-border transition-colors disabled:opacity-50"
+                    className="h-auto gap-1 px-3 py-1.5 border-0 text-xs font-semibold text-ink bg-surface-alt hover:bg-border"
                   >
                     <X size={12} />
                     Annuler
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -174,11 +179,11 @@ export default function ProfilePage() {
                 <div className="min-w-0 flex-1">
                   <p className="text-xs text-ink-muted m-0">Nom d&apos;utilisateur</p>
                   {editing ? (
-                    <input
+                    <Input
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full mt-1 px-3 py-1.5 rounded-md border border-border bg-bg text-sm text-ink outline-none focus:border-coral focus:ring-1 focus:ring-coral"
+                      className="h-auto w-full mt-1 px-3 py-1.5 rounded-md border-border bg-bg text-sm text-ink shadow-none focus-visible:border-coral focus-visible:ring-1 focus-visible:ring-coral"
                     />
                   ) : (
                     <p className="text-sm font-medium text-ink m-0 mt-0.5 truncate">{user.username}</p>
@@ -193,11 +198,11 @@ export default function ProfilePage() {
                 <div className="min-w-0 flex-1">
                   <p className="text-xs text-ink-muted m-0">Adresse email</p>
                   {editing ? (
-                    <input
+                    <Input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full mt-1 px-3 py-1.5 rounded-md border border-border bg-bg text-sm text-ink outline-none focus:border-coral focus:ring-1 focus:ring-coral"
+                      className="h-auto w-full mt-1 px-3 py-1.5 rounded-md border-border bg-bg text-sm text-ink shadow-none focus-visible:border-coral focus-visible:ring-1 focus-visible:ring-coral"
                     />
                   ) : (
                     <p className="text-sm font-medium text-ink m-0 mt-0.5 truncate">{user.email}</p>
@@ -216,6 +221,9 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+
+          <AvailabilityCard />
+          <AdopterProfileCard />
         </div>
       </main>
       <Footer />

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 const AMOUNTS = [
   { value: 10,  label: '10€',  sub: null,              tintClass: 'bg-peach' },
@@ -18,7 +20,7 @@ const WHAT_IT_DOES = [
   { amt: '250 €', desc: 'Sauve un chat sur trois mois', tintClass: 'bg-mint' },
 ]
 
-const inputClass = "px-3.5 py-3 rounded-lg border border-border bg-surface text-sm font-[inherit] text-ink outline-none w-full"
+const inputClass = "h-auto px-3.5 py-3 rounded-lg border border-border bg-surface text-sm font-[inherit] text-ink outline-none w-full shadow-none"
 
 export default function DonateForm() {
   const [monthly, setMonthly] = useState(false)
@@ -60,14 +62,14 @@ export default function DonateForm() {
               {['Don ponctuel', 'Don mensuel'].map((label, i) => {
                 const active = i === 0 ? !monthly : monthly
                 return (
-                  <button
+                  <Button
                     key={label}
                     type="button"
                     onClick={() => setMonthly(i === 1)}
-                    className={`px-4 py-[7px] rounded-full border-none cursor-pointer font-[inherit] text-xs font-semibold ${active ? 'bg-coral text-white' : 'bg-transparent text-ink-muted'}`}
+                    className={`h-auto whitespace-normal px-4 py-[7px] rounded-full border-none cursor-pointer font-[inherit] text-xs font-semibold ${active ? 'bg-coral text-white' : 'bg-transparent text-ink-muted'}`}
                   >
                     {label}
-                  </button>
+                  </Button>
                 )
               })}
             </div>
@@ -80,11 +82,11 @@ export default function DonateForm() {
               {AMOUNTS.map(({ value, label, sub, tintClass }) => {
                 const active = selected === value
                 return (
-                  <button
+                  <Button
                     key={value}
                     type="button"
                     onClick={() => { setSelected(value); setCustom('') }}
-                    className={`px-3 py-3.5 rounded-lg cursor-pointer border-[1.5px] font-[inherit] text-left relative ${tintClass} ${active ? 'border-coral' : 'border-transparent'}`}
+                    className={`block h-auto whitespace-normal px-3 py-3.5 rounded-lg cursor-pointer border-[1.5px] font-[inherit] text-left relative ${tintClass} ${active ? 'border-coral' : 'border-transparent'}`}
                   >
                     <div className={`text-[19px] font-semibold tracking-[-0.015em] ${active ? 'text-coral-ink' : 'text-ink'}`}>
                       {label}
@@ -97,7 +99,7 @@ export default function DonateForm() {
                         </svg>
                       </div>
                     )}
-                  </button>
+                  </Button>
                 )
               })}
             </div>
@@ -105,25 +107,25 @@ export default function DonateForm() {
             {/* Montant libre */}
             <div className="border border-border rounded-lg px-3.5 py-3 flex items-center gap-2.5 mb-5">
               <span className="text-sm text-ink-muted">Autre montant</span>
-              <input
+              <Input
                 type="number"
                 min="1"
                 value={custom}
                 onChange={(e) => { setCustom(e.target.value); setSelected(0) }}
                 placeholder="0"
                 aria-label="Montant personnalisé"
-                className="border-none outline-none bg-transparent text-sm font-[inherit] text-ink flex-1 text-right"
+                className="h-auto border-none outline-none bg-transparent text-sm font-[inherit] text-ink flex-1 text-right shadow-none"
               />
               <span className="text-sm text-ink font-semibold">€</span>
             </div>
 
             {/* Nom / email */}
             <div className="grid grid-cols-2 gap-2 mb-2">
-              <input placeholder="Prénom" value={prenom} onChange={(e) => setPrenom(e.target.value)} className={inputClass} />
-              <input placeholder="Nom" value={nom} onChange={(e) => setNom(e.target.value)} className={inputClass} />
+              <Input placeholder="Prénom" value={prenom} onChange={(e) => setPrenom(e.target.value)} className={inputClass} />
+              <Input placeholder="Nom" value={nom} onChange={(e) => setNom(e.target.value)} className={inputClass} />
             </div>
             <div className="mb-[18px]">
-              <input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+              <Input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
             </div>
 
             {/* CTA */}

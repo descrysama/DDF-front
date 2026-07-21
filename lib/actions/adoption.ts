@@ -1,6 +1,7 @@
 "use server"
 
 import { STRAPI_URL, STRAPI_TOKEN } from '@/lib/config'
+import { getCurrentUser } from '@/lib/auth'
 
 export interface AdoptionFormData {
   catId: string
@@ -64,6 +65,8 @@ export async function submitAdoptionRequest(data: AdoptionFormData): Promise<Ado
     engagements: data.engagements,
   }, null, 2)
 
+  const user = await getCurrentUser()
+
   const res = await fetch(`${STRAPI_URL}/api/adoption-requests`, {
     method: 'POST',
     headers: {
@@ -75,6 +78,8 @@ export async function submitAdoptionRequest(data: AdoptionFormData): Promise<Ado
         message,
         request_date: new Date().toISOString().split('T')[0],
         status: 'pending',
+        animal: data.catId,
+        ...(user && { adopter: user.id }),
       },
     }),
   })
