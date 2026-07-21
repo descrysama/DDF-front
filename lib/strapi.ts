@@ -450,6 +450,34 @@ export interface StrapiFosterFamilyRaw {
   foster_assignments?: StrapiFosterAssignmentRaw[]
 }
 
+export interface AdoptionCandidat {
+  prenom?: string
+  nom?: string
+  email?: string
+  telephone?: string
+  codePostal?: string
+  ville?: string
+  age?: string
+  profession?: string
+}
+
+export interface AdoptionFoyer {
+  typeLogement?: string
+  surface?: string
+  accesExterieur?: string
+  compositionFoyer?: string
+  autresAnimaux?: string
+  statutLogement?: string
+  personnesFoyer?: string
+}
+
+export interface AdoptionChatInfo {
+  experienceChat?: string
+  pourquoiCeChat?: string
+  veterinaire?: string
+  disponibilite?: string
+}
+
 export interface StrapiAdoptionRequestRaw {
   id: number
   documentId: string
@@ -457,6 +485,10 @@ export interface StrapiAdoptionRequestRaw {
   status: AdoptionRequestStatus
   match_score: number | null
   request_date: string | null
+  candidat: AdoptionCandidat | null
+  foyer: AdoptionFoyer | null
+  chat_info: AdoptionChatInfo | null
+  engagements: boolean[] | null
   announcement?: { id: number; documentId: string; title: string }
   animal?: { id: number; documentId: string; name: string }
   adopter?: { username: string; email: string }
@@ -641,7 +673,7 @@ export async function fetchAdoptionRequests(opts?: {
 }): Promise<{ adoptionRequests: StrapiAdoptionRequestRaw[]; total: number }> {
   const limit = opts?.limit ?? 100
   const { data, meta } = await strapiGet<StrapiListResponse<StrapiAdoptionRequestRaw>>(
-    `/api/adoption-requests?populate[0]=announcement&populate[1]=adopter&populate[2]=referent&pagination[pageSize]=${limit}`
+    `/api/adoption-requests?populate[0]=announcement&populate[1]=adopter&populate[2]=referent&populate[3]=animal&pagination[pageSize]=${limit}`
   )
   return { adoptionRequests: data, total: meta.pagination.total }
 }

@@ -24,7 +24,7 @@ function initials(name: string): string {
     .join('')
 }
 
-const GRID_COLS = '32px 1.7fr 1.3fr 0.9fr 0.9fr 130px'
+const GRID_COLS = '32px 1.5fr 1.1fr 0.8fr 0.7fr 0.8fr 130px'
 
 export default async function AdminAdoptionRequestsPage() {
   const { adoptionRequests, total } = await fetchAdoptionRequests({ limit: 100 })
@@ -80,7 +80,7 @@ export default async function AdminAdoptionRequestsPage() {
           }}
         >
           <div />
-          {['Demandeur', 'Chat concerné', 'Statut', 'Reçue', 'Actions'].map(col => (
+          {['Demandeur', 'Chat concerné', 'Statut', 'Score', 'Reçue', 'Actions'].map(col => (
             <div
               key={col}
               style={{
@@ -150,12 +150,22 @@ export default async function AdminAdoptionRequestsPage() {
               {/* Chat concerné */}
               <div>
                 <p style={{ fontSize: 13, color: AD.ink, fontWeight: 500 }}>
-                  {req.announcement?.title ?? '—'}
+                  {req.animal?.name ?? '—'}
                 </p>
+                {req.announcement && (
+                  <p style={{ fontSize: 11.5, color: AD.inkSubtle }}>
+                    via {req.announcement.title}
+                  </p>
+                )}
               </div>
 
               {/* Statut */}
               <StatusBadge status={req.status} />
+
+              {/* Score */}
+              <p style={{ fontSize: 12.5, fontWeight: 600, color: AD.inkMuted }}>
+                {req.match_score != null ? `${req.match_score}%` : '—'}
+              </p>
 
               {/* Reçue */}
               <p style={{ fontSize: 12.5, color: AD.inkMuted }}>{dateStr}</p>

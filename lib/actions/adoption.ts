@@ -35,36 +35,6 @@ export interface AdoptionFormData {
 export type AdoptionResult = { success: true } | { success: false; error: string }
 
 export async function submitAdoptionRequest(data: AdoptionFormData): Promise<AdoptionResult> {
-  const message = JSON.stringify({
-    cat: { id: data.catId, name: data.catName },
-    candidat: {
-      prenom: data.prenom,
-      nom: data.nom,
-      email: data.email,
-      telephone: data.telephone,
-      codePostal: data.codePostal,
-      ville: data.ville,
-      age: data.age,
-      profession: data.profession,
-    },
-    foyer: {
-      typeLogement: data.typeLogement,
-      surface: data.surface,
-      accesExterieur: data.accesExterieur,
-      compositionFoyer: data.compositionFoyer,
-      autresAnimaux: data.autresAnimaux,
-      statutLogement: data.statutLogement,
-      personnesFoyer: data.personnesFoyer,
-    },
-    chat: {
-      experienceChat: data.experienceChat,
-      pourquoiCeChat: data.pourquoiCeChat,
-      veterinaire: data.veterinaire,
-      disponibilite: data.disponibilite,
-    },
-    engagements: data.engagements,
-  }, null, 2)
-
   const user = await getCurrentUser()
 
   const res = await fetch(`${STRAPI_URL}/api/adoption-requests`, {
@@ -75,7 +45,32 @@ export async function submitAdoptionRequest(data: AdoptionFormData): Promise<Ado
     },
     body: JSON.stringify({
       data: {
-        message,
+        candidat: {
+          prenom: data.prenom,
+          nom: data.nom,
+          email: data.email,
+          telephone: data.telephone,
+          codePostal: data.codePostal,
+          ville: data.ville,
+          age: data.age,
+          profession: data.profession,
+        },
+        foyer: {
+          typeLogement: data.typeLogement,
+          surface: data.surface,
+          accesExterieur: data.accesExterieur,
+          compositionFoyer: data.compositionFoyer,
+          autresAnimaux: data.autresAnimaux,
+          statutLogement: data.statutLogement,
+          personnesFoyer: data.personnesFoyer,
+        },
+        chat_info: {
+          experienceChat: data.experienceChat,
+          pourquoiCeChat: data.pourquoiCeChat,
+          veterinaire: data.veterinaire,
+          disponibilite: data.disponibilite,
+        },
+        engagements: data.engagements,
         request_date: new Date().toISOString().split('T')[0],
         status: 'pending',
         animal: data.catId,

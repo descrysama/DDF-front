@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { fetchAnnouncements, fetchUsers } from '@/lib/strapi'
+import { fetchAnnouncements, fetchUsers, fetchAnimals } from '@/lib/strapi'
 import { createAdoptionRequest } from '../actions'
 import { AD } from '@/lib/admin-tokens'
 import { fieldStyle, labelStyle } from '@/lib/admin-styles'
@@ -7,9 +7,10 @@ import SubmitButton from '@/components/admin/submit-button'
 import { Card } from '@/components/ui/card'
 
 export default async function NewAdoptionRequestPage() {
-  const [{ announcements }, users] = await Promise.all([
+  const [{ announcements }, users, { animals }] = await Promise.all([
     fetchAnnouncements({ limit: 100 }),
     fetchUsers(),
+    fetchAnimals({ limit: 200 }),
   ])
 
   return (
@@ -28,6 +29,18 @@ export default async function NewAdoptionRequestPage() {
 
       <Card className="p-7 max-w-2xl hover:translate-y-0">
         <form action={createAdoptionRequest}>
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>Chat concerné</label>
+            <select name="animal_id" style={fieldStyle}>
+              <option value="">— Aucun —</option>
+              {animals.map(a => (
+                <option key={a.documentId} value={a.documentId}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div style={{ marginBottom: 16 }}>
             <label style={labelStyle}>Annonce liée</label>
             <select name="announcement_id" style={fieldStyle}>

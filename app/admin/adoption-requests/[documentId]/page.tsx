@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { fetchResource, fetchAnnouncements, fetchUsers } from '@/lib/strapi'
+import { fetchResource, fetchAnnouncements, fetchUsers, fetchAnimals } from '@/lib/strapi'
 import type { StrapiAdoptionRequestRaw } from '@/lib/strapi'
 import { updateAdoptionRequest, deleteAdoptionRequest } from '../actions'
 import StatusBadge from '@/components/admin/status-badge'
@@ -9,6 +9,27 @@ import { AD } from '@/lib/admin-tokens'
 import { fieldStyle, labelStyle, metaRowStyle } from '@/lib/admin-styles'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+
+function DossierGroup({ title, rows }: { title: string; rows: [string, string | undefined][] }) {
+  const visible = rows.filter(([, value]) => value)
+  if (visible.length === 0) return null
+
+  return (
+    <div>
+      <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: AD.inkMuted, marginBottom: 6 }}>
+        {title}
+      </p>
+      <div style={{ display: 'grid', gap: 4 }}>
+        {visible.map(([label, value]) => (
+          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13 }}>
+            <span style={{ color: AD.inkMuted }}>{label}</span>
+            <span style={{ color: AD.ink, textAlign: 'right' }}>{value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default async function AdoptionRequestDetailPage({
   params,
@@ -20,16 +41,17 @@ export default async function AdoptionRequestDetailPage({
   let request: StrapiAdoptionRequestRaw
   try {
     const res = await fetchResource<StrapiAdoptionRequestRaw>(
-      `/api/adoption-requests/${documentId}?populate[0]=announcement&populate[1]=adopter&populate[2]=referent`
+      `/api/adoption-requests/${documentId}?populate[0]=announcement&populate[1]=adopter&populate[2]=referent&populate[3]=animal`
     )
     request = res.data
   } catch {
     notFound()
   }
 
-  const [{ announcements }, users] = await Promise.all([
+  const [{ announcements }, users, { animals }] = await Promise.all([
     fetchAnnouncements({ limit: 100 }),
     fetchUsers(),
+    fetchAnimals({ limit: 200 }),
   ])
   const boundUpdate = updateAdoptionRequest.bind(null, documentId)
   const boundDelete = deleteAdoptionRequest.bind(null, documentId)
@@ -54,7 +76,8 @@ export default async function AdoptionRequestDetailPage({
             Demande d&apos;adoption
           </h1>
           <p style={{ fontSize: 14, color: AD.inkMuted }}>
-            {request.announcement?.title ?? 'Annonce inconnue'}
+            {request.animal?.name ?? 'Chat inconnu'}
+            {request.announcement && ` · via ${request.announcement.title}`}
           </p>
         </div>
         <form action={boundDelete}>
@@ -74,6 +97,10 @@ export default async function AdoptionRequestDetailPage({
             <div style={metaRowStyle}>
               <span style={{ color: AD.inkMuted }}>Statut actuel</span>
               <StatusBadge status={request.status} />
+            </div>
+            <div style={metaRowStyle}>
+              <span style={{ color: AD.inkMuted }}>Chat concerné</span>
+              <span style={{ fontWeight: 500 }}>{request.animal?.name ?? '—'}</span>
             </div>
             <div style={metaRowStyle}>
               <span style={{ color: AD.inkMuted }}>Adoptant</span>
@@ -113,6 +140,62 @@ export default async function AdoptionRequestDetailPage({
               </p>
             </div>
           )}
+
+          {(request.candidat || request.foyer || request.chat_info || request.engagements) && (
+            <div style={{ marginTop: 20 }}>
+              <p style={{ ...labelStyle, marginBottom: 8 }}>Dossier du candidat</p>
+              <div style={{ background: '#f8f9fa', borderRadius: 6, padding: 14, display: 'grid', gap: 14 }}>
+                {request.candidat && (
+                  <DossierGroup
+                    title="Candidat"
+                    rows={[
+                      ['Nom', `${request.candidat.prenom ?? ''} ${request.candidat.nom ?? ''}`.trim()],
+                      ['Email', request.candidat.email],
+                      ['Téléphone', request.candidat.telephone],
+                      ['Adresse', [request.candidat.codePostal, request.candidat.ville].filter(Boolean).join(' ')],
+                      ['Âge', request.candidat.age],
+                      ['Profession', request.candidat.profession],
+                    ]}
+                  />
+                )}
+                {request.foyer && (
+                  <DossierGroup
+                    title="Foyer"
+                    rows={[
+                      ['Logement', request.foyer.typeLogement],
+                      ['Surface', request.foyer.surface],
+                      ['Accès extérieur', request.foyer.accesExterieur],
+                      ['Composition', request.foyer.compositionFoyer],
+                      ['Autres animaux', request.foyer.autresAnimaux],
+                      ['Statut', request.foyer.statutLogement],
+                      ['Personnes au foyer', request.foyer.personnesFoyer],
+                    ]}
+                  />
+                )}
+                {request.chat_info && (
+                  <DossierGroup
+                    title="Le chat"
+                    rows={[
+                      ['Expérience', request.chat_info.experienceChat],
+                      ['Pourquoi ce chat', request.chat_info.pourquoiCeChat],
+                      ['Vétérinaire', request.chat_info.veterinaire],
+                      ['Disponibilité', request.chat_info.disponibilite],
+                    ]}
+                  />
+                )}
+                {request.engagements && (
+                  <div>
+                    <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: AD.inkMuted, marginBottom: 4 }}>
+                      Engagements
+                    </p>
+                    <p style={{ fontSize: 13, color: AD.ink, margin: 0 }}>
+                      {request.engagements.filter(Boolean).length} / {request.engagements.length} coché(s)
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </Card>
 
         {/* Formulaire d'édition complet */}
@@ -121,6 +204,22 @@ export default async function AdoptionRequestDetailPage({
             Modifier la demande
           </h2>
           <form action={boundUpdate}>
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>Chat concerné</label>
+              <select
+                name="animal_id"
+                defaultValue={request.animal?.documentId ?? ''}
+                style={fieldStyle}
+              >
+                <option value="">— Aucun —</option>
+                {animals.map(a => (
+                  <option key={a.documentId} value={a.documentId}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div style={{ marginBottom: 14 }}>
               <label style={labelStyle}>Annonce liée</label>
               <select

@@ -7,6 +7,7 @@ import type { AdoptionRequestStatus } from '@/lib/strapi'
 import { requireAdmin } from '@/lib/auth'
 
 function parseAdoptionFormData(formData: FormData) {
+  const animalId       = formData.get('animal_id') as string
   const announcementId = formData.get('announcement_id') as string
   const adopterId     = formData.get('adopter_id') as string
   const referentId    = formData.get('referent_id') as string
@@ -17,6 +18,7 @@ function parseAdoptionFormData(formData: FormData) {
     status:       formData.get('status') as AdoptionRequestStatus,
     match_score:  matchScore ? Number(matchScore) : null,
     request_date: requestDate || null,
+    animal: animalId || null,
     ...(announcementId ? { announcement: announcementId } : {}),
     ...(adopterId     ? { adopter: Number(adopterId) }   : {}),
     referent: referentId ? Number(referentId) : null,
