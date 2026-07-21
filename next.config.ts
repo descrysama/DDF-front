@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   experimental: {
     serverActions: {
       bodySizeLimit: '5mb',
@@ -10,8 +11,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'http', hostname: 'localhost', port: '1337', pathname: '/uploads/**' },
+      { protocol: 'http', hostname: '84.235.236.136', port: '1337', pathname: '/uploads/**' },
     ],
-    dangerouslyAllowLocalIP: process.env.NODE_ENV !== 'production',
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
   },
