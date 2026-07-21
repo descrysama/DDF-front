@@ -33,7 +33,7 @@ jobs:
           context: .
           push: true
           build-args: |
-            VITE_API_URL=${{ vars.API_URL }}
+            NEXT_PUBLIC_STRAPI_URL=${{ vars.API_URL }}
           tags: |
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ github.sha }}
