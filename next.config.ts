@@ -1,4 +1,17 @@
 import type { NextConfig } from "next";
+import type { RemotePattern } from "next/dist/shared/lib/image-config";
+import { loadEnvConfig } from "@next/env";
+
+loadEnvConfig(process.cwd());
+
+const strapiUrl = new URL(process.env.STRAPI_URL ?? "http://localhost:1337");
+
+const strapiRemotePattern: RemotePattern = {
+  protocol: strapiUrl.protocol.replace(":", "") as "http" | "https",
+  hostname: strapiUrl.hostname,
+  ...(strapiUrl.port ? { port: strapiUrl.port } : {}),
+  pathname: "/uploads/**",
+};
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -10,9 +23,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
-      { protocol: 'http', hostname: 'localhost', port: '1337', pathname: '/uploads/**' },
-      { protocol: 'http', hostname: '84.235.236.136', port: '1337', pathname: '/uploads/**' },
-      { protocol: 'http', hostname: 'localhost', port: '1337', pathname: '/uploads/**' },
+      strapiRemotePattern,
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
