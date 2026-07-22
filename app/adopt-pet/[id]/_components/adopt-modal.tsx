@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogTrigger, DialogPortal, DialogClose } from "@/components/ui/dialog"
-import type { CardAnimal, StrapiAdopterProfileRaw } from "@/lib/strapi"
+import type { CardAnnouncement, StrapiAdopterProfileRaw } from "@/lib/strapi"
 import { submitAdoptionRequest, type AdoptionFormData } from "@/lib/actions/adoption"
 import { useUserStore } from "@/lib/stores/user-store"
 
@@ -20,6 +20,12 @@ function mapHousingType(v: StrapiAdopterProfileRaw["housing_type"]): string | nu
   if (v === "house") return "Maison"
   if (v === "apartment") return "Appartement"
   return null
+}
+
+function mapCatExperience(v: string): "none" | "some" | "experienced" {
+  if (v === "Oui, plusieurs fois") return "experienced"
+  if (v === "Oui, une fois") return "some"
+  return "none"
 }
 
 // ── Primitives ───────────────────────────────────────────────────────────────
@@ -81,7 +87,7 @@ function FSectionHeader({ num, title, subtitle, tintClass }: { num: number; titl
 
 type Errors = Partial<Record<string, string>>
 
-function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => void }) {
+function AdoptionFormInner({ cat, onClose }: { cat: CardAnnouncement; onClose: () => void }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading]     = useState(false)
@@ -141,7 +147,10 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
   const [balconySecured,  setBalconySecured]  = useState("")
 
   // Étape 7 — Autres animaux
+  const [catExperience,       setCatExperience]       = useState("")
   const [hasOtherPets,        setHasOtherPets]        = useState("")
+  const [hasDog,              setHasDog]              = useState("")
+  const [hasCat,              setHasCat]              = useState("")
   const [otherPetsDetails,    setOtherPetsDetails]    = useState("")
   const [otherPetsSterilized, setOtherPetsSterilized] = useState("")
   const [otherPetsSince,      setOtherPetsSince]      = useState("")
@@ -166,7 +175,14 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
 
         if (profile.has_garden) setHasGarden("Oui")
         if (profile.has_children) setHasChildren("Oui")
-        if (profile.has_dogs || profile.has_cats) setHasOtherPets("Oui")
+        if (profile.has_dogs || profile.has_cats) {
+          setHasOtherPets("Oui")
+          if (profile.has_dogs) setHasDog("Oui")
+          if (profile.has_cats) setHasCat("Oui")
+        }
+        if (profile.experience_level === "experienced") setCatExperience("Oui, plusieurs fois")
+        else if (profile.experience_level === "some") setCatExperience("Oui, une fois")
+        else if (profile.experience_level === "none") setCatExperience("Jamais")
       })
       .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -251,9 +267,11 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
     }
 
     if (n === 7) {
+      if (!catExperience) e.catExperience = pick
       if (!hasOtherPets) e.hasOtherPets = pick
       else if (hasOtherPets === "Oui") {
-        if (!otherPetsDetails.trim())    e.otherPetsDetails    = required
+        if (!hasDog)                     e.hasDog              = pick
+        if (!hasCat)                     e.hasCat              = pick
         if (!otherPetsSterilized)        e.otherPetsSterilized = pick
         if (!otherPetsSince.trim())      e.otherPetsSince      = required
       }
@@ -304,7 +322,8 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
     setServerError("")
 
     const data: AdoptionFormData = {
-      catId: cat.id,
+      announcementId: cat.id,
+      animalId: cat.animals[0]?.documentId,
       adoption_process_agreement: agreement === "Oui",
       applicant: {
         animal_name: animalName,
@@ -362,9 +381,16 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
       other_pets: {
         has_other_pets: hasOtherPets === "Oui",
         ...(hasOtherPets === "Oui"
-          ? { details: otherPetsDetails, sterilized: otherPetsSterilized, owned_since: otherPetsSince }
+          ? {
+              has_dog: hasDog === "Oui",
+              has_cat: hasCat === "Oui",
+              details: otherPetsDetails,
+              sterilized: otherPetsSterilized,
+              owned_since: otherPetsSince,
+            }
           : {}),
       },
+      cat_experience: mapCatExperience(catExperience),
       remarks,
       responsibility_agreement: responsibilityAgreement,
     }
@@ -699,6 +725,11 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
           {/* Étape 7 — Autres animaux */}
           {step === 7 && (
             <div className="grid gap-4">
+              <Field data-error={errors["catExperience"] ? "true" : undefined}>
+                <FieldLabel>Avez-vous déjà eu un chat ?</FieldLabel>
+                <ChipGroup options={["Jamais", "Oui, une fois", "Oui, plusieurs fois"]} value={catExperience} onChange={(v) => { setCatExperience(v); clearError("catExperience") }} />
+                <FieldError>{errors["catExperience"]}</FieldError>
+              </Field>
               <Field data-error={errors["hasOtherPets"] ? "true" : undefined}>
                 <FieldLabel>Avez-vous d&apos;autres animaux ?</FieldLabel>
                 <ChipGroup options={["Oui", "Non"]} value={hasOtherPets} onChange={(v) => { setHasOtherPets(v); clearError("hasOtherPets") }} />
@@ -706,10 +737,19 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
               </Field>
               {hasOtherPets === "Oui" && (
                 <>
-                  <Field data-error={errors["otherPetsDetails"] ? "true" : undefined}>
-                    <FieldLabel>Quels animaux avez-vous ?</FieldLabel>
-                    <Textarea rows={3} placeholder="Nombre / espèce / race / sexe et âge" value={otherPetsDetails} onChange={(e) => { setOtherPetsDetails(e.target.value); clearError("otherPetsDetails") }} className={inp(!!errors["otherPetsDetails"]) + " resize-y leading-[1.55]"} />
-                    <FieldError>{errors["otherPetsDetails"]}</FieldError>
+                  <Field data-error={errors["hasDog"] ? "true" : undefined}>
+                    <FieldLabel>Un chien ?</FieldLabel>
+                    <ChipGroup options={["Oui", "Non"]} value={hasDog} onChange={(v) => { setHasDog(v); clearError("hasDog") }} />
+                    <FieldError>{errors["hasDog"]}</FieldError>
+                  </Field>
+                  <Field data-error={errors["hasCat"] ? "true" : undefined}>
+                    <FieldLabel>Un ou plusieurs chats ?</FieldLabel>
+                    <ChipGroup options={["Oui", "Non"]} value={hasCat} onChange={(v) => { setHasCat(v); clearError("hasCat") }} />
+                    <FieldError>{errors["hasCat"]}</FieldError>
+                  </Field>
+                  <Field>
+                    <FieldLabel>Détails (race, âge…)</FieldLabel>
+                    <Textarea rows={2} placeholder="Facultatif" value={otherPetsDetails} onChange={(e) => setOtherPetsDetails(e.target.value)} className={inp(false) + " resize-y leading-[1.55]"} />
                   </Field>
                   <Field data-error={errors["otherPetsSterilized"] ? "true" : undefined}>
                     <FieldLabel>Sont-ils stérilisés ?</FieldLabel>
@@ -828,7 +868,7 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
 
 // ── Public component ─────────────────────────────────────────────────────────
 
-export function AdoptModal({ cat, defaultOpen = false }: { cat: CardAnimal; defaultOpen?: boolean }) {
+export function AdoptModal({ cat, defaultOpen = false }: { cat: CardAnnouncement; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen)
 
   return (

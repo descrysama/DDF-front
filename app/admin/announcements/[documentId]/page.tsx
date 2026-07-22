@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import AnnouncementForm from '@/components/admin/announcement-form'
-import { fetchResource } from '@/lib/strapi'
+import { fetchResource, fetchAnimals, fetchConstraints } from '@/lib/strapi'
 import type { StrapiAnnouncementRaw } from '@/lib/strapi'
 import { updateAnnouncement } from '../actions'
 import { requireAdmin } from '@/lib/auth'
@@ -18,11 +18,18 @@ export default async function EditAnnouncementPage({
 
   let announcement: StrapiAnnouncementRaw
   try {
-    const res = await fetchResource<StrapiAnnouncementRaw>(`/api/announcements/${documentId}`)
+    const res = await fetchResource<StrapiAnnouncementRaw>(
+      `/api/announcements/${documentId}?status=draft&populate[animals]=true&populate[constraints]=true`
+    )
     announcement = res.data
   } catch {
     notFound()
   }
+
+  const [{ animals }, constraints] = await Promise.all([
+    fetchAnimals({ limit: 200 }),
+    fetchConstraints(),
+  ])
 
   const boundUpdate = updateAnnouncement.bind(null, documentId)
 
@@ -40,7 +47,16 @@ export default async function EditAnnouncementPage({
         Modifier : {announcement.title}
       </h1>
       <Card className="p-7 max-w-2xl hover:translate-y-0">
-        <AnnouncementForm defaultValues={announcement} action={boundUpdate} />
+        <AnnouncementForm
+          defaultValues={{
+            ...announcement,
+            animalDocumentIds: (announcement.animals ?? []).map((a) => a.documentId),
+            constraintDocumentIds: (announcement.constraints ?? []).map((c) => c.documentId),
+          }}
+          animalOptions={animals.map((a) => ({ documentId: a.documentId, name: a.name }))}
+          constraintOptions={constraints.map((c) => ({ documentId: c.documentId, name: c.name }))}
+          action={boundUpdate}
+        />
       </Card>
     </div>
   )

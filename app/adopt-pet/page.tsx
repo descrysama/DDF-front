@@ -1,11 +1,11 @@
 import Link from "next/link"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
-import { fetchAnimals } from "@/lib/strapi"
+import { fetchAnnouncements } from "@/lib/strapi"
 import { AdoptionFilters } from "./_components/adoption-filters"
 
 export default async function AdoptionPage() {
-  const { animals, total } = await fetchAnimals({ limit: 100 })
+  const { announcements, total } = await fetchAnnouncements({ limit: 100 })
 
   return (
     <div className="min-h-screen bg-bg">
@@ -31,7 +31,7 @@ export default async function AdoptionPage() {
           </div>
         </section>
 
-        <AdoptionFilters cats={animals} />
+        <AdoptionFilters cats={announcements} />
       </main>
       <Footer />
     </div>

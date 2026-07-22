@@ -69,69 +69,67 @@ export default function AnimalForm({ defaultValues = {}, action, breeds = [], ch
   return (
     <form onSubmit={handleSubmit} className="max-w-xl">
       <FieldGroup>
-        <div className="grid grid-cols-2 gap-4">
-          <Field>
-            <FieldLabel htmlFor="name">Nom</FieldLabel>
-            <Input id="name" name="name" required defaultValue={defaultValues.name ?? ''} placeholder="Ex: Mimi" />
-          </Field>
+        <Field>
+          <FieldLabel htmlFor="name">Nom</FieldLabel>
+          <Input id="name" name="name" required defaultValue={defaultValues.name ?? ''} placeholder="Ex: Mimi" />
+        </Field>
 
-          <Field>
-            <FieldLabel htmlFor="age">Âge (années)</FieldLabel>
-            <Input id="age" name="age" type="number" required min={0} defaultValue={defaultValues.age ?? 0} />
-          </Field>
+        <Field>
+          <FieldLabel htmlFor="age">Âge (années)</FieldLabel>
+          <Input id="age" name="age" type="number" required min={0} defaultValue={defaultValues.age ?? 0} />
+        </Field>
 
-          <Field>
-            <FieldLabel htmlFor="gender">Genre</FieldLabel>
-            <Select value={gender} onValueChange={handleGenderChange} items={GENDER_ITEMS}>
-              <SelectTrigger id="gender" className="w-full"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="female">Femelle</SelectItem>
-                <SelectItem value="male">Mâle</SelectItem>
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="gender" value={gender} />
-          </Field>
+        <Field>
+          <FieldLabel htmlFor="gender">Genre</FieldLabel>
+          <Select value={gender} onValueChange={handleGenderChange} items={GENDER_ITEMS}>
+            <SelectTrigger id="gender" className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="female">Femelle</SelectItem>
+              <SelectItem value="male">Mâle</SelectItem>
+            </SelectContent>
+          </Select>
+          <input type="hidden" name="gender" value={gender} />
+        </Field>
 
-          <Field>
-            <FieldLabel htmlFor="status">Statut</FieldLabel>
-            <Select value={status} onValueChange={handleStatusChange} items={STATUS_ITEMS}>
-              <SelectTrigger id="status" className="w-full"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="available">Disponible</SelectItem>
-                <SelectItem value="in_foster">En famille d&apos;accueil</SelectItem>
-                <SelectItem value="reserved">Réservé</SelectItem>
-                <SelectItem value="adopted">Adopté</SelectItem>
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="status" value={status} />
-          </Field>
+        <Field>
+          <FieldLabel htmlFor="status">Statut</FieldLabel>
+          <Select value={status} onValueChange={handleStatusChange} items={STATUS_ITEMS}>
+            <SelectTrigger id="status" className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="available">Disponible</SelectItem>
+              <SelectItem value="in_foster">En famille d&apos;accueil</SelectItem>
+              <SelectItem value="reserved">Réservé</SelectItem>
+              <SelectItem value="adopted">Adopté</SelectItem>
+            </SelectContent>
+          </Select>
+          <input type="hidden" name="status" value={status} />
+        </Field>
 
-          <Field>
-            <FieldLabel htmlFor="breed_id">Race</FieldLabel>
-            <Select value={breedId} onValueChange={(v) => setBreedId(v ?? '')} items={breedItems}>
-              <SelectTrigger id="breed_id" className="w-full"><SelectValue placeholder="Non renseignée" /></SelectTrigger>
-              <SelectContent>
-                {breeds.map((b) => (
-                  <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="breed_id" value={breedId} />
-          </Field>
+        <Field>
+          <FieldLabel htmlFor="breed_id">Race</FieldLabel>
+          <Select value={breedId} onValueChange={(v) => setBreedId(v ?? '')} items={breedItems}>
+            <SelectTrigger id="breed_id" className="w-full"><SelectValue placeholder="Non renseignée" /></SelectTrigger>
+            <SelectContent>
+              {breeds.map((b) => (
+                <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <input type="hidden" name="breed_id" value={breedId} />
+        </Field>
 
-          <Field>
-            <FieldLabel htmlFor="activity_level">Niveau d&apos;activité</FieldLabel>
-            <Select value={activityLevel} onValueChange={handleActivityLevelChange} items={ACTIVITY_ITEMS}>
-              <SelectTrigger id="activity_level" className="w-full"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Faible</SelectItem>
-                <SelectItem value="medium">Moyen</SelectItem>
-                <SelectItem value="high">Élevé</SelectItem>
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="activity_level" value={activityLevel} />
-          </Field>
-        </div>
+        <Field>
+          <FieldLabel htmlFor="activity_level">Niveau d&apos;activité</FieldLabel>
+          <Select value={activityLevel} onValueChange={handleActivityLevelChange} items={ACTIVITY_ITEMS}>
+            <SelectTrigger id="activity_level" className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">Faible</SelectItem>
+              <SelectItem value="medium">Moyen</SelectItem>
+              <SelectItem value="high">Élevé</SelectItem>
+            </SelectContent>
+          </Select>
+          <input type="hidden" name="activity_level" value={activityLevel} />
+        </Field>
 
         <Field>
           <FieldLabel htmlFor="description">Description</FieldLabel>
@@ -157,7 +155,7 @@ export default function AnimalForm({ defaultValues = {}, action, breeds = [], ch
 
         <Field>
           <FieldLabel>Caractère</FieldLabel>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-col gap-2">
             {characters.map((c) => (
               <Label key={c.id} htmlFor={`character-${c.id}`} className="flex cursor-pointer items-center gap-2 font-normal">
                 <Checkbox id={`character-${c.id}`} name="character_ids" value={String(c.id)} />

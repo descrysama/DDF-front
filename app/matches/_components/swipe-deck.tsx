@@ -7,7 +7,7 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { Heart, X, ArrowRight, Sparkles, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogPortal } from "@/components/ui/dialog"
-import { compatibilityTone, type DiscoverAnimal } from "@/lib/strapi"
+import { compatibilityTone, type DiscoverAnnouncement } from "@/lib/strapi"
 import { recordSwipe } from "@/lib/actions/swipes"
 
 const SWIPE_THRESHOLD = 120
@@ -17,7 +17,7 @@ function SwipeCard({
   isTop,
   onCommit,
 }: {
-  cat: DiscoverAnimal
+  cat: DiscoverAnnouncement
   isTop: boolean
   onCommit: (direction: "like" | "pass") => void
 }) {
@@ -117,7 +117,7 @@ function SwipeCard({
   )
 }
 
-function MatchOverlay({ cat, onClose }: { cat: DiscoverAnimal; onClose: () => void }) {
+function MatchOverlay({ cat, onClose }: { cat: DiscoverAnnouncement; onClose: () => void }) {
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
       <DialogPortal>
@@ -162,10 +162,10 @@ function MatchOverlay({ cat, onClose }: { cat: DiscoverAnimal; onClose: () => vo
   )
 }
 
-export function SwipeDeck({ initialCats, hasProfile }: { initialCats: DiscoverAnimal[]; hasProfile: boolean }) {
+export function SwipeDeck({ initialCats, hasProfile }: { initialCats: DiscoverAnnouncement[]; hasProfile: boolean }) {
   const [cats] = useState(initialCats)
   const [index, setIndex] = useState(0)
-  const [matched, setMatched] = useState<DiscoverAnimal | null>(null)
+  const [matched, setMatched] = useState<DiscoverAnnouncement | null>(null)
   const [unsaved, setUnsaved] = useState<string[]>([])
 
   const visible = cats.slice(index, index + 3)

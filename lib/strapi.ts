@@ -86,7 +86,6 @@ interface StrapiAnimalRaw {
   dewormed: boolean
   breed: StrapiBreed | null
   characters: StrapiCharacter[]
-  bonded_with: StrapiAnimalRaw | null
   medias?: StrapiMedia[]
   video_url?: string | null
   trap_date?: string | null
@@ -142,7 +141,6 @@ const TONES: [string, string][] = [
 ]
 
 function deriveTag(a: StrapiAnimalRaw): CatTag {
-  if (a.bonded_with) return 'Duo'
   if (a.age >= 10) return 'Senior'
   if (a.age <= 1) return 'Chaton'
   return a.gender === 'male' ? 'Adulte mâle' : 'Adulte femelle'
@@ -154,12 +152,6 @@ function formatAge(years: number): string {
 }
 
 function formatSex(a: StrapiAnimalRaw): string {
-  if (a.bonded_with) {
-    if (a.gender === a.bonded_with.gender) {
-      return a.gender === 'male' ? 'Mâles' : 'Femelles'
-    }
-    return 'Mâle & Femelle'
-  }
   return a.gender === 'male' ? 'Mâle' : 'Femelle'
 }
 
@@ -177,7 +169,7 @@ function toCardAnimal(a: StrapiAnimalRaw): CardAnimal {
   return {
     id: a.documentId,
     documentId: a.documentId,
-    name: a.bonded_with ? `${a.name} & ${a.bonded_with.name}` : a.name,
+    name: a.name,
     age: formatAge(a.age),
     sex: formatSex(a),
     blurb: a.description ?? '',
@@ -258,7 +250,7 @@ export async function fetchAnimals(opts?: {
   const categoryFilter = categoryFilterQuery(opts?.category)
 
   const { data, meta } = await strapiGet<StrapiListResponse<StrapiAnimalRaw>>(
-    `/api/animals?populate[breed]=true&populate[bonded_with]=true&populate[characters]=true&populate[medias][populate]=image&pagination[pageSize]=${limit}&pagination[page]=${page}${filter}${searchFilter}${statusFilter}${categoryFilter}`
+    `/api/animals?populate[breed]=true&populate[characters]=true&populate[medias][populate]=image&pagination[pageSize]=${limit}&pagination[page]=${page}${filter}${searchFilter}${statusFilter}${categoryFilter}`
   )
   return {
     animals: data.map(toCardAnimal),
@@ -275,7 +267,7 @@ export async function fetchUnassignedAnimals(opts?: {
 }): Promise<{ animals: CardAnimal[]; total: number }> {
   const limit = opts?.limit ?? 100
   const { data, meta } = await strapiGet<StrapiListResponse<StrapiAnimalRaw>>(
-    `/api/animals?populate[0]=breed&populate[1]=bonded_with&populate[medias][populate]=image&filters[referent][id][$null]=true&pagination[pageSize]=${limit}`
+    `/api/animals?populate[0]=breed&populate[medias][populate]=image&filters[referent][id][$null]=true&pagination[pageSize]=${limit}`
   )
   return {
     animals: data.map(toCardAnimal),
@@ -292,7 +284,6 @@ export interface MyAnimalAssignment extends CardAnimal {
 export async function fetchMyAnimals(userId: number): Promise<{ animals: MyAnimalAssignment[]; total: number }> {
   const params = new URLSearchParams({
     'populate[breed]': 'true',
-    'populate[bonded_with]': 'true',
     'populate[medias][populate]': 'image',
     'populate[referent]': 'true',
     'populate[backup_referents]': 'true',
@@ -316,7 +307,7 @@ export async function fetchMyAnimals(userId: number): Promise<{ animals: MyAnima
 
 export async function fetchAnimal(documentId: string): Promise<CardAnimal | null> {
   const res = await fetch(
-    `${STRAPI_URL}/api/animals/${documentId}?populate[breed]=true&populate[bonded_with]=true&populate[characters]=true&populate[medias][populate]=image&populate[medical_history]=true`,
+    `${STRAPI_URL}/api/animals/${documentId}?populate[breed]=true&populate[characters]=true&populate[medias][populate]=image&populate[medical_history]=true`,
     {
       headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
       next: { revalidate: 60 },
@@ -540,8 +531,14 @@ export async function fetchSocialLinks(): Promise<SocialLink[]> {
 
 // ─── Admin types ──────────────────────────────────────────────────────────────
 
-export type AnnouncementStatus = 'open' | 'closed' | 'draft'
+export type AnnouncementStatus = 'open' | 'closed'
 export type AdoptionRequestStatus = 'pending' | 'in_progress' | 'approved' | 'rejected'
+
+export interface StrapiConstraint {
+  id: number
+  documentId: string
+  name: string
+}
 
 export interface StrapiAnnouncementRaw {
   id: number
@@ -549,8 +546,181 @@ export interface StrapiAnnouncementRaw {
   title: string
   description: string | null
   status: AnnouncementStatus
+  publishedAt: string | null
   animals?: StrapiAnimalRaw[]
+  constraints?: StrapiConstraint[]
   tags?: { id: number; name: string }[]
+}
+
+/** Public-facing shape of an adoption announcement — the sole public surface over `animal`. */
+export interface CardAnnouncement {
+  id: string          // = documentId, used for href routing
+  documentId: string
+  title: string
+  name: string
+  age: string
+  sex: string
+  blurb: string
+  tag: CatTag
+  tagStyle: 'coral' | 'ink'
+  tones: [string, string]
+  status: AnimalStatus
+  announcementStatus: AnnouncementStatus
+  photoUrl: string | null
+  medias: CardAnimalMedia[]
+  videoUrl: string | null
+  trapDate: string | null
+  breed: string | null
+  characters: string[]
+  activityLevel: AnimalActivity | null
+  okWithChildren: boolean
+  okWithDogs: boolean
+  okWithCats: boolean
+  indoorOnly: boolean
+  vaccinated: boolean
+  sterilized: boolean
+  identified: boolean
+  dewormed: boolean
+  medicalHistory: StrapiMedicalEvent[]
+  constraints: string[]
+  animals: CardAnimal[]
+}
+
+function combinedSex(animals: CardAnimal[]): string {
+  if (animals.length <= 1) return animals[0]?.sex ?? ''
+  if (animals.every((a) => a.sex === 'Mâle')) return 'Mâles'
+  if (animals.every((a) => a.sex === 'Femelle')) return 'Femelles'
+  return 'Mâle & Femelle'
+}
+
+function toCardAnnouncement(raw: StrapiAnnouncementRaw): CardAnnouncement {
+  const animals = (raw.animals ?? []).map(toCardAnimal)
+  const isDuo = animals.length > 1
+  const first = animals[0]
+
+  const medias = animals.flatMap((a) => a.medias)
+  const cover = medias.find((m) => m.isCover) ?? medias[0] ?? null
+
+  const characters = Array.from(new Set(animals.flatMap((a) => a.characters)))
+  const breeds = Array.from(new Set(animals.map((a) => a.breed).filter((b): b is string => Boolean(b))))
+
+  const tag: CatTag = isDuo ? 'Duo' : first?.tag ?? 'Cas particulier'
+
+  return {
+    id: raw.documentId,
+    documentId: raw.documentId,
+    title: raw.title,
+    name: animals.map((a) => a.name).join(' & ') || raw.title,
+    age: animals.map((a) => a.age).join(' / '),
+    sex: combinedSex(animals),
+    blurb: raw.description ?? animals.map((a) => a.blurb).filter(Boolean).join('\n\n'),
+    tag,
+    tagStyle: tag === 'Senior' || tag === 'Cas particulier' ? 'ink' : 'coral',
+    tones: first?.tones ?? TONES[raw.id % TONES.length],
+    status: first?.status ?? 'available',
+    announcementStatus: raw.status,
+    photoUrl: cover?.url ?? null,
+    medias,
+    videoUrl: first?.videoUrl ?? null,
+    trapDate: first?.trapDate ?? null,
+    breed: breeds.join(' & ') || null,
+    characters,
+    activityLevel: first?.activityLevel ?? null,
+    okWithChildren: animals.every((a) => a.okWithChildren),
+    okWithDogs: animals.every((a) => a.okWithDogs),
+    okWithCats: animals.every((a) => a.okWithCats),
+    indoorOnly: animals.some((a) => a.indoorOnly),
+    vaccinated: animals.every((a) => a.vaccinated),
+    sterilized: animals.every((a) => a.sterilized),
+    identified: animals.every((a) => a.identified),
+    dewormed: animals.every((a) => a.dewormed),
+    medicalHistory: animals
+      .flatMap((a) => a.medicalHistory)
+      .sort((x, y) => y.event_date.localeCompare(x.event_date)),
+    constraints: (raw.constraints ?? []).map((c) => c.name),
+    animals,
+  }
+}
+
+const ANNOUNCEMENT_POPULATE =
+  'populate[animals][populate][breed]=true' +
+  '&populate[animals][populate][characters]=true' +
+  '&populate[animals][populate][medias][populate]=image' +
+  '&populate[animals][populate][medical_history]=true' +
+  '&populate[constraints]=true' +
+  '&populate[tags]=true'
+
+// Public listing: only announcements accepting requests (`status=open`); the
+// default publish visibility (no `status=` query param) already excludes
+// drafts for draftAndPublish content types, so unpublished announcements
+// never reach the public site.
+export async function fetchAnnouncements(opts?: {
+  limit?: number
+}): Promise<{ announcements: CardAnnouncement[]; total: number }> {
+  const limit = opts?.limit ?? 100
+  const { data, meta } = await strapiGet<StrapiListResponse<StrapiAnnouncementRaw>>(
+    `/api/announcements?filters[status][$eq]=open&${ANNOUNCEMENT_POPULATE}&pagination[pageSize]=${limit}`
+  )
+  return { announcements: data.map(toCardAnnouncement), total: meta.pagination.total }
+}
+
+export async function fetchAnnouncement(documentId: string): Promise<CardAnnouncement | null> {
+  const res = await fetch(`${STRAPI_URL}/api/announcements/${documentId}?${ANNOUNCEMENT_POPULATE}`, {
+    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+    next: { revalidate: 60 },
+  })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`Strapi ${res.status}: /api/announcements/${documentId}`)
+
+  const { data } = (await res.json()) as { data: StrapiAnnouncementRaw }
+  return toCardAnnouncement(data)
+}
+
+// Admin listing: every announcement regardless of status (open/closed) or
+// publish state (draft/published) — merges both like fetchBlogPostsAdmin,
+// since the plain REST default only surfaces published entries.
+export async function fetchAnnouncementsAdmin(opts?: {
+  limit?: number
+}): Promise<{ announcements: StrapiAnnouncementRaw[]; total: number }> {
+  const limit = opts?.limit ?? 100
+  const [{ data: draftData }, { data: pubData, meta }] = await Promise.all([
+    strapiGet<StrapiListResponse<StrapiAnnouncementRaw>>(
+      `/api/announcements?status=draft&populate[animals]=true&pagination[pageSize]=${limit}`
+    ),
+    strapiGet<StrapiListResponse<StrapiAnnouncementRaw>>(
+      `/api/announcements?populate[animals]=true&pagination[pageSize]=${limit}`
+    ),
+  ])
+  // Strapi always keeps a draft row alongside a published one (draft/publish
+  // are two separate rows sharing a documentId) — draft's own `publishedAt`
+  // is always null. Merging content with draft-wins (so the admin edits the
+  // latest unsaved changes) would make every published announcement look
+  // unpublished if we kept its `publishedAt`, so that field is patched back
+  // from whichever record actually appeared in the published-only query.
+  const publishedAtByDocumentId = new Map(pubData.map((a) => [a.documentId, a.publishedAt]))
+  const allMap = new Map<string, StrapiAnnouncementRaw>()
+  for (const a of [...pubData, ...draftData]) allMap.set(a.documentId, a)
+  const all = Array.from(allMap.values()).map((a) => ({
+    ...a,
+    publishedAt: publishedAtByDocumentId.get(a.documentId) ?? null,
+  }))
+  return { announcements: all, total: meta.pagination.total }
+}
+
+export async function publishAnnouncement(documentId: string): Promise<void> {
+  const res = await fetch(`${STRAPI_URL}/api/announcements/${documentId}/publish`, {
+    method: 'POST',
+    headers: strapiAuthHeaders(),
+  })
+  if (!res.ok) throw new Error(`Strapi ${res.status} POST /api/announcements/${documentId}/publish`)
+}
+
+export async function unpublishAnnouncement(documentId: string): Promise<void> {
+  const res = await fetch(`${STRAPI_URL}/api/announcements/${documentId}/unpublish`, {
+    method: 'POST',
+    headers: strapiAuthHeaders(),
+  })
+  if (!res.ok) throw new Error(`Strapi ${res.status} POST /api/announcements/${documentId}/unpublish`)
 }
 
 export interface StrapiFosterAssignmentRaw {
@@ -710,7 +880,6 @@ export async function fetchMyAdoptionRequests(userId: number): Promise<MyAdoptio
   const params = new URLSearchParams({
     'filters[adopter][id][$eq]': String(userId),
     'populate[animal][populate][breed]': 'true',
-    'populate[animal][populate][bonded_with]': 'true',
     'populate[animal][populate][medias][populate]': 'image',
     sort: 'createdAt:desc',
     'pagination[pageSize]': '100',
@@ -745,14 +914,14 @@ export async function fetchAdopterProfile(userId: number): Promise<StrapiAdopter
 
 export type SwipeDirection = 'like' | 'pass'
 
-export interface DiscoverAnimal extends CardAnimal {
+export interface DiscoverAnnouncement extends CardAnnouncement {
   compatibility: number | null
 }
 
-export async function fetchDiscoverAnimals(
+export async function fetchDiscoverAnnouncements(
   token: string,
   opts?: { limit?: number }
-): Promise<DiscoverAnimal[]> {
+): Promise<DiscoverAnnouncement[]> {
   const limit = opts?.limit ?? 30
   const res = await fetch(
     `${STRAPI_URL}/api/animal-discovery?limit=${limit}`,
@@ -761,20 +930,20 @@ export async function fetchDiscoverAnimals(
   if (!res.ok) throw new Error(`Strapi ${res.status}: /api/animal-discovery`)
 
   const { data } = (await res.json()) as {
-    data: (StrapiAnimalRaw & { compatibility: number | null })[]
+    data: (StrapiAnnouncementRaw & { compatibility: number | null })[]
   }
-  return data.map((a) => ({ ...toCardAnimal(a), compatibility: a.compatibility }))
+  return data.map((a) => ({ ...toCardAnnouncement(a), compatibility: a.compatibility }))
 }
 
 export async function postSwipe(
   token: string,
-  animalDocumentId: string,
+  announcementDocumentId: string,
   direction: SwipeDirection
 ): Promise<void> {
   const res = await fetch(`${STRAPI_URL}/api/swipes`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ data: { animal: animalDocumentId, direction } }),
+    body: JSON.stringify({ data: { announcement: announcementDocumentId, direction } }),
   })
   if (!res.ok) throw new Error(`Strapi ${res.status}: /api/swipes`)
 }
@@ -834,16 +1003,6 @@ export async function fetchResource<T>(path: string): Promise<{ data: T }> {
 }
 
 // ─── Admin fetch helpers ──────────────────────────────────────────────────────
-
-export async function fetchAnnouncements(opts?: {
-  limit?: number
-}): Promise<{ announcements: StrapiAnnouncementRaw[]; total: number }> {
-  const limit = opts?.limit ?? 100
-  const { data, meta } = await strapiGet<StrapiListResponse<StrapiAnnouncementRaw>>(
-    `/api/announcements?pagination[pageSize]=${limit}`
-  )
-  return { announcements: data, total: meta.pagination.total }
-}
 
 export interface FosterPickerAnimal {
   id: number
@@ -988,6 +1147,11 @@ export async function fetchBreeds(): Promise<StrapiBreed[]> {
 
 export async function fetchCharacters(): Promise<StrapiCharacter[]> {
   const { data } = await strapiGet<{ data: StrapiCharacter[] }>('/api/characters?pagination[pageSize]=200')
+  return data
+}
+
+export async function fetchConstraints(): Promise<StrapiConstraint[]> {
+  const { data } = await strapiGet<{ data: StrapiConstraint[] }>('/api/constraints?pagination[pageSize]=200')
   return data
 }
 
