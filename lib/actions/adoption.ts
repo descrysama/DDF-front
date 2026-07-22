@@ -69,10 +69,8 @@ export interface AdoptionFormData {
     sterilized?: string
     owned_since?: string
   }
-  // Used by the backend's match_score computation (adoption-request
-  // lifecycles) as the "experience" criterion — the separate adopter-profile
-  // (/profile) rarely gets filled in before a real request, so this is the
-  // reliable source.
+  // Collected in the form but not sent to Strapi — the adoption-request
+  // schema has no matching field, and sending it 400s the request.
   cat_experience: AdopterExperience
   remarks: string
   responsibility_agreement: boolean
@@ -98,7 +96,6 @@ export async function submitAdoptionRequest(data: AdoptionFormData): Promise<Ado
         housing: data.housing,
         outdoor: data.outdoor,
         other_pets: data.other_pets,
-        cat_experience: data.cat_experience,
         remarks: data.remarks,
         responsibility_agreement: data.responsibility_agreement,
         request_date: new Date().toISOString().split('T')[0],
