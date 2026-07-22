@@ -229,7 +229,7 @@ export async function fetchAnimals(opts?: {
   const filter = exclude ? `&filters[status][$ne]=${exclude}` : ''
 
   const { data, meta } = await strapiGet<StrapiListResponse<StrapiAnimalRaw>>(
-    `/api/animals?populate[0]=breed&populate[1]=bonded_with&populate[characters]=true&populate[medias][populate]=image&pagination[pageSize]=${limit}${filter}`
+    `/api/animals?populate[breed]=true&populate[bonded_with]=true&populate[characters]=true&populate[medias][populate]=image&pagination[pageSize]=${limit}${filter}`
   )
   return {
     animals: data.map(toCardAnimal),
@@ -239,7 +239,7 @@ export async function fetchAnimals(opts?: {
 
 export async function fetchAnimal(documentId: string): Promise<CardAnimal | null> {
   const res = await fetch(
-    `${STRAPI_URL}/api/animals/${documentId}?populate[0]=breed&populate[1]=bonded_with&populate[characters]=true&populate[medias][populate]=image&populate[medical_history]=true`,
+    `${STRAPI_URL}/api/animals/${documentId}?populate[breed]=true&populate[bonded_with]=true&populate[characters]=true&populate[medias][populate]=image&populate[medical_history]=true`,
     {
       headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
       next: { revalidate: 60 },

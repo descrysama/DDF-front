@@ -65,6 +65,22 @@ export function AdoptionFilters({ cats }: Props) {
     return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b))
   }, [cats])
 
+  const breedItems = useMemo(() => {
+    const items: Record<string, string> = { [ALL_BREEDS]: 'Toutes les races' }
+    breeds.forEach((b) => { items[b] = b })
+    return items
+  }, [breeds])
+
+  const statusItems = useMemo(() => ({
+    [ALL_STATUSES]: 'Tous les statuts',
+    ...STATUS_LABEL,
+  }), [])
+
+  const energyItems = useMemo(() => ({
+    [ALL_ENERGY]: 'Tous niveaux',
+    ...ACTIVITY_LABEL,
+  }), [])
+
   const visible = useMemo(() => {
     return cats.filter((c) => {
       const matchFilter = tagMatchesFilter(c.tag, active)
@@ -105,7 +121,7 @@ export function AdoptionFilters({ cats }: Props) {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <Select value={breed} onValueChange={(v) => v && setBreed(v)}>
+            <Select value={breed} onValueChange={(v) => v && setBreed(v)} items={breedItems}>
               <SelectTrigger className="h-auto py-1.5 text-xs w-auto"><SelectValue placeholder="Race" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value={ALL_BREEDS}>Toutes les races</SelectItem>
@@ -115,7 +131,7 @@ export function AdoptionFilters({ cats }: Props) {
               </SelectContent>
             </Select>
 
-            <Select value={status} onValueChange={(v) => v && setStatus(v as AnimalStatus | typeof ALL_STATUSES)}>
+            <Select value={status} onValueChange={(v) => v && setStatus(v as AnimalStatus | typeof ALL_STATUSES)} items={statusItems}>
               <SelectTrigger className="h-auto py-1.5 text-xs w-auto"><SelectValue placeholder="Statut" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value={ALL_STATUSES}>Tous les statuts</SelectItem>
@@ -125,7 +141,7 @@ export function AdoptionFilters({ cats }: Props) {
               </SelectContent>
             </Select>
 
-            <Select value={energy} onValueChange={(v) => v && setEnergy(v as AnimalActivity | typeof ALL_ENERGY)}>
+            <Select value={energy} onValueChange={(v) => v && setEnergy(v as AnimalActivity | typeof ALL_ENERGY)} items={energyItems}>
               <SelectTrigger className="h-auto py-1.5 text-xs w-auto"><SelectValue placeholder="Énergie" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value={ALL_ENERGY}>Tous niveaux</SelectItem>
