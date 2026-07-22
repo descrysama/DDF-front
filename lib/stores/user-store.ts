@@ -19,3 +19,9 @@ export const useUserStore = create<UserState>((set) => ({
 
 export const useIsAdmin = () =>
   useUserStore((s) => s.user?.role?.name?.toLowerCase() === 'admin')
+
+export const useIsStaff = () =>
+  useUserStore((s) => {
+    const role = s.user?.role?.name?.toLowerCase()
+    return role === 'admin' || role === 'membre'
+  })

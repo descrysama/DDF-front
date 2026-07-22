@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useState, useRef, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { Menu, X, User, Heart, LogOut, Shield, Cat } from "lucide-react"
-import { useUserStore, useIsAdmin } from "@/lib/stores/user-store"
+import { useUserStore, useIsStaff } from "@/lib/stores/user-store"
 import { Button } from "@/components/ui/button"
 
 const NAV_LINKS = [
@@ -22,7 +22,7 @@ export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const user = useUserStore((s) => s.user)
   const clear = useUserStore((s) => s.clear)
-  const isAdmin = useIsAdmin()
+  const isStaff = useIsStaff()
   const pathname = usePathname()
   const router = useRouter()
 
@@ -129,9 +129,9 @@ export default function Header() {
                         <Cat size={14} />
                         Trouver mon match
                       </Link>
-                      {isAdmin && (
+                      {isStaff && (
                         <Link
-                          href="/admin/animals"
+                          href="/admin"
                           onClick={() => setDropdownOpen(false)}
                           className="flex items-center gap-2 px-4 py-2 text-sm text-ink no-underline hover:bg-surface-alt"
                         >
@@ -217,9 +217,9 @@ export default function Header() {
                   >
                     Trouver mon match
                   </Link>
-                  {isAdmin && (
+                  {isStaff && (
                     <Link
-                      href="/admin/animals"
+                      href="/admin"
                       onClick={() => setMenuOpen(false)}
                       className="px-4 py-2.5 rounded-md bg-ink text-white font-semibold text-sm no-underline text-center"
                     >
