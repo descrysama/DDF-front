@@ -1,10 +1,10 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { CatCard } from "@/components/cat-card"
-import { fetchAnimals } from "@/lib/strapi"
+import { fetchAnnouncements } from "@/lib/strapi"
 
 export async function CatsPreview() {
-  const { animals, total } = await fetchAnimals({ limit: 4, excludeStatus: 'adopted' })
+  const { announcements, total } = await fetchAnnouncements({ limit: 4 })
 
   return (
     <section className="bg-bg">
@@ -27,7 +27,7 @@ export async function CatsPreview() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-          {animals.map((cat) => (
+          {announcements.map((cat) => (
             <CatCard key={cat.documentId} cat={cat} />
           ))}
         </div>

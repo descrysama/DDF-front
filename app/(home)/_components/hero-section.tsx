@@ -1,11 +1,11 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
-import { fetchAnimals } from "@/lib/strapi"
+import { fetchAnnouncements } from "@/lib/strapi"
 
 export async function HeroSection() {
-  const { animals, total } = await fetchAnimals({ limit: 1, excludeStatus: 'adopted' })
-  const featured = animals[0]
+  const { announcements, total } = await fetchAnnouncements({ limit: 1 })
+  const featured = announcements[0]
 
   return (
     <section className="relative overflow-hidden bg-bg">
