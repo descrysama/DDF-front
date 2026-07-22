@@ -57,7 +57,7 @@ export default async function EditAnimalPage({
   try {
     const res = await fetchResource<AnimalDetail>(
       `/api/animals/${documentId}` +
-        '?populate[0]=breed' +
+        '?populate[breed]=true' +
         '&populate[characters]=true' +
         '&populate[medias][populate]=image' +
         '&populate[medical_history]=true' +

@@ -267,7 +267,7 @@ export async function fetchUnassignedAnimals(opts?: {
 }): Promise<{ animals: CardAnimal[]; total: number }> {
   const limit = opts?.limit ?? 100
   const { data, meta } = await strapiGet<StrapiListResponse<StrapiAnimalRaw>>(
-    `/api/animals?populate[0]=breed&populate[medias][populate]=image&filters[referent][id][$null]=true&pagination[pageSize]=${limit}`
+    `/api/animals?populate[breed]=true&populate[medias][populate]=image&filters[referent][id][$null]=true&pagination[pageSize]=${limit}`
   )
   return {
     animals: data.map(toCardAnimal),
@@ -999,7 +999,12 @@ export async function strapiDelete(path: string): Promise<void> {
 }
 
 export async function fetchResource<T>(path: string): Promise<{ data: T }> {
-  return strapiGet<{ data: T }>(path)
+  const res = await fetch(`${STRAPI_URL}${path}`, {
+    headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
+    cache: 'no-store',
+  })
+  if (!res.ok) throw new Error(`Strapi ${res.status}: ${path}`)
+  return res.json()
 }
 
 // ─── Admin fetch helpers ──────────────────────────────────────────────────────
