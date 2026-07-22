@@ -544,32 +544,76 @@ export interface StrapiFosterFamilyRaw {
   foster_assignments?: StrapiFosterAssignmentRaw[]
 }
 
-export interface AdoptionCandidat {
-  prenom?: string
-  nom?: string
+export interface AdoptionApplicant {
+  animal_name?: string
+  first_name?: string
+  last_name?: string
+  birth_date?: string
+  address?: string
+  postal_code?: string
+  city?: string
+  phone?: string
   email?: string
-  telephone?: string
-  codePostal?: string
-  ville?: string
-  age?: string
+}
+
+export interface AdoptionHousehold {
+  composition?: string
+  roommates_count?: string
+  has_children?: boolean
+  children_count?: string
+  children_ages?: string
+  household_agrees?: boolean
+  disagreement_who?: string
+  disagreement_why?: string
+}
+
+export interface AdoptionEmployment {
+  employed?: boolean
   profession?: string
+  work_hours?: string
+  hours_alone_per_day?: string
 }
 
-export interface AdoptionFoyer {
-  typeLogement?: string
-  surface?: string
-  accesExterieur?: string
-  compositionFoyer?: string
-  autresAnimaux?: string
-  statutLogement?: string
-  personnesFoyer?: string
+export interface AdoptionApartment {
+  floor?: string
+  windows_secured?: string
+  plans_to_secure_windows?: string
 }
 
-export interface AdoptionChatInfo {
-  experienceChat?: string
-  pourquoiCeChat?: string
-  veterinaire?: string
-  disponibilite?: string
+export interface AdoptionHousing {
+  type?: string
+  surface_area?: string
+  animal_environment?: string
+  area_type?: string
+  busy_road_nearby?: string
+  outdoor_access_allowed?: string
+  apartment?: AdoptionApartment | null
+}
+
+export interface AdoptionGarden {
+  has_garden?: boolean
+  description?: string
+  surface_area?: string
+  fenced?: boolean
+  fence_height?: string
+}
+
+export interface AdoptionBalcony {
+  has_balcony?: boolean
+  surface_area?: string
+  secured?: string
+}
+
+export interface AdoptionOutdoor {
+  garden?: AdoptionGarden | null
+  balcony?: AdoptionBalcony | null
+}
+
+export interface AdoptionOtherPets {
+  has_other_pets?: boolean
+  details?: string
+  sterilized?: string
+  owned_since?: string
 }
 
 export interface StrapiAdoptionRequestRaw {
@@ -579,10 +623,15 @@ export interface StrapiAdoptionRequestRaw {
   status: AdoptionRequestStatus
   match_score: number | null
   request_date: string | null
-  candidat: AdoptionCandidat | null
-  foyer: AdoptionFoyer | null
-  chat_info: AdoptionChatInfo | null
-  engagements: boolean[] | null
+  adoption_process_agreement: boolean | null
+  applicant: AdoptionApplicant | null
+  household: AdoptionHousehold | null
+  employment: AdoptionEmployment | null
+  housing: AdoptionHousing | null
+  outdoor: AdoptionOutdoor | null
+  other_pets: AdoptionOtherPets | null
+  remarks: string | null
+  responsibility_agreement: boolean | null
   announcement?: { id: number; documentId: string; title: string }
   animal?: {
     id: number
