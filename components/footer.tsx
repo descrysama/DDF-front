@@ -66,7 +66,7 @@ export default async function Footer() {
                 >
                   {iconUrl && (
                     <div className="relative w-3.5 h-3.5">
-                      <Image src={iconUrl} alt="" fill className="object-contain" />
+                      <Image src={iconUrl} alt="" fill unoptimized className="object-contain" />
                     </div>
                   )}
                 </Link>
