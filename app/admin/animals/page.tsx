@@ -7,7 +7,7 @@ import StatCard from '@/components/admin/stat-card'
 import ActionButtons from '@/components/admin/action-buttons'
 import { AD } from '@/lib/admin-tokens'
 import { Card } from '@/components/ui/card'
-import { Search } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import SearchInput from '@/components/admin/search-input'
 import FilterSelect from '@/components/admin/filter-select'
@@ -61,7 +61,7 @@ export default async function AdminAnimalsPage({
   const reserved  = allAnimals.filter(a => a.status === 'reserved').length
 
   const STAT_CARDS = [
-    { label: 'Publiés',              count: available,          dot: '#3FA66E' },
+    { label: 'Disponibles',          count: available,          dot: '#3FA66E' },
     { label: "En famille d'accueil", count: in_foster,          dot: '#E0944A' },
     { label: 'Réservés',             count: reserved,           dot: '#7B6CC4' },
     { label: 'Demandes en attente',  count: adoptionData.total, dot: '#E84A77' },
@@ -172,13 +172,19 @@ export default async function AdminAnimalsPage({
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div
                   style={{
+                    position: 'relative',
                     width: 36,
                     height: 36,
                     borderRadius: 6,
-                    background: `linear-gradient(135deg, ${tones[0]}, ${tones[1]})`,
+                    overflow: 'hidden',
+                    background: animal.photoUrl ? undefined : `linear-gradient(135deg, ${tones[0]}, ${tones[1]})`,
                     flexShrink: 0,
                   }}
-                />
+                >
+                  {animal.photoUrl && (
+                    <Image src={animal.photoUrl} alt={animal.name} fill unoptimized sizes="36px" style={{ objectFit: 'cover' }} />
+                  )}
+                </div>
                 <div>
                   <p style={{ fontSize: 13.5, fontWeight: 600, color: AD.ink }}>{animal.name}</p>
                   <p style={{ fontSize: 11, color: AD.inkSubtle, fontFamily: 'Geist Mono, ui-monospace, monospace' }}>
@@ -210,30 +216,11 @@ export default async function AdminAnimalsPage({
               <StatusBadge status={animal.status} />
 
               {/* Actions */}
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <Link
-                  href={`/admin/animals/${animal.documentId}`}
-                  title="Voir"
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 6,
-                    border: `1px solid ${AD.border}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textDecoration: 'none',
-                    background: AD.surface,
-                    flexShrink: 0,
-                  }}
-                >
-                  <Search size={13} color={AD.inkMuted} />
-                </Link>
-                <ActionButtons
-                  editHref={`/admin/animals/${animal.documentId}`}
-                  deleteAction={deleteAnimal.bind(null, animal.documentId)}
-                />
-              </div>
+              <ActionButtons
+                viewHref={`/adopt-pet/${animal.documentId}`}
+                editHref={`/admin/animals/${animal.documentId}`}
+                deleteAction={deleteAnimal.bind(null, animal.documentId)}
+              />
             </div>
           )
         })}

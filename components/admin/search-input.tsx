@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Search } from 'lucide-react'
-import { AD } from '@/lib/admin-tokens'
-import { fieldStyle } from '@/lib/admin-styles'
+import { Input } from '@/components/ui/input'
 
 export default function SearchInput({
   paramName = 'q',
@@ -40,18 +39,14 @@ export default function SearchInput({
   }, [value])
 
   return (
-    <div style={{ position: 'relative', maxWidth: 320 }}>
-      <Search
-        size={14}
-        color={AD.inkMuted}
-        style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
-      />
-      <input
+    <div className="relative max-w-[320px]">
+      <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+      <Input
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        style={{ ...fieldStyle, paddingLeft: 32 }}
+        className="pl-8"
       />
     </div>
   )

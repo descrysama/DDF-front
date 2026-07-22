@@ -11,6 +11,17 @@ import { FormError } from '@/components/ui/form-error'
 import SubmitButton from '@/components/admin/submit-button'
 import { useServerFormAction } from '@/lib/hooks/use-server-form-action'
 
+const GENDER_ITEMS: Record<string, string> = { female: 'Femelle', male: 'Mâle' }
+
+const STATUS_ITEMS: Record<string, string> = {
+  available: 'Disponible',
+  in_foster: "En famille d'accueil",
+  reserved: 'Réservé',
+  adopted: 'Adopté',
+}
+
+const ACTIVITY_ITEMS: Record<string, string> = { low: 'Faible', medium: 'Moyen', high: 'Élevé' }
+
 interface AnimalFormData {
   name?: string
   age?: number
@@ -42,6 +53,8 @@ export default function AnimalForm({ defaultValues = {}, action, breeds = [], ch
   const [status, setStatus] = useState<string>(defaultValues.status ?? 'available')
   const [activityLevel, setActivityLevel] = useState<string>(defaultValues.activity_level ?? 'medium')
   const [breedId, setBreedId] = useState<string>(defaultValues.breed_id ? String(defaultValues.breed_id) : '')
+  const breedItems: Record<string, string> = {}
+  breeds.forEach((b) => { breedItems[String(b.id)] = b.name })
 
   function handleGenderChange(value: string | null) {
     if (value !== null) setGender(value)
@@ -69,7 +82,7 @@ export default function AnimalForm({ defaultValues = {}, action, breeds = [], ch
 
           <Field>
             <FieldLabel htmlFor="gender">Genre</FieldLabel>
-            <Select value={gender} onValueChange={handleGenderChange}>
+            <Select value={gender} onValueChange={handleGenderChange} items={GENDER_ITEMS}>
               <SelectTrigger id="gender" className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="female">Femelle</SelectItem>
@@ -81,7 +94,7 @@ export default function AnimalForm({ defaultValues = {}, action, breeds = [], ch
 
           <Field>
             <FieldLabel htmlFor="status">Statut</FieldLabel>
-            <Select value={status} onValueChange={handleStatusChange}>
+            <Select value={status} onValueChange={handleStatusChange} items={STATUS_ITEMS}>
               <SelectTrigger id="status" className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="available">Disponible</SelectItem>
@@ -95,7 +108,7 @@ export default function AnimalForm({ defaultValues = {}, action, breeds = [], ch
 
           <Field>
             <FieldLabel htmlFor="breed_id">Race</FieldLabel>
-            <Select value={breedId} onValueChange={(v) => setBreedId(v ?? '')}>
+            <Select value={breedId} onValueChange={(v) => setBreedId(v ?? '')} items={breedItems}>
               <SelectTrigger id="breed_id" className="w-full"><SelectValue placeholder="Non renseignée" /></SelectTrigger>
               <SelectContent>
                 {breeds.map((b) => (
@@ -108,7 +121,7 @@ export default function AnimalForm({ defaultValues = {}, action, breeds = [], ch
 
           <Field>
             <FieldLabel htmlFor="activity_level">Niveau d&apos;activité</FieldLabel>
-            <Select value={activityLevel} onValueChange={handleActivityLevelChange}>
+            <Select value={activityLevel} onValueChange={handleActivityLevelChange} items={ACTIVITY_ITEMS}>
               <SelectTrigger id="activity_level" className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="low">Faible</SelectItem>

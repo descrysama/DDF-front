@@ -32,7 +32,7 @@ export type StatusKey =
   | 'planned' | 'completed' | 'cancelled'
 
 export const STATUS_META: Record<StatusKey, { label: string; tint: string; dot: string; ink: string }> = {
-  available: { label: 'Publié',     tint: '#E0F0E8', dot: '#3FA66E', ink: '#1E6B43' },
+  available: { label: 'Disponible', tint: '#E0F0E8', dot: '#3FA66E', ink: '#1E6B43' },
   in_foster: { label: 'En famille', tint: '#FCE9D9', dot: '#E0944A', ink: '#8C5A1E' },
   reserved:  { label: 'Réservé',    tint: '#E8E5F4', dot: '#7B6CC4', ink: '#4A3F8E' },
   adopted:   { label: 'Adopté',     tint: '#EFEAE2', dot: '#9C9588', ink: '#5C564B' },

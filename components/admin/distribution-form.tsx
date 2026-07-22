@@ -11,6 +11,8 @@ import SubmitButton from '@/components/admin/submit-button'
 import { useServerFormAction } from '@/lib/hooks/use-server-form-action'
 import type { DistributionStatus, StrapiDistributionRaw, StrapiUser } from '@/lib/strapi'
 
+const STATUS_ITEMS: Record<string, string> = { planned: 'Planifiée', completed: 'Terminée', cancelled: 'Annulée' }
+
 interface DistributionFormData {
   date?: string
   location?: string
@@ -52,7 +54,7 @@ export default function DistributionForm({ defaultValues = {}, users, action }: 
         </Field>
         <Field>
           <FieldLabel htmlFor="status">Statut</FieldLabel>
-          <Select value={status} onValueChange={handleStatusChange}>
+          <Select value={status} onValueChange={handleStatusChange} items={STATUS_ITEMS}>
             <SelectTrigger id="status" className="w-full"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="planned">Planifiée</SelectItem>

@@ -9,6 +9,8 @@ import SubmitButton from '@/components/admin/submit-button'
 import { useServerFormAction } from '@/lib/hooks/use-server-form-action'
 import type { AnnouncementStatus } from '@/lib/strapi'
 
+const STATUS_ITEMS: Record<string, string> = { open: 'Ouvert', closed: 'Fermé', draft: 'Brouillon' }
+
 interface AnnouncementFormData {
   title?: string
   description?: string | null
@@ -37,7 +39,7 @@ export default function AnnouncementForm({ defaultValues = {}, action }: Announc
         </Field>
         <Field>
           <FieldLabel htmlFor="status">Statut</FieldLabel>
-          <Select value={status} onValueChange={handleStatusChange}>
+          <Select value={status} onValueChange={handleStatusChange} items={STATUS_ITEMS}>
             <SelectTrigger id="status" className="w-full"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="open">Ouvert</SelectItem>
