@@ -217,7 +217,6 @@ export default async function AdminAnimalsPage({
 
               {/* Actions */}
               <ActionButtons
-                viewHref={`/adopt-pet/${animal.documentId}`}
                 editHref={`/admin/animals/${animal.documentId}`}
                 deleteAction={deleteAnimal.bind(null, animal.documentId)}
               />
