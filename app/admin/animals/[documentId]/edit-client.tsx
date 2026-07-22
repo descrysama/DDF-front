@@ -268,7 +268,7 @@ export default function AnimalEditClient({
           <div style={card}>
             <div style={cardTitle}>Identité</div>
             <div style={cardHint}>Les informations affichées sur la fiche publique.</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ display: 'grid', gap: 14 }}>
               <div>
                 <span style={label}>Nom</span>
                 <input name="name" required defaultValue={animal.name} style={input} placeholder="Ex: Mimi" />
@@ -290,7 +290,7 @@ export default function AnimalEditClient({
                   ))}
                 </select>
               </div>
-              <div style={{ gridColumn: 'span 2' }}>
+              <div>
                 <span style={label}>Sexe</span>
                 <div style={{ display: 'flex', gap: 6 }}>
                   {[
@@ -336,7 +336,7 @@ export default function AnimalEditClient({
                 <option value="high">Élevé</option>
               </select>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <div style={{ display: 'grid', gap: 8 }}>
               {[
                 { name: 'ok_with_children', label: 'Compatible enfants', checked: animal.ok_with_children },
                 { name: 'ok_with_dogs',     label: 'Compatible chiens',  checked: animal.ok_with_dogs },
@@ -358,7 +358,7 @@ export default function AnimalEditClient({
           <div style={card}>
             <div style={cardTitle}>Caractère</div>
             <div style={cardHint}>Les traits de personnalité affichés sur la fiche publique.</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <div style={{ display: 'grid', gap: 8 }}>
               {characters.map((c) => (
                 <label key={c.id} style={{
                   display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer',
@@ -381,7 +381,7 @@ export default function AnimalEditClient({
           <div style={card}>
             <div style={cardTitle}>Santé & identification</div>
             <div style={cardHint}>États affichés en pills Actif/Inactif sur la fiche publique.</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <div style={{ display: 'grid', gap: 8 }}>
               {[
                 { name: 'vaccinated', label: 'Vacciné',          checked: animal.vaccinated },
                 { name: 'sterilized', label: 'Stérilisé/castré', checked: animal.sterilized },
@@ -744,7 +744,7 @@ export default function AnimalEditClient({
             </div>
 
             <form ref={medicalFormRef} onSubmit={handleAddMedicalEvent} style={{ display: 'grid', gap: 8 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div style={{ display: 'grid', gap: 8 }}>
                 <input name="event_date" type="date" required style={{ ...input, fontSize: 12 }} />
                 <select name="event_type" defaultValue="consultation" style={{ ...input, fontSize: 12 }}>
                   {Object.entries(MEDICAL_EVENT_LABEL).map(([value, entryLabel]) => (
