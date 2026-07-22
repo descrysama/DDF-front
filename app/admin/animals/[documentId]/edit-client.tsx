@@ -42,6 +42,7 @@ interface Animal {
   identified: boolean
   dewormed: boolean
   breed?: StrapiBreed | null
+  characters?: { id: number; name: string }[]
   medias?: StrapiMedia[]
   video_url?: string | null
   trap_date?: string | null
@@ -106,12 +107,14 @@ export default function AnimalEditClient({
   strapiUrl,
   users,
   breeds,
+  characters,
   fosterFamilies,
 }: {
   animal: Animal
   strapiUrl: string
   users: StrapiUser[]
   breeds: StrapiBreed[]
+  characters: { id: number; name: string }[]
   fosterFamilies: StrapiFosterFamilyRaw[]
 }) {
   const [isPending, startTransition] = useTransition()
@@ -340,6 +343,29 @@ export default function AnimalEditClient({
                 }}>
                   <input type="checkbox" name={item.name} defaultChecked={!!item.checked} style={{ marginTop: 2, flexShrink: 0 }} />
                   <span style={{ fontSize: 12.5, color: AD.ink }}>{item.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Caractère */}
+          <div style={card}>
+            <div style={cardTitle}>Caractère</div>
+            <div style={cardHint}>Les traits de personnalité affichés sur la fiche publique.</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {characters.map((c) => (
+                <label key={c.id} style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer',
+                  padding: '8px 12px', borderRadius: 7, background: AD.surfaceAlt,
+                }}>
+                  <input
+                    type="checkbox"
+                    name="character_ids"
+                    value={c.id}
+                    defaultChecked={animal.characters?.some((x) => x.id === c.id) ?? false}
+                    style={{ marginTop: 2, flexShrink: 0 }}
+                  />
+                  <span style={{ fontSize: 12.5, color: AD.ink }}>{c.name}</span>
                 </label>
               ))}
             </div>

@@ -33,9 +33,10 @@ interface AnimalFormProps {
   defaultValues?: AnimalFormData
   action: (formData: FormData) => Promise<void>
   breeds?: { id: number; name: string }[]
+  characters?: { id: number; name: string }[]
 }
 
-export default function AnimalForm({ defaultValues = {}, action, breeds = [] }: AnimalFormProps) {
+export default function AnimalForm({ defaultValues = {}, action, breeds = [], characters = [] }: AnimalFormProps) {
   const { error, isPending, handleSubmit } = useServerFormAction(action)
   const [gender, setGender] = useState<string>(defaultValues.gender ?? 'female')
   const [status, setStatus] = useState<string>(defaultValues.status ?? 'available')
@@ -136,6 +137,18 @@ export default function AnimalForm({ defaultValues = {}, action, breeds = [] }: 
               <Label key={name} htmlFor={name} className="flex cursor-pointer items-center gap-2 font-normal">
                 <Checkbox id={name} name={name} defaultChecked={!!checked} />
                 {label}
+              </Label>
+            ))}
+          </div>
+        </Field>
+
+        <Field>
+          <FieldLabel>Caractère</FieldLabel>
+          <div className="grid grid-cols-2 gap-2">
+            {characters.map((c) => (
+              <Label key={c.id} htmlFor={`character-${c.id}`} className="flex cursor-pointer items-center gap-2 font-normal">
+                <Checkbox id={`character-${c.id}`} name="character_ids" value={String(c.id)} />
+                {c.name}
               </Label>
             ))}
           </div>

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
-import { fetchResource, fetchUsers, fetchBreeds, fetchFosterFamilies } from '@/lib/strapi'
-import type { StrapiMedia, StrapiMedicalEvent, StrapiUser, StrapiBreed } from '@/lib/strapi'
+import { fetchResource, fetchUsers, fetchBreeds, fetchCharacters, fetchFosterFamilies } from '@/lib/strapi'
+import type { StrapiMedia, StrapiMedicalEvent, StrapiUser, StrapiBreed, StrapiCharacter } from '@/lib/strapi'
 import AnimalEditClient from './edit-client'
 import { STRAPI_URL } from '@/lib/config'
 
@@ -30,6 +30,7 @@ interface AnimalDetail {
   identified: boolean
   dewormed: boolean
   breed?: StrapiBreed | null
+  characters?: StrapiCharacter[]
   medias?: StrapiMedia[]
   video_url?: string | null
   trap_date?: string | null
@@ -51,6 +52,7 @@ export default async function EditAnimalPage({
     const res = await fetchResource<AnimalDetail>(
       `/api/animals/${documentId}` +
         '?populate[0]=breed' +
+        '&populate[characters]=true' +
         '&populate[medias][populate]=image' +
         '&populate[medical_history]=true' +
         '&populate[foster_assignments][populate]=foster_family' +
@@ -62,9 +64,10 @@ export default async function EditAnimalPage({
     notFound()
   }
 
-  const [users, breeds, { fosterFamilies }] = await Promise.all([
+  const [users, breeds, characters, { fosterFamilies }] = await Promise.all([
     fetchUsers(),
     fetchBreeds(),
+    fetchCharacters(),
     fetchFosterFamilies({ limit: 200 }),
   ])
 
@@ -74,6 +77,7 @@ export default async function EditAnimalPage({
       strapiUrl={STRAPI_URL}
       users={users}
       breeds={breeds}
+      characters={characters}
       fosterFamilies={fosterFamilies}
     />
   )

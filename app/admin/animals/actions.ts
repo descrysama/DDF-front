@@ -30,6 +30,7 @@ function parseAnimalFormData(formData: FormData) {
     dewormed:         formData.get('dewormed') === 'on',
     trap_date:        trapDate || null,
     breed:            breedId ? Number(breedId) : null,
+    characters:       formData.getAll('character_ids').map(Number),
   }
 }
 

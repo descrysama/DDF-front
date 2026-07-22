@@ -103,6 +103,19 @@ export default async function CatPage({ params, searchParams }: Props) {
                 {cat.blurb}
               </p>
 
+              {cat.characters.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-5">
+                  {cat.characters.map((c) => (
+                    <span
+                      key={c}
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/60 text-ink"
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               {/* Key facts */}
               <div className="bg-white/60 rounded-lg px-3 mb-[18px]">
                 {[

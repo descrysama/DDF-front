@@ -36,6 +36,12 @@ export interface StrapiBreed {
   species: string
 }
 
+export interface StrapiCharacter {
+  id: number
+  documentId: string
+  name: string
+}
+
 export interface StrapiImageFile {
   id: number
   documentId: string
@@ -79,6 +85,7 @@ interface StrapiAnimalRaw {
   identified: boolean
   dewormed: boolean
   breed: StrapiBreed | null
+  characters: StrapiCharacter[]
   bonded_with: StrapiAnimalRaw | null
   medias?: StrapiMedia[]
   video_url?: string | null
@@ -108,6 +115,7 @@ export interface CardAnimal {
   videoUrl: string | null
   trapDate: string | null
   breed: string | null
+  characters: string[]
   activityLevel: AnimalActivity | null
   okWithChildren: boolean
   okWithDogs: boolean
@@ -182,6 +190,7 @@ function toCardAnimal(a: StrapiAnimalRaw): CardAnimal {
     videoUrl: a.video_url ? `${STRAPI_URL}${a.video_url}` : null,
     trapDate: a.trap_date ?? null,
     breed: a.breed?.name ?? null,
+    characters: (a.characters ?? []).map((c) => c.name),
     activityLevel: a.activity_level ?? null,
     okWithChildren: a.ok_with_children,
     okWithDogs: a.ok_with_dogs,
@@ -220,7 +229,7 @@ export async function fetchAnimals(opts?: {
   const filter = exclude ? `&filters[status][$ne]=${exclude}` : ''
 
   const { data, meta } = await strapiGet<StrapiListResponse<StrapiAnimalRaw>>(
-    `/api/animals?populate[0]=breed&populate[1]=bonded_with&populate[medias][populate]=image&pagination[pageSize]=${limit}${filter}`
+    `/api/animals?populate[0]=breed&populate[1]=bonded_with&populate[characters]=true&populate[medias][populate]=image&pagination[pageSize]=${limit}${filter}`
   )
   return {
     animals: data.map(toCardAnimal),
@@ -230,7 +239,7 @@ export async function fetchAnimals(opts?: {
 
 export async function fetchAnimal(documentId: string): Promise<CardAnimal | null> {
   const res = await fetch(
-    `${STRAPI_URL}/api/animals/${documentId}?populate[0]=breed&populate[1]=bonded_with&populate[medias][populate]=image&populate[medical_history]=true`,
+    `${STRAPI_URL}/api/animals/${documentId}?populate[0]=breed&populate[1]=bonded_with&populate[characters]=true&populate[medias][populate]=image&populate[medical_history]=true`,
     {
       headers: { Authorization: `Bearer ${STRAPI_TOKEN}` },
       next: { revalidate: 60 },
@@ -784,6 +793,11 @@ export async function fetchUsersForFosterPicker(excludeFamilyDocumentId?: string
 
 export async function fetchBreeds(): Promise<StrapiBreed[]> {
   const { data } = await strapiGet<{ data: StrapiBreed[] }>('/api/breeds?pagination[pageSize]=200')
+  return data
+}
+
+export async function fetchCharacters(): Promise<StrapiCharacter[]> {
+  const { data } = await strapiGet<{ data: StrapiCharacter[] }>('/api/characters?pagination[pageSize]=200')
   return data
 }
 
