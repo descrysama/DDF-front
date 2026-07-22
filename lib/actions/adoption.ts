@@ -4,7 +4,7 @@ import { STRAPI_URL, strapiAuthHeaders } from '@/lib/config'
 import { getCurrentUser } from '@/lib/auth'
 
 export interface AdoptionFormData {
-  catId: string
+  announcementId: string
   adoption_process_agreement: boolean
   applicant: {
     animal_name: string
@@ -90,7 +90,7 @@ export async function submitAdoptionRequest(data: AdoptionFormData): Promise<Ado
         responsibility_agreement: data.responsibility_agreement,
         request_date: new Date().toISOString().split('T')[0],
         status: 'pending',
-        animal: data.catId,
+        announcement: data.announcementId,
         ...(user && { adopter: user.id }),
       },
     }),

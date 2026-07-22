@@ -5,7 +5,7 @@ import { CatCard } from "@/components/cat-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { ACTIVITY_LABEL, type CardAnimal, type CatTag, type AnimalStatus, type AnimalActivity } from "@/lib/strapi"
+import { ACTIVITY_LABEL, type CardAnnouncement, type CatTag, type AnimalStatus, type AnimalActivity } from "@/lib/strapi"
 
 type FilterKey = 'Tous' | 'Chaton' | 'Adulte' | 'Senior' | 'Duo' | 'Cas particulier'
 
@@ -36,7 +36,7 @@ function tagMatchesFilter(tag: CatTag, filter: FilterKey): boolean {
 }
 
 interface Props {
-  cats: CardAnimal[]
+  cats: CardAnnouncement[]
 }
 
 export function AdoptionFilters({ cats }: Props) {

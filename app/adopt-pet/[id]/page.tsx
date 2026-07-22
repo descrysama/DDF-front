@@ -4,7 +4,7 @@ import { ArrowRight, Sparkles } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { CAT_TINT } from "@/lib/placeholder-cats"
-import { fetchAnimal, fetchAnimals, fetchCompatibility, compatibilityTone, ACTIVITY_LABEL, type CardAnimal, type AnimalActivity } from "@/lib/strapi"
+import { fetchAnnouncement, fetchAnnouncements, fetchCompatibility, compatibilityTone, ACTIVITY_LABEL, type CardAnnouncement } from "@/lib/strapi"
 import { getCurrentUser, getAuthToken } from "@/lib/auth"
 import { CatCard } from "@/components/cat-card"
 import { AdoptModal } from "./_components/adopt-modal"
@@ -29,7 +29,7 @@ const MEDICAL_EVENT_LABEL: Record<string, string> = {
   autre: 'Suivi',
 }
 
-function enteneLabel(cat: CardAnimal): string {
+function enteneLabel(cat: CardAnnouncement): string {
   const compat = [
     cat.okWithChildren && 'les enfants',
     cat.okWithDogs && 'les chiens',
@@ -41,15 +41,17 @@ function enteneLabel(cat: CardAnimal): string {
 
 export default async function CatPage({ params }: Props) {
   const { id } = await params
-  const cat = await fetchAnimal(id)
+  const cat = await fetchAnnouncement(id)
   if (!cat) notFound()
 
   const user = await getCurrentUser()
   const token = user ? await getAuthToken() : null
-  const compatibility = user && token ? await fetchCompatibility(cat.documentId, token) : null
+  const primaryAnimalDocumentId = cat.animals[0]?.documentId
+  const compatibility =
+    user && token && primaryAnimalDocumentId ? await fetchCompatibility(primaryAnimalDocumentId, token) : null
 
-  const { animals } = await fetchAnimals({ limit: 8 })
-  const others = animals.filter((c) => c.documentId !== cat.documentId).slice(0, 4)
+  const { announcements } = await fetchAnnouncements({ limit: 8 })
+  const others = announcements.filter((c) => c.documentId !== cat.documentId).slice(0, 4)
   const tintClass = CAT_TINT[cat.tag]
   const tagClass = cat.tagStyle === 'coral' ? 'bg-coral' : 'bg-ink'
   const storyParagraphs = cat.blurb.split('\n').map((p) => p.trim()).filter(Boolean)

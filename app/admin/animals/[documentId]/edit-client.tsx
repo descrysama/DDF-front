@@ -228,6 +228,12 @@ export default function AnimalEditClient({
           <span style={{ color: AD.coral }}>{animal.name}</span>
         </h1>
         <div style={{ display: 'flex', gap: 8 }}>
+          <Link href={`/admin/announcements/new?animal=${animal.documentId}`} style={{
+            padding: '9px 14px', borderRadius: 6,
+            background: '#fff', color: AD.coral, border: `1px solid ${AD.borderStrong}`,
+            fontSize: 12.5, fontWeight: 600, textDecoration: 'none',
+            display: 'inline-flex', alignItems: 'center',
+          }}>+ Créer une annonce</Link>
           <Link href="/admin/animals" style={{
             padding: '9px 14px', borderRadius: 6,
             background: '#fff', color: AD.ink, border: `1px solid ${AD.borderStrong}`,

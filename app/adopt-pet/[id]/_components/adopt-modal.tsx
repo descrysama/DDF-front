@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogTrigger, DialogPortal, DialogClose } from "@/components/ui/dialog"
-import type { CardAnimal, StrapiAdopterProfileRaw } from "@/lib/strapi"
+import type { CardAnnouncement, StrapiAdopterProfileRaw } from "@/lib/strapi"
 import { submitAdoptionRequest, type AdoptionFormData } from "@/lib/actions/adoption"
 import { useUserStore } from "@/lib/stores/user-store"
 
@@ -81,7 +81,7 @@ function FSectionHeader({ num, title, subtitle, tintClass }: { num: number; titl
 
 type Errors = Partial<Record<string, string>>
 
-function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => void }) {
+function AdoptionFormInner({ cat, onClose }: { cat: CardAnnouncement; onClose: () => void }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading]     = useState(false)
@@ -304,7 +304,7 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
     setServerError("")
 
     const data: AdoptionFormData = {
-      catId: cat.id,
+      announcementId: cat.id,
       adoption_process_agreement: agreement === "Oui",
       applicant: {
         animal_name: animalName,
@@ -828,7 +828,7 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
 
 // ── Public component ─────────────────────────────────────────────────────────
 
-export function AdoptModal({ cat, defaultOpen = false }: { cat: CardAnimal; defaultOpen?: boolean }) {
+export function AdoptModal({ cat, defaultOpen = false }: { cat: CardAnnouncement; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen)
 
   return (
