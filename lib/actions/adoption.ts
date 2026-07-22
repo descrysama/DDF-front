@@ -2,9 +2,14 @@
 
 import { STRAPI_URL, strapiAuthHeaders } from '@/lib/config'
 import { getCurrentUser } from '@/lib/auth'
+import type { AdopterExperience } from '@/lib/strapi'
 
 export interface AdoptionFormData {
   announcementId: string
+  // First animal of the announcement — kept alongside `announcementId` so the
+  // backend's referent-notification lifecycle and the "mes demandes" bénévole
+  // filter (both keyed on adoption-request.animal.referent) keep working.
+  animalId?: string
   adoption_process_agreement: boolean
   applicant: {
     animal_name: string
@@ -58,10 +63,17 @@ export interface AdoptionFormData {
   }
   other_pets: {
     has_other_pets: boolean
+    has_dog?: boolean
+    has_cat?: boolean
     details?: string
     sterilized?: string
     owned_since?: string
   }
+  // Used by the backend's match_score computation (adoption-request
+  // lifecycles) as the "experience" criterion — the separate adopter-profile
+  // (/profile) rarely gets filled in before a real request, so this is the
+  // reliable source.
+  cat_experience: AdopterExperience
   remarks: string
   responsibility_agreement: boolean
 }
@@ -86,11 +98,13 @@ export async function submitAdoptionRequest(data: AdoptionFormData): Promise<Ado
         housing: data.housing,
         outdoor: data.outdoor,
         other_pets: data.other_pets,
+        cat_experience: data.cat_experience,
         remarks: data.remarks,
         responsibility_agreement: data.responsibility_agreement,
         request_date: new Date().toISOString().split('T')[0],
         status: 'pending',
         announcement: data.announcementId,
+        ...(data.animalId && { animal: data.animalId }),
         ...(user && { adopter: user.id }),
       },
     }),

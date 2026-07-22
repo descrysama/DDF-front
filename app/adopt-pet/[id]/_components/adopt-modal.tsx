@@ -22,6 +22,12 @@ function mapHousingType(v: StrapiAdopterProfileRaw["housing_type"]): string | nu
   return null
 }
 
+function mapCatExperience(v: string): "none" | "some" | "experienced" {
+  if (v === "Oui, plusieurs fois") return "experienced"
+  if (v === "Oui, une fois") return "some"
+  return "none"
+}
+
 // ── Primitives ───────────────────────────────────────────────────────────────
 
 const TOTAL_STEPS = 8
@@ -141,7 +147,10 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnnouncement; onClose: (
   const [balconySecured,  setBalconySecured]  = useState("")
 
   // Étape 7 — Autres animaux
+  const [catExperience,       setCatExperience]       = useState("")
   const [hasOtherPets,        setHasOtherPets]        = useState("")
+  const [hasDog,              setHasDog]              = useState("")
+  const [hasCat,              setHasCat]              = useState("")
   const [otherPetsDetails,    setOtherPetsDetails]    = useState("")
   const [otherPetsSterilized, setOtherPetsSterilized] = useState("")
   const [otherPetsSince,      setOtherPetsSince]      = useState("")
@@ -166,7 +175,14 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnnouncement; onClose: (
 
         if (profile.has_garden) setHasGarden("Oui")
         if (profile.has_children) setHasChildren("Oui")
-        if (profile.has_dogs || profile.has_cats) setHasOtherPets("Oui")
+        if (profile.has_dogs || profile.has_cats) {
+          setHasOtherPets("Oui")
+          if (profile.has_dogs) setHasDog("Oui")
+          if (profile.has_cats) setHasCat("Oui")
+        }
+        if (profile.experience_level === "experienced") setCatExperience("Oui, plusieurs fois")
+        else if (profile.experience_level === "some") setCatExperience("Oui, une fois")
+        else if (profile.experience_level === "none") setCatExperience("Jamais")
       })
       .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -251,9 +267,11 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnnouncement; onClose: (
     }
 
     if (n === 7) {
+      if (!catExperience) e.catExperience = pick
       if (!hasOtherPets) e.hasOtherPets = pick
       else if (hasOtherPets === "Oui") {
-        if (!otherPetsDetails.trim())    e.otherPetsDetails    = required
+        if (!hasDog)                     e.hasDog              = pick
+        if (!hasCat)                     e.hasCat              = pick
         if (!otherPetsSterilized)        e.otherPetsSterilized = pick
         if (!otherPetsSince.trim())      e.otherPetsSince      = required
       }
@@ -305,6 +323,7 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnnouncement; onClose: (
 
     const data: AdoptionFormData = {
       announcementId: cat.id,
+      animalId: cat.animals[0]?.documentId,
       adoption_process_agreement: agreement === "Oui",
       applicant: {
         animal_name: animalName,
@@ -362,9 +381,16 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnnouncement; onClose: (
       other_pets: {
         has_other_pets: hasOtherPets === "Oui",
         ...(hasOtherPets === "Oui"
-          ? { details: otherPetsDetails, sterilized: otherPetsSterilized, owned_since: otherPetsSince }
+          ? {
+              has_dog: hasDog === "Oui",
+              has_cat: hasCat === "Oui",
+              details: otherPetsDetails,
+              sterilized: otherPetsSterilized,
+              owned_since: otherPetsSince,
+            }
           : {}),
       },
+      cat_experience: mapCatExperience(catExperience),
       remarks,
       responsibility_agreement: responsibilityAgreement,
     }
@@ -699,6 +725,11 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnnouncement; onClose: (
           {/* Étape 7 — Autres animaux */}
           {step === 7 && (
             <div className="grid gap-4">
+              <Field data-error={errors["catExperience"] ? "true" : undefined}>
+                <FieldLabel>Avez-vous déjà eu un chat ?</FieldLabel>
+                <ChipGroup options={["Jamais", "Oui, une fois", "Oui, plusieurs fois"]} value={catExperience} onChange={(v) => { setCatExperience(v); clearError("catExperience") }} />
+                <FieldError>{errors["catExperience"]}</FieldError>
+              </Field>
               <Field data-error={errors["hasOtherPets"] ? "true" : undefined}>
                 <FieldLabel>Avez-vous d&apos;autres animaux ?</FieldLabel>
                 <ChipGroup options={["Oui", "Non"]} value={hasOtherPets} onChange={(v) => { setHasOtherPets(v); clearError("hasOtherPets") }} />
@@ -706,10 +737,19 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnnouncement; onClose: (
               </Field>
               {hasOtherPets === "Oui" && (
                 <>
-                  <Field data-error={errors["otherPetsDetails"] ? "true" : undefined}>
-                    <FieldLabel>Quels animaux avez-vous ?</FieldLabel>
-                    <Textarea rows={3} placeholder="Nombre / espèce / race / sexe et âge" value={otherPetsDetails} onChange={(e) => { setOtherPetsDetails(e.target.value); clearError("otherPetsDetails") }} className={inp(!!errors["otherPetsDetails"]) + " resize-y leading-[1.55]"} />
-                    <FieldError>{errors["otherPetsDetails"]}</FieldError>
+                  <Field data-error={errors["hasDog"] ? "true" : undefined}>
+                    <FieldLabel>Un chien ?</FieldLabel>
+                    <ChipGroup options={["Oui", "Non"]} value={hasDog} onChange={(v) => { setHasDog(v); clearError("hasDog") }} />
+                    <FieldError>{errors["hasDog"]}</FieldError>
+                  </Field>
+                  <Field data-error={errors["hasCat"] ? "true" : undefined}>
+                    <FieldLabel>Un ou plusieurs chats ?</FieldLabel>
+                    <ChipGroup options={["Oui", "Non"]} value={hasCat} onChange={(v) => { setHasCat(v); clearError("hasCat") }} />
+                    <FieldError>{errors["hasCat"]}</FieldError>
+                  </Field>
+                  <Field>
+                    <FieldLabel>Détails (race, âge…)</FieldLabel>
+                    <Textarea rows={2} placeholder="Facultatif" value={otherPetsDetails} onChange={(e) => setOtherPetsDetails(e.target.value)} className={inp(false) + " resize-y leading-[1.55]"} />
                   </Field>
                   <Field data-error={errors["otherPetsSterilized"] ? "true" : undefined}>
                     <FieldLabel>Sont-ils stérilisés ?</FieldLabel>

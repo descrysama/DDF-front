@@ -691,9 +691,19 @@ export async function fetchAnnouncementsAdmin(opts?: {
       `/api/announcements?populate[animals]=true&pagination[pageSize]=${limit}`
     ),
   ])
+  // Strapi always keeps a draft row alongside a published one (draft/publish
+  // are two separate rows sharing a documentId) — draft's own `publishedAt`
+  // is always null. Merging content with draft-wins (so the admin edits the
+  // latest unsaved changes) would make every published announcement look
+  // unpublished if we kept its `publishedAt`, so that field is patched back
+  // from whichever record actually appeared in the published-only query.
+  const publishedAtByDocumentId = new Map(pubData.map((a) => [a.documentId, a.publishedAt]))
   const allMap = new Map<string, StrapiAnnouncementRaw>()
   for (const a of [...pubData, ...draftData]) allMap.set(a.documentId, a)
-  const all = Array.from(allMap.values())
+  const all = Array.from(allMap.values()).map((a) => ({
+    ...a,
+    publishedAt: publishedAtByDocumentId.get(a.documentId) ?? null,
+  }))
   return { announcements: all, total: meta.pagination.total }
 }
 
