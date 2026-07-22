@@ -155,58 +155,106 @@ export default async function AdoptionRequestDetailPage({
             </div>
           )}
 
-          {(request.candidat || request.foyer || request.chat_info || request.engagements) && (
+          {(request.applicant || request.household || request.employment || request.housing || request.outdoor || request.other_pets || request.remarks) && (
             <div style={{ marginTop: 20 }}>
               <p style={{ ...labelStyle, marginBottom: 8 }}>Dossier du candidat</p>
               <div style={{ background: '#f8f9fa', borderRadius: 6, padding: 14, display: 'grid', gap: 14 }}>
-                {request.candidat && (
+                <DossierGroup
+                  title="Accord préalable"
+                  rows={[
+                    ["D'accord avec la démarche", request.adoption_process_agreement == null ? undefined : (request.adoption_process_agreement ? 'Oui' : 'Non')],
+                  ]}
+                />
+                {request.applicant && (
                   <DossierGroup
-                    title="Candidat"
+                    title="Identité & contact"
                     rows={[
-                      ['Nom', `${request.candidat.prenom ?? ''} ${request.candidat.nom ?? ''}`.trim()],
-                      ['Email', request.candidat.email],
-                      ['Téléphone', request.candidat.telephone],
-                      ['Adresse', [request.candidat.codePostal, request.candidat.ville].filter(Boolean).join(' ')],
-                      ['Âge', request.candidat.age],
-                      ['Profession', request.candidat.profession],
+                      ['Animal concerné', request.applicant.animal_name],
+                      ['Nom', `${request.applicant.first_name ?? ''} ${request.applicant.last_name ?? ''}`.trim()],
+                      ['Date de naissance', request.applicant.birth_date],
+                      ['Adresse', [request.applicant.address, request.applicant.postal_code, request.applicant.city].filter(Boolean).join(' · ')],
+                      ['Téléphone', request.applicant.phone],
+                      ['Email', request.applicant.email],
                     ]}
                   />
                 )}
-                {request.foyer && (
+                {request.household && (
                   <DossierGroup
                     title="Foyer"
                     rows={[
-                      ['Logement', request.foyer.typeLogement],
-                      ['Surface', request.foyer.surface],
-                      ['Accès extérieur', request.foyer.accesExterieur],
-                      ['Composition', request.foyer.compositionFoyer],
-                      ['Autres animaux', request.foyer.autresAnimaux],
-                      ['Statut', request.foyer.statutLogement],
-                      ['Personnes au foyer', request.foyer.personnesFoyer],
+                      ['Composition', request.household.composition],
+                      ['Colocataires', request.household.roommates_count],
+                      ['Enfants', request.household.has_children == null ? undefined : (request.household.has_children ? `Oui (${request.household.children_count ?? '?'}, ${request.household.children_ages ?? '?'})` : 'Non')],
+                      ["Tous les habitants d'accord", request.household.household_agrees == null ? undefined : (request.household.household_agrees ? 'Oui' : `Non — ${request.household.disagreement_who ?? '?'} : ${request.household.disagreement_why ?? '?'}`)],
                     ]}
                   />
                 )}
-                {request.chat_info && (
+                {request.employment && (
                   <DossierGroup
-                    title="Le chat"
+                    title="Activité professionnelle"
                     rows={[
-                      ['Expérience', request.chat_info.experienceChat],
-                      ['Pourquoi ce chat', request.chat_info.pourquoiCeChat],
-                      ['Vétérinaire', request.chat_info.veterinaire],
-                      ['Disponibilité', request.chat_info.disponibilite],
+                      ['Travaille', request.employment.employed == null ? undefined : (request.employment.employed ? 'Oui' : 'Non')],
+                      ['Profession', request.employment.profession],
+                      ['Horaires', request.employment.work_hours],
+                      ['Temps seul par jour', request.employment.hours_alone_per_day],
                     ]}
                   />
                 )}
-                {request.engagements && (
+                {request.housing && (
+                  <DossierGroup
+                    title="Logement"
+                    rows={[
+                      ['Type', request.housing.type],
+                      ['Superficie', request.housing.surface_area],
+                      ['Animal vivra', request.housing.animal_environment],
+                      ['Zone', request.housing.area_type],
+                      ['Route passante', request.housing.busy_road_nearby],
+                      ['Sortie extérieure autorisée', request.housing.outdoor_access_allowed],
+                      ['Étage', request.housing.apartment?.floor],
+                      ['Fenêtres sécurisées', request.housing.apartment?.windows_secured],
+                      ['Sécurisation prévue', request.housing.apartment?.plans_to_secure_windows],
+                    ]}
+                  />
+                )}
+                {request.outdoor && (
+                  <DossierGroup
+                    title="Extérieur"
+                    rows={[
+                      ['Jardin', request.outdoor.garden?.has_garden == null ? undefined : (request.outdoor.garden.has_garden ? 'Oui' : 'Non')],
+                      ['Lieu de vie', request.outdoor.garden?.description],
+                      ['Superficie jardin', request.outdoor.garden?.surface_area],
+                      ['Grillagé', request.outdoor.garden?.fenced == null ? undefined : (request.outdoor.garden.fenced ? `Oui (${request.outdoor.garden.fence_height ?? '?'})` : 'Non')],
+                      ['Balcon/terrasse', request.outdoor.balcony?.has_balcony == null ? undefined : (request.outdoor.balcony.has_balcony ? 'Oui' : 'Non')],
+                      ['Superficie balcon', request.outdoor.balcony?.surface_area],
+                      ['Balcon sécurisé', request.outdoor.balcony?.secured],
+                    ]}
+                  />
+                )}
+                {request.other_pets && (
+                  <DossierGroup
+                    title="Autres animaux"
+                    rows={[
+                      ['Autres animaux', request.other_pets.has_other_pets == null ? undefined : (request.other_pets.has_other_pets ? 'Oui' : 'Non')],
+                      ['Détails', request.other_pets.details],
+                      ['Stérilisés', request.other_pets.sterilized],
+                      ['Depuis quand', request.other_pets.owned_since],
+                    ]}
+                  />
+                )}
+                {request.remarks && (
                   <div>
                     <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: AD.inkMuted, marginBottom: 4 }}>
-                      Engagements
+                      Remarques
                     </p>
-                    <p style={{ fontSize: 13, color: AD.ink, margin: 0 }}>
-                      {request.engagements.filter(Boolean).length} / {request.engagements.length} coché(s)
-                    </p>
+                    <p style={{ fontSize: 13, color: AD.ink, margin: 0 }}>{request.remarks}</p>
                   </div>
                 )}
+                <DossierGroup
+                  title="Engagement"
+                  rows={[
+                    ['Mention de responsabilité acceptée', request.responsibility_agreement == null ? undefined : (request.responsibility_agreement ? 'Oui' : 'Non')],
+                  ]}
+                />
               </div>
             </div>
           )}

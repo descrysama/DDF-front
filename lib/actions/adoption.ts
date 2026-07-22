@@ -5,31 +5,65 @@ import { getCurrentUser } from '@/lib/auth'
 
 export interface AdoptionFormData {
   catId: string
-  catName: string
-  // Section 1 — Vous
-  prenom: string
-  nom: string
-  email: string
-  telephone: string
-  codePostal: string
-  ville: string
-  age?: string
-  profession?: string
-  // Section 2 — Foyer
-  typeLogement: string
-  surface: string
-  accesExterieur: string
-  compositionFoyer: string
-  autresAnimaux: string
-  statutLogement: string
-  personnesFoyer: string
-  // Section 3 — Le chat
-  experienceChat: string
-  pourquoiCeChat: string
-  veterinaire?: string
-  disponibilite: string
-  // Section 4 — Engagements
-  engagements: boolean[]
+  adoption_process_agreement: boolean
+  applicant: {
+    animal_name: string
+    first_name: string
+    last_name: string
+    birth_date: string
+    address: string
+    postal_code: string
+    city: string
+    phone: string
+    email: string
+  }
+  household: {
+    composition: string
+    roommates_count?: string
+    has_children: boolean
+    children_count?: string
+    children_ages?: string
+    household_agrees: boolean
+    disagreement_who?: string
+    disagreement_why?: string
+  }
+  employment: {
+    employed: boolean
+    profession?: string
+    work_hours?: string
+    hours_alone_per_day: string
+  }
+  housing: {
+    type: string
+    surface_area: string
+    animal_environment: string
+    area_type: string
+    busy_road_nearby: string
+    outdoor_access_allowed: string
+    apartment: { floor: string; windows_secured: string; plans_to_secure_windows: string } | null
+  }
+  outdoor: {
+    garden: {
+      has_garden: boolean
+      description?: string
+      surface_area?: string
+      fenced?: boolean
+      fence_height?: string
+    }
+    balcony: {
+      has_balcony: boolean
+      surface_area?: string
+      secured?: string
+    }
+  }
+  other_pets: {
+    has_other_pets: boolean
+    details?: string
+    sterilized?: string
+    owned_since?: string
+  }
+  remarks: string
+  responsibility_agreement: boolean
 }
 
 export type AdoptionResult = { success: true } | { success: false; error: string }
@@ -45,32 +79,15 @@ export async function submitAdoptionRequest(data: AdoptionFormData): Promise<Ado
     },
     body: JSON.stringify({
       data: {
-        candidat: {
-          prenom: data.prenom,
-          nom: data.nom,
-          email: data.email,
-          telephone: data.telephone,
-          codePostal: data.codePostal,
-          ville: data.ville,
-          age: data.age,
-          profession: data.profession,
-        },
-        foyer: {
-          typeLogement: data.typeLogement,
-          surface: data.surface,
-          accesExterieur: data.accesExterieur,
-          compositionFoyer: data.compositionFoyer,
-          autresAnimaux: data.autresAnimaux,
-          statutLogement: data.statutLogement,
-          personnesFoyer: data.personnesFoyer,
-        },
-        chat_info: {
-          experienceChat: data.experienceChat,
-          pourquoiCeChat: data.pourquoiCeChat,
-          veterinaire: data.veterinaire,
-          disponibilite: data.disponibilite,
-        },
-        engagements: data.engagements,
+        adoption_process_agreement: data.adoption_process_agreement,
+        applicant: data.applicant,
+        household: data.household,
+        employment: data.employment,
+        housing: data.housing,
+        outdoor: data.outdoor,
+        other_pets: data.other_pets,
+        remarks: data.remarks,
+        responsibility_agreement: data.responsibility_agreement,
         request_date: new Date().toISOString().split('T')[0],
         status: 'pending',
         animal: data.catId,

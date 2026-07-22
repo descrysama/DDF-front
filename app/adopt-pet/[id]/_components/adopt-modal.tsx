@@ -6,7 +6,6 @@ import { Heart, X, ArrowRight, Lock, CheckCircle2, AlertCircle } from "lucide-re
 import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogTrigger, DialogPortal, DialogClose } from "@/components/ui/dialog"
@@ -22,16 +21,20 @@ function mapHousingType(v: StrapiAdopterProfileRaw["housing_type"]): string | nu
   return null
 }
 
-function mapExperience(v: StrapiAdopterProfileRaw["experience_level"]): string | null {
-  if (v === "none") return "Jamais"
-  if (v === "some") return "Oui, une fois"
-  if (v === "experienced") return "Oui, plusieurs fois"
-  return null
-}
-
 // ── Primitives ───────────────────────────────────────────────────────────────
 
-const REQUIRED_COMMITMENTS = [0, 1, 3]
+const TOTAL_STEPS = 8
+
+const STEP_META: { title: string; subtitle: (catName: string) => string; tint: string }[] = [
+  { title: "Accord préalable",          subtitle: () => "Avant de commencer, une question importante.",                    tint: "bg-pink"  },
+  { title: "Identité & contact",        subtitle: () => "Vos coordonnées pour qu'on puisse vous recontacter.",             tint: "bg-peach" },
+  { title: "Votre foyer",               subtitle: (n) => `Composition et accord de votre foyer pour accueillir ${n}.`,     tint: "bg-lilac" },
+  { title: "Activité professionnelle",  subtitle: () => "Pour évaluer le temps que l'animal passera seul.",                tint: "bg-mint"  },
+  { title: "Votre logement",            subtitle: () => "Le cadre de vie qui attend votre futur compagnon.",               tint: "bg-pink"  },
+  { title: "Extérieur",                 subtitle: () => "Jardin, balcon ou terrasse : les accès extérieurs du logement.",  tint: "bg-peach" },
+  { title: "Autres animaux",            subtitle: () => "Les compagnons déjà présents chez vous.",                        tint: "bg-lilac" },
+  { title: "Remarques & engagement",    subtitle: () => "Dernière étape avant l'envoi de votre demande.",                  tint: "bg-mint"  },
+]
 
 const inputBase = "w-full box-border px-3 py-2.5 rounded-lg border text-xs font-[inherit] text-ink outline-none bg-white transition-colors"
 const inputOk   = "border-border focus:border-ink/40"
@@ -73,13 +76,6 @@ function FSectionHeader({ num, title, subtitle, tintClass }: { num: number; titl
   )
 }
 
-const COMMITMENTS: { text: string; required: boolean }[] = [
-  { text: "Je m'engage à offrir un foyer pour la vie.",                                                                    required: true  },
-  { text: "Je comprends que les frais d'adoption (150 €) couvrent stérilisation, vaccins et identification.",              required: true  },
-  { text: "J'accepte une visite de notre famille d'accueil avant la décision finale.",                                     required: false },
-  { text: "Je consens à ce que mes données soient utilisées dans le cadre de cette demande d'adoption.",                   required: true  },
-]
-
 // ── Form ─────────────────────────────────────────────────────────────────────
 
 type Errors = Partial<Record<string, string>>
@@ -90,34 +86,68 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
   const [loading, setLoading]     = useState(false)
   const [serverError, setServerError] = useState("")
   const [errors, setErrors]       = useState<Errors>({})
+  const [step, setStep] = useState(1)
 
-  // Section 1
-  const [prenom,     setPrenom]     = useState("")
-  const [nom,        setNom]        = useState("")
+  // Étape 1 — Accord préalable
+  const [agreement, setAgreement] = useState("")
+
+  // Étape 2 — Identité & contact
+  const [animalName, setAnimalName] = useState(cat.name)
+  const [firstName,  setFirstName]  = useState("")
+  const [lastName,   setLastName]   = useState("")
+  const [birthDate,  setBirthDate]  = useState("")
+  const [address,    setAddress]    = useState("")
+  const [postalCode, setPostalCode] = useState("")
+  const [city,       setCity]       = useState("")
+  const [phone,      setPhone]      = useState("")
   const [email,      setEmail]      = useState("")
-  const [telephone,  setTelephone]  = useState("")
-  const [codePostal, setCodePostal] = useState("")
-  const [ville,      setVille]      = useState("")
-  const [age,        setAge]        = useState("")
+
+  // Étape 3 — Votre foyer
+  const [composition,      setComposition]      = useState("")
+  const [roommatesCount,   setRoommatesCount]   = useState("")
+  const [hasChildren,      setHasChildren]      = useState("")
+  const [childrenCount,    setChildrenCount]    = useState("")
+  const [childrenAges,     setChildrenAges]     = useState("")
+  const [householdAgrees,  setHouseholdAgrees]  = useState("")
+  const [disagreementWho,  setDisagreementWho]  = useState("")
+  const [disagreementWhy,  setDisagreementWhy]  = useState("")
+
+  // Étape 4 — Activité professionnelle
+  const [employed,   setEmployed]   = useState("")
   const [profession, setProfession] = useState("")
+  const [workHours,  setWorkHours]  = useState("")
+  const [hoursAlone, setHoursAlone] = useState("")
 
-  // Section 2
-  const [typeLogement,    setTypeLogement]    = useState("Appartement")
-  const [surface,         setSurface]         = useState("")
-  const [accesExterieur,  setAccesExterieur]  = useState("Aucun")
-  const [compositionFoyer,setCompositionFoyer]= useState("Seul·e")
-  const [autresAnimaux,   setAutresAnimaux]   = useState("Aucun")
-  const [statutLogement,  setStatutLogement]  = useState("locataire")
-  const [personnesFoyer,  setPersonnesFoyer]  = useState("")
+  // Étape 5 — Votre logement
+  const [housingType,          setHousingType]          = useState("")
+  const [surfaceArea,          setSurfaceArea]          = useState("")
+  const [animalEnvironment,    setAnimalEnvironment]    = useState("")
+  const [areaType,             setAreaType]             = useState("")
+  const [busyRoad,             setBusyRoad]             = useState("")
+  const [outdoorAccessAllowed, setOutdoorAccessAllowed] = useState("")
+  const [apartmentFloor,       setApartmentFloor]       = useState("")
+  const [windowsSecured,       setWindowsSecured]       = useState("")
+  const [plansToSecureWindows, setPlansToSecureWindows] = useState("")
 
-  // Section 3
-  const [experienceChat,  setExperienceChat]  = useState("Oui, plusieurs fois")
-  const [pourquoiCeChat,  setPourquoiCeChat]  = useState("")
-  const [veterinaire,     setVeterinaire]     = useState("")
-  const [disponibilite,   setDisponibilite]   = useState("Cette semaine")
+  // Étape 6 — Extérieur
+  const [hasGarden,       setHasGarden]       = useState("")
+  const [gardenDescription, setGardenDescription] = useState("")
+  const [gardenSurface,   setGardenSurface]   = useState("")
+  const [gardenFenced,    setGardenFenced]    = useState("")
+  const [fenceHeight,     setFenceHeight]     = useState("")
+  const [hasBalcony,      setHasBalcony]      = useState("")
+  const [balconySurface,  setBalconySurface]  = useState("")
+  const [balconySecured,  setBalconySecured]  = useState("")
 
-  // Section 4
-  const [checked, setChecked] = useState([false, false, false, false])
+  // Étape 7 — Autres animaux
+  const [hasOtherPets,        setHasOtherPets]        = useState("")
+  const [otherPetsDetails,    setOtherPetsDetails]    = useState("")
+  const [otherPetsSterilized, setOtherPetsSterilized] = useState("")
+  const [otherPetsSince,      setOtherPetsSince]      = useState("")
+
+  // Étape 8 — Remarques & engagement
+  const [remarks, setRemarks] = useState("")
+  const [responsibilityAgreement, setResponsibilityAgreement] = useState(false)
 
   // Préremplissage depuis le profil adoptant existant (/profile), une fois au montage
   const user = useUserStore((s) => s.user)
@@ -131,64 +161,211 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
         if (!profile) return
 
         const housing = mapHousingType(profile.housing_type)
-        if (housing) setTypeLogement(housing)
+        if (housing) setHousingType(housing)
 
-        if (profile.has_garden) setAccesExterieur("Jardin clos")
-        if (profile.has_children) setCompositionFoyer("Avec enfant(s)")
-        if (profile.has_dogs) setAutresAnimaux("Chien")
-        else if (profile.has_cats) setAutresAnimaux("Un chat")
-
-        const experience = mapExperience(profile.experience_level)
-        if (experience) setExperienceChat(experience)
+        if (profile.has_garden) setHasGarden("Oui")
+        if (profile.has_children) setHasChildren("Oui")
+        if (profile.has_dogs || profile.has_cats) setHasOtherPets("Oui")
       })
       .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  const toggleCheck = (i: number) => {
-    setChecked((prev) => prev.map((v, j) => (j === i ? !v : v)))
-    if (errors["engagements"]) setErrors((e) => ({ ...e, engagements: undefined }))
-  }
 
   function clearError(key: string) {
     if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }))
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  function validateStep(n: number): Errors {
+    const e: Errors = {}
+    const required = "Champ requis"
+    const pick = "Merci de répondre à cette question."
 
-    const allRequiredChecked = REQUIRED_COMMITMENTS.every((i) => checked[i])
+    if (n === 1) {
+      if (!agreement) e.agreement = pick
+    }
 
-    const newErrors: Errors = {}
-    if (!prenom.trim())        newErrors["prenom"]        = "Champ requis"
-    if (!nom.trim())           newErrors["nom"]           = "Champ requis"
-    if (!email.trim())         newErrors["email"]         = "Champ requis"
-    else if (!email.includes("@")) newErrors["email"]     = "Adresse email invalide"
-    if (!telephone.trim())     newErrors["telephone"]     = "Champ requis"
-    if (!pourquoiCeChat.trim()) newErrors["pourquoiCeChat"] = "Décrivez en quelques mots votre motivation"
-    if (!allRequiredChecked)   newErrors["engagements"]   = "Vous devez cocher les engagements requis (*) pour continuer."
+    if (n === 2) {
+      if (!animalName.trim()) e.animalName = required
+      if (!firstName.trim())  e.firstName  = required
+      if (!lastName.trim())   e.lastName   = required
+      if (!birthDate)         e.birthDate  = required
+      if (!address.trim())    e.address    = required
+      if (!postalCode.trim()) e.postalCode = required
+      if (!city.trim())       e.city       = required
+      if (!phone.trim())      e.phone      = required
+      if (!email.trim())      e.email      = required
+      else if (!email.includes("@")) e.email = "Adresse email invalide"
+    }
 
-    setErrors(newErrors)
+    if (n === 3) {
+      if (!composition) e.composition = pick
+      if (composition === "Colocation" && !roommatesCount.trim()) e.roommatesCount = required
+      if (!hasChildren) e.hasChildren = pick
+      else if (hasChildren === "Oui") {
+        if (!childrenCount.trim()) e.childrenCount = required
+        if (!childrenAges.trim())  e.childrenAges  = required
+      }
+      if (!householdAgrees) e.householdAgrees = pick
+      else if (householdAgrees === "Non") {
+        if (!disagreementWho.trim()) e.disagreementWho = required
+        if (!disagreementWhy.trim()) e.disagreementWhy = required
+      }
+    }
 
-    if (Object.keys(newErrors).length > 0) {
-      requestAnimationFrame(() => {
-        const container = scrollRef.current
-        if (!container) return
-        const firstError = container.querySelector("[data-error='true']") as HTMLElement | null
-        firstError?.scrollIntoView({ behavior: "smooth", block: "center" })
-      })
+    if (n === 4) {
+      if (!employed) e.employed = pick
+      else if (employed === "Oui") {
+        if (!profession.trim()) e.profession = required
+        if (!workHours.trim())  e.workHours  = required
+      }
+      if (!hoursAlone.trim()) e.hoursAlone = required
+    }
+
+    if (n === 5) {
+      if (!housingType)          e.housingType          = pick
+      if (!surfaceArea.trim())   e.surfaceArea          = required
+      if (!animalEnvironment)    e.animalEnvironment    = pick
+      if (!areaType)             e.areaType             = pick
+      if (!busyRoad)             e.busyRoad             = pick
+      if (!outdoorAccessAllowed) e.outdoorAccessAllowed = pick
+      if (housingType === "Appartement") {
+        if (!apartmentFloor.trim()) e.apartmentFloor = required
+        if (!windowsSecured)        e.windowsSecured = pick
+      }
+    }
+
+    if (n === 6) {
+      if (!hasGarden) e.hasGarden = pick
+      else if (hasGarden !== "Non") {
+        if (!gardenDescription.trim()) e.gardenDescription = required
+        if (!gardenSurface.trim())     e.gardenSurface     = required
+        if (!gardenFenced) e.gardenFenced = pick
+        else if (gardenFenced === "Oui" && !fenceHeight.trim()) e.fenceHeight = required
+      }
+      if (!hasBalcony) e.hasBalcony = pick
+      else if (hasBalcony !== "Non") {
+        if (!balconySurface.trim()) e.balconySurface = required
+        if (!balconySecured)        e.balconySecured = pick
+      }
+    }
+
+    if (n === 7) {
+      if (!hasOtherPets) e.hasOtherPets = pick
+      else if (hasOtherPets === "Oui") {
+        if (!otherPetsDetails.trim())    e.otherPetsDetails    = required
+        if (!otherPetsSterilized)        e.otherPetsSterilized = pick
+        if (!otherPetsSince.trim())      e.otherPetsSince      = required
+      }
+    }
+
+    if (n === 8) {
+      if (!responsibilityAgreement) e.responsibilityAgreement = "Vous devez accepter cette mention pour valider votre demande."
+    }
+
+    return e
+  }
+
+  function scrollToFirstError() {
+    requestAnimationFrame(() => {
+      const container = scrollRef.current
+      if (!container) return
+      const firstError = container.querySelector("[data-error='true']") as HTMLElement | null
+      firstError?.scrollIntoView({ behavior: "smooth", block: "center" })
+    })
+  }
+
+  function handleBack() {
+    setErrors({})
+    setStep((s) => Math.max(1, s - 1))
+    scrollRef.current?.scrollTo({ top: 0 })
+  }
+
+  async function handleNext() {
+    const stepErrors = validateStep(step)
+    setErrors(stepErrors)
+
+    if (Object.keys(stepErrors).length > 0) {
+      scrollToFirstError()
       return
     }
 
+    if (step < TOTAL_STEPS) {
+      setStep((s) => s + 1)
+      scrollRef.current?.scrollTo({ top: 0 })
+      return
+    }
+
+    await handleSubmit()
+  }
+
+  async function handleSubmit() {
     setLoading(true)
     setServerError("")
 
     const data: AdoptionFormData = {
-      catId: cat.id, catName: cat.name,
-      prenom, nom, email, telephone, codePostal, ville, age, profession,
-      typeLogement, surface, accesExterieur, compositionFoyer,
-      autresAnimaux, statutLogement, personnesFoyer,
-      experienceChat, pourquoiCeChat, veterinaire, disponibilite,
-      engagements: checked,
+      catId: cat.id,
+      adoption_process_agreement: agreement === "Oui",
+      applicant: {
+        animal_name: animalName,
+        first_name: firstName,
+        last_name: lastName,
+        birth_date: birthDate,
+        address,
+        postal_code: postalCode,
+        city,
+        phone,
+        email,
+      },
+      household: {
+        composition,
+        ...(composition === "Colocation" ? { roommates_count: roommatesCount } : {}),
+        has_children: hasChildren === "Oui",
+        ...(hasChildren === "Oui" ? { children_count: childrenCount, children_ages: childrenAges } : {}),
+        household_agrees: householdAgrees === "Oui",
+        ...(householdAgrees === "Non" ? { disagreement_who: disagreementWho, disagreement_why: disagreementWhy } : {}),
+      },
+      employment: {
+        employed: employed === "Oui",
+        ...(employed === "Oui" ? { profession, work_hours: workHours } : {}),
+        hours_alone_per_day: hoursAlone,
+      },
+      housing: {
+        type: housingType,
+        surface_area: surfaceArea,
+        animal_environment: animalEnvironment,
+        area_type: areaType,
+        busy_road_nearby: busyRoad,
+        outdoor_access_allowed: outdoorAccessAllowed,
+        apartment:
+          housingType === "Appartement"
+            ? { floor: apartmentFloor, windows_secured: windowsSecured, plans_to_secure_windows: plansToSecureWindows }
+            : null,
+      },
+      outdoor: {
+        garden: {
+          has_garden: hasGarden === "Oui" || hasGarden === "Autre",
+          ...(hasGarden !== "Non"
+            ? {
+                description: gardenDescription,
+                surface_area: gardenSurface,
+                fenced: gardenFenced === "Oui",
+                ...(gardenFenced === "Oui" ? { fence_height: fenceHeight } : {}),
+              }
+            : {}),
+        },
+        balcony: {
+          has_balcony: hasBalcony === "Oui" || hasBalcony === "Autre",
+          ...(hasBalcony !== "Non" ? { surface_area: balconySurface, secured: balconySecured } : {}),
+        },
+      },
+      other_pets: {
+        has_other_pets: hasOtherPets === "Oui",
+        ...(hasOtherPets === "Oui"
+          ? { details: otherPetsDetails, sterilized: otherPetsSterilized, owned_since: otherPetsSince }
+          : {}),
+      },
+      remarks,
+      responsibility_agreement: responsibilityAgreement,
     }
 
     const result = await submitAdoptionRequest(data)
@@ -225,207 +402,370 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
   }
 
   const inp = (hasErr: boolean) => `${inputBase} ${hasErr ? inputErr : inputOk}`
+  const meta = STEP_META[step - 1]
+  const isBlocked = step === 1 && agreement === "Non"
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col flex-1 overflow-hidden min-h-0">
+    <div className="flex flex-col flex-1 overflow-hidden min-h-0">
+      {/* Barre de progression */}
+      <div className="shrink-0">
+        <div className="px-7 pt-3 pb-2 text-[11px] font-semibold text-ink-muted">
+          Étape {step} / {TOTAL_STEPS}
+        </div>
+        <div className="h-1 bg-border">
+          <div
+            className="h-full bg-coral transition-[width]"
+            style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
+          />
+        </div>
+      </div>
+
       {/* Scrollable body — seul scroll de la modal */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto min-h-0">
+        <div className="px-7 py-[22px]">
+          <FSectionHeader num={step} title={meta.title} subtitle={meta.subtitle(cat.name)} tintClass={meta.tint} />
 
-        {/* Section 1 — Vous */}
-        <div className="px-7 py-[22px] border-b border-border">
-          <FSectionHeader num={1} title="Faisons connaissance" subtitle="Vos coordonnées pour qu'on puisse vous recontacter." tintClass="bg-pink" />
-          <div className="grid grid-cols-2 gap-3">
-            <Field id="field-prenom">
-              <FieldLabel>Prénom</FieldLabel>
-              <Input
-                data-error={errors["prenom"] ? "true" : undefined}
-                placeholder="Élodie" value={prenom}
-                onChange={(e) => { setPrenom(e.target.value); clearError("prenom") }}
-                className={inp(!!errors["prenom"])}
-              />
-              <FieldError>{errors["prenom"]}</FieldError>
-            </Field>
-            <Field id="field-nom">
-              <FieldLabel>Nom</FieldLabel>
-              <Input
-                data-error={errors["nom"] ? "true" : undefined}
-                placeholder="Mercier" value={nom}
-                onChange={(e) => { setNom(e.target.value); clearError("nom") }}
-                className={inp(!!errors["nom"])}
-              />
-              <FieldError>{errors["nom"]}</FieldError>
-            </Field>
-            <Field id="field-email">
-              <FieldLabel>Adresse email</FieldLabel>
-              <Input
-                data-error={errors["email"] ? "true" : undefined}
-                type="email" placeholder="vous@exemple.fr" value={email}
-                onChange={(e) => { setEmail(e.target.value); clearError("email") }}
-                className={inp(!!errors["email"])}
-              />
-              <FieldError>{errors["email"]}</FieldError>
-            </Field>
-            <Field id="field-telephone">
-              <FieldLabel>Téléphone</FieldLabel>
-              <Input
-                data-error={errors["telephone"] ? "true" : undefined}
-                placeholder="06 12 34 56 78" value={telephone}
-                onChange={(e) => { setTelephone(e.target.value); clearError("telephone") }}
-                className={inp(!!errors["telephone"])}
-              />
-              <FieldError>{errors["telephone"]}</FieldError>
-            </Field>
-            <Field>
-              <FieldLabel>Code postal</FieldLabel>
-              <Input placeholder="69007" value={codePostal} onChange={(e) => setCodePostal(e.target.value)} className={inp(false)} />
-            </Field>
-            <Field>
-              <FieldLabel>Ville</FieldLabel>
-              <Input placeholder="Lyon 7e" value={ville} onChange={(e) => setVille(e.target.value)} className={inp(false)} />
-            </Field>
-            <Field>
-              <FieldLabel>Âge</FieldLabel>
-              <Input placeholder="34 ans" value={age} onChange={(e) => setAge(e.target.value)} className={inp(false)} />
-              <FieldDescription>Facultatif</FieldDescription>
-            </Field>
-            <Field>
-              <FieldLabel>Profession</FieldLabel>
-              <Input placeholder="Designer · télétravail 80%" value={profession} onChange={(e) => setProfession(e.target.value)} className={inp(false)} />
-              <FieldDescription>Facultatif</FieldDescription>
-            </Field>
-          </div>
-        </div>
-
-        {/* Section 2 — Foyer */}
-        <div className="px-7 py-[22px] border-b border-border">
-          <FSectionHeader num={2} title="Votre foyer" subtitle={`Pour s'assurer que l'environnement convient à ${cat.name}.`} tintClass="bg-peach" />
-          <div className="grid grid-cols-2 gap-4">
-            <Field className="col-span-2">
-              <FieldLabel>Type de logement</FieldLabel>
-              <ChipGroup options={["Appartement", "Maison", "Studio", "Colocation"]} value={typeLogement} onChange={setTypeLogement} />
-            </Field>
-            <Field>
-              <FieldLabel>Surface</FieldLabel>
-              <Input placeholder="60 m²" value={surface} onChange={(e) => setSurface(e.target.value)} className={inp(false)} />
-            </Field>
-            <Field>
-              <FieldLabel>Accès extérieur</FieldLabel>
-              <ChipGroup options={["Aucun", "Balcon sécurisé", "Jardin clos", "Jardin libre"]} value={accesExterieur} onChange={setAccesExterieur} />
-            </Field>
-            <Field className="col-span-2">
-              <FieldLabel>Composition du foyer</FieldLabel>
-              <ChipGroup options={["Seul·e", "En couple", "Avec enfant(s)", "Colocation"]} value={compositionFoyer} onChange={setCompositionFoyer} />
-            </Field>
-            <Field className="col-span-2">
-              <FieldLabel>Avez-vous d&apos;autres animaux ?</FieldLabel>
-              <ChipGroup options={["Aucun", "Un chat", "Plusieurs chats", "Chien", "Autres"]} value={autresAnimaux} onChange={setAutresAnimaux} />
-            </Field>
-            <Field>
-              <FieldLabel>Statut du logement</FieldLabel>
-              <Select value={statutLogement} onValueChange={(v) => v && setStatutLogement(v)}>
-                <SelectTrigger className={inp(false) + " w-full justify-between h-auto"}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="proprietaire">Propriétaire</SelectItem>
-                  <SelectItem value="locataire">Locataire (animaux autorisés)</SelectItem>
-                  <SelectItem value="autre">Autre</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field>
-              <FieldLabel>Personnes au foyer</FieldLabel>
-              <Input placeholder="1 adulte" value={personnesFoyer} onChange={(e) => setPersonnesFoyer(e.target.value)} className={inp(false)} />
-            </Field>
-          </div>
-        </div>
-
-        {/* Section 3 — Le chat */}
-        <div className="px-7 py-[22px] border-b border-border">
-          <FSectionHeader num={3} title={`Pourquoi ${cat.name} ?`} subtitle="Ce qui compte le plus pour nous." tintClass="bg-lilac" />
-          <div className="grid gap-4">
-            <Field>
-              <FieldLabel>Avez-vous déjà eu un chat ?</FieldLabel>
-              <ChipGroup options={["Oui, plusieurs fois", "Oui, une fois", "Jamais"]} value={experienceChat} onChange={setExperienceChat} />
-            </Field>
-            <Field id="field-pourquoiCeChat">
-              <FieldLabel>Pourquoi avoir choisi {cat.name} ?</FieldLabel>
-              <Textarea
-                data-error={errors["pourquoiCeChat"] ? "true" : undefined}
-                rows={4}
-                placeholder={`J'ai craqué pour ${cat.name} parce que…`}
-                value={pourquoiCeChat}
-                onChange={(e) => { setPourquoiCeChat(e.target.value); clearError("pourquoiCeChat") }}
-                className={inp(!!errors["pourquoiCeChat"]) + " resize-y leading-[1.55]"}
-              />
-              {!errors["pourquoiCeChat"] && (
-                <FieldDescription>Quelques phrases suffisent. Pas besoin de bien écrire.</FieldDescription>
+          {/* Étape 1 — Accord préalable */}
+          {step === 1 && (
+            <div className="grid gap-4">
+              <Field data-error={errors["agreement"] ? "true" : undefined}>
+                <FieldLabel>Êtes-vous d&apos;accord avec la démarche d&apos;adoption ?</FieldLabel>
+                <ChipGroup
+                  options={["Oui", "Non"]}
+                  value={agreement}
+                  onChange={(v) => { setAgreement(v); clearError("agreement") }}
+                />
+                <FieldError>{errors["agreement"]}</FieldError>
+              </Field>
+              {isBlocked && (
+                <div className="flex items-start gap-2 px-3.5 py-2.5 rounded-lg bg-red-50 border border-red-200 text-xs text-red-600">
+                  <AlertCircle size={13} className="shrink-0 mt-0.5" />
+                  Nous ne pouvons malheureusement pas donner suite à une demande d&apos;adoption sans cet accord.
+                </div>
               )}
-              <FieldError>{errors["pourquoiCeChat"]}</FieldError>
-            </Field>
-            <Field>
-              <FieldLabel>Vétérinaire de référence</FieldLabel>
-              <Input placeholder="Clinique vétérinaire des Brotteaux, Lyon 6e" value={veterinaire} onChange={(e) => setVeterinaire(e.target.value)} className={inp(false)} />
-              <FieldDescription>Facultatif · Si vous en avez déjà un, ça nous simplifie le suivi.</FieldDescription>
-            </Field>
-            <Field>
-              <FieldLabel>Quand seriez-vous disponible pour une rencontre ?</FieldLabel>
-              <ChipGroup options={["Cette semaine", "Le week-end", "Sous 2 semaines", "Plus tard"]} value={disponibilite} onChange={setDisponibilite} />
-            </Field>
-          </div>
-        </div>
-
-        {/* Section 4 — Engagements */}
-        <div id="field-engagements" className="px-7 py-[22px]">
-          <FSectionHeader num={4} title="Engagements" subtitle="L'adoption d'un chat est une responsabilité de 15-20 ans." tintClass="bg-mint" />
-
-          {errors["engagements"] && (
-            <div
-              data-error="true"
-              className="flex items-start gap-2 mb-4 px-3.5 py-2.5 rounded-lg bg-red-50 border border-red-200 text-xs text-red-600"
-            >
-              <AlertCircle size={13} className="shrink-0 mt-0.5" />
-              {errors["engagements"]}
             </div>
           )}
 
-          <div className="grid gap-0">
-            {COMMITMENTS.map(({ text, required }, i) => {
-              const isChecked = checked[i]
-              const isErrored = !!errors["engagements"] && required && !isChecked
-              return (
-                <label
-                  key={i}
-                  onClick={() => toggleCheck(i)}
-                  className="flex items-start gap-3 py-3 cursor-pointer group border-b border-border last:border-0"
+          {/* Étape 2 — Identité & contact */}
+          {step === 2 && (
+            <div className="grid grid-cols-2 gap-3">
+              <Field className="col-span-2" data-error={errors["animalName"] ? "true" : undefined}>
+                <FieldLabel>Nom de l&apos;animal</FieldLabel>
+                <Input value={animalName} onChange={(e) => { setAnimalName(e.target.value); clearError("animalName") }} className={inp(!!errors["animalName"])} />
+                <FieldDescription>En cas de duo, merci de préciser les deux noms.</FieldDescription>
+                <FieldError>{errors["animalName"]}</FieldError>
+              </Field>
+              <Field data-error={errors["firstName"] ? "true" : undefined}>
+                <FieldLabel>Votre prénom</FieldLabel>
+                <Input placeholder="Élodie" value={firstName} onChange={(e) => { setFirstName(e.target.value); clearError("firstName") }} className={inp(!!errors["firstName"])} />
+                <FieldError>{errors["firstName"]}</FieldError>
+              </Field>
+              <Field data-error={errors["lastName"] ? "true" : undefined}>
+                <FieldLabel>Votre nom</FieldLabel>
+                <Input placeholder="Mercier" value={lastName} onChange={(e) => { setLastName(e.target.value); clearError("lastName") }} className={inp(!!errors["lastName"])} />
+                <FieldError>{errors["lastName"]}</FieldError>
+              </Field>
+              <Field data-error={errors["birthDate"] ? "true" : undefined}>
+                <FieldLabel>Votre date de naissance</FieldLabel>
+                <Input type="date" value={birthDate} onChange={(e) => { setBirthDate(e.target.value); clearError("birthDate") }} className={inp(!!errors["birthDate"])} />
+                <FieldError>{errors["birthDate"]}</FieldError>
+              </Field>
+              <Field className="col-span-2" data-error={errors["address"] ? "true" : undefined}>
+                <FieldLabel>Votre adresse postale complète</FieldLabel>
+                <Input placeholder="12 rue de la République" value={address} onChange={(e) => { setAddress(e.target.value); clearError("address") }} className={inp(!!errors["address"])} />
+                <FieldError>{errors["address"]}</FieldError>
+              </Field>
+              <Field data-error={errors["postalCode"] ? "true" : undefined}>
+                <FieldLabel>Code postal</FieldLabel>
+                <Input placeholder="69007" value={postalCode} onChange={(e) => { setPostalCode(e.target.value); clearError("postalCode") }} className={inp(!!errors["postalCode"])} />
+                <FieldError>{errors["postalCode"]}</FieldError>
+              </Field>
+              <Field data-error={errors["city"] ? "true" : undefined}>
+                <FieldLabel>Ville</FieldLabel>
+                <Input placeholder="Lyon 7e" value={city} onChange={(e) => { setCity(e.target.value); clearError("city") }} className={inp(!!errors["city"])} />
+                <FieldError>{errors["city"]}</FieldError>
+              </Field>
+              <Field data-error={errors["phone"] ? "true" : undefined}>
+                <FieldLabel>Votre numéro de téléphone</FieldLabel>
+                <Input placeholder="06 12 34 56 78" value={phone} onChange={(e) => { setPhone(e.target.value); clearError("phone") }} className={inp(!!errors["phone"])} />
+                <FieldError>{errors["phone"]}</FieldError>
+              </Field>
+              <Field data-error={errors["email"] ? "true" : undefined}>
+                <FieldLabel>Votre adresse email</FieldLabel>
+                <Input type="email" placeholder="vous@exemple.fr" value={email} onChange={(e) => { setEmail(e.target.value); clearError("email") }} className={inp(!!errors["email"])} />
+                <FieldError>{errors["email"]}</FieldError>
+              </Field>
+            </div>
+          )}
+
+          {/* Étape 3 — Votre foyer */}
+          {step === 3 && (
+            <div className="grid gap-4">
+              <Field data-error={errors["composition"] ? "true" : undefined}>
+                <FieldLabel>Composition du foyer</FieldLabel>
+                <ChipGroup options={["Seul·e", "En couple", "Colocation", "Autre"]} value={composition} onChange={(v) => { setComposition(v); clearError("composition") }} />
+                <FieldError>{errors["composition"]}</FieldError>
+              </Field>
+              {composition === "Colocation" && (
+                <Field data-error={errors["roommatesCount"] ? "true" : undefined}>
+                  <FieldLabel>Combien de colocataires ?</FieldLabel>
+                  <Input placeholder="2" value={roommatesCount} onChange={(e) => { setRoommatesCount(e.target.value); clearError("roommatesCount") }} className={inp(!!errors["roommatesCount"])} />
+                  <FieldError>{errors["roommatesCount"]}</FieldError>
+                </Field>
+              )}
+              <Field data-error={errors["hasChildren"] ? "true" : undefined}>
+                <FieldLabel>Avez-vous des enfants ?</FieldLabel>
+                <ChipGroup options={["Oui", "Non"]} value={hasChildren} onChange={(v) => { setHasChildren(v); clearError("hasChildren") }} />
+                <FieldError>{errors["hasChildren"]}</FieldError>
+              </Field>
+              {hasChildren === "Oui" && (
+                <>
+                  <Field data-error={errors["childrenCount"] ? "true" : undefined}>
+                    <FieldLabel>Combien d&apos;enfants ?</FieldLabel>
+                    <Input placeholder="2" value={childrenCount} onChange={(e) => { setChildrenCount(e.target.value); clearError("childrenCount") }} className={inp(!!errors["childrenCount"])} />
+                    <FieldError>{errors["childrenCount"]}</FieldError>
+                  </Field>
+                  <Field data-error={errors["childrenAges"] ? "true" : undefined}>
+                    <FieldLabel>Quel âge ont-ils ?</FieldLabel>
+                    <Input placeholder="4 et 8 ans" value={childrenAges} onChange={(e) => { setChildrenAges(e.target.value); clearError("childrenAges") }} className={inp(!!errors["childrenAges"])} />
+                    <FieldError>{errors["childrenAges"]}</FieldError>
+                  </Field>
+                </>
+              )}
+              <Field data-error={errors["householdAgrees"] ? "true" : undefined}>
+                <FieldLabel>Toutes les personnes vivant au foyer sont-elles d&apos;accord avec cette demande d&apos;adoption ?</FieldLabel>
+                <ChipGroup options={["Oui", "Non"]} value={householdAgrees} onChange={(v) => { setHouseholdAgrees(v); clearError("householdAgrees") }} />
+                <FieldError>{errors["householdAgrees"]}</FieldError>
+              </Field>
+              {householdAgrees === "Non" && (
+                <>
+                  <Field data-error={errors["disagreementWho"] ? "true" : undefined}>
+                    <FieldLabel>Qui n&apos;est pas d&apos;accord ?</FieldLabel>
+                    <Input value={disagreementWho} onChange={(e) => { setDisagreementWho(e.target.value); clearError("disagreementWho") }} className={inp(!!errors["disagreementWho"])} />
+                    <FieldError>{errors["disagreementWho"]}</FieldError>
+                  </Field>
+                  <Field data-error={errors["disagreementWhy"] ? "true" : undefined}>
+                    <FieldLabel>Pourquoi ?</FieldLabel>
+                    <Textarea rows={3} value={disagreementWhy} onChange={(e) => { setDisagreementWhy(e.target.value); clearError("disagreementWhy") }} className={inp(!!errors["disagreementWhy"]) + " resize-y leading-[1.55]"} />
+                    <FieldError>{errors["disagreementWhy"]}</FieldError>
+                  </Field>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Étape 4 — Activité professionnelle */}
+          {step === 4 && (
+            <div className="grid gap-4">
+              <Field data-error={errors["employed"] ? "true" : undefined}>
+                <FieldLabel>Travaillez-vous ?</FieldLabel>
+                <ChipGroup options={["Oui", "Non"]} value={employed} onChange={(v) => { setEmployed(v); clearError("employed") }} />
+                <FieldError>{errors["employed"]}</FieldError>
+              </Field>
+              {employed === "Oui" && (
+                <>
+                  <Field data-error={errors["profession"] ? "true" : undefined}>
+                    <FieldLabel>Quelle est votre profession ?</FieldLabel>
+                    <Input placeholder="Designer" value={profession} onChange={(e) => { setProfession(e.target.value); clearError("profession") }} className={inp(!!errors["profession"])} />
+                    <FieldError>{errors["profession"]}</FieldError>
+                  </Field>
+                  <Field data-error={errors["workHours"] ? "true" : undefined}>
+                    <FieldLabel>Quels sont vos horaires de travail ?</FieldLabel>
+                    <Input placeholder="9h-17h, télétravail 2j/semaine" value={workHours} onChange={(e) => { setWorkHours(e.target.value); clearError("workHours") }} className={inp(!!errors["workHours"])} />
+                    <FieldError>{errors["workHours"]}</FieldError>
+                  </Field>
+                </>
+              )}
+              <Field data-error={errors["hoursAlone"] ? "true" : undefined}>
+                <FieldLabel>Combien de temps l&apos;animal restera-t-il seul chez vous dans la journée ?</FieldLabel>
+                <Input placeholder="4 heures" value={hoursAlone} onChange={(e) => { setHoursAlone(e.target.value); clearError("hoursAlone") }} className={inp(!!errors["hoursAlone"])} />
+                <FieldError>{errors["hoursAlone"]}</FieldError>
+              </Field>
+            </div>
+          )}
+
+          {/* Étape 5 — Votre logement */}
+          {step === 5 && (
+            <div className="grid gap-4">
+              <Field data-error={errors["housingType"] ? "true" : undefined}>
+                <FieldLabel>Vous vivez ?</FieldLabel>
+                <ChipGroup options={["Appartement", "Maison", "Autre"]} value={housingType} onChange={(v) => { setHousingType(v); clearError("housingType") }} />
+                <FieldError>{errors["housingType"]}</FieldError>
+              </Field>
+              <Field data-error={errors["surfaceArea"] ? "true" : undefined}>
+                <FieldLabel>Superficie du logement ?</FieldLabel>
+                <Input placeholder="60 m²" value={surfaceArea} onChange={(e) => { setSurfaceArea(e.target.value); clearError("surfaceArea") }} className={inp(!!errors["surfaceArea"])} />
+                <FieldError>{errors["surfaceArea"]}</FieldError>
+              </Field>
+              <Field data-error={errors["animalEnvironment"] ? "true" : undefined}>
+                <FieldLabel>L&apos;animal vivra-t-il ?</FieldLabel>
+                <ChipGroup options={["Intérieur", "Extérieur", "Les deux", "Autre"]} value={animalEnvironment} onChange={(v) => { setAnimalEnvironment(v); clearError("animalEnvironment") }} />
+                <FieldError>{errors["animalEnvironment"]}</FieldError>
+              </Field>
+              <Field data-error={errors["areaType"] ? "true" : undefined}>
+                <FieldLabel>Habitez-vous ?</FieldLabel>
+                <ChipGroup options={["Ville", "Campagne", "Lotissement", "Autre"]} value={areaType} onChange={(v) => { setAreaType(v); clearError("areaType") }} />
+                <FieldError>{errors["areaType"]}</FieldError>
+              </Field>
+              <Field data-error={errors["busyRoad"] ? "true" : undefined}>
+                <FieldLabel>Habitez-vous à proximité d&apos;une route passante ?</FieldLabel>
+                <ChipGroup options={["Oui", "Non", "Autre"]} value={busyRoad} onChange={(v) => { setBusyRoad(v); clearError("busyRoad") }} />
+                <FieldError>{errors["busyRoad"]}</FieldError>
+              </Field>
+              <Field data-error={errors["outdoorAccessAllowed"] ? "true" : undefined}>
+                <FieldLabel>L&apos;animal aura-t-il le droit/la possibilité de sortir ?</FieldLabel>
+                <ChipGroup options={["Oui", "Non", "Autre"]} value={outdoorAccessAllowed} onChange={(v) => { setOutdoorAccessAllowed(v); clearError("outdoorAccessAllowed") }} />
+                <FieldError>{errors["outdoorAccessAllowed"]}</FieldError>
+              </Field>
+              {housingType === "Appartement" && (
+                <>
+                  <Field data-error={errors["apartmentFloor"] ? "true" : undefined}>
+                    <FieldLabel>À quel étage êtes-vous ?</FieldLabel>
+                    <Input placeholder="3e étage" value={apartmentFloor} onChange={(e) => { setApartmentFloor(e.target.value); clearError("apartmentFloor") }} className={inp(!!errors["apartmentFloor"])} />
+                    <FieldError>{errors["apartmentFloor"]}</FieldError>
+                  </Field>
+                  <Field data-error={errors["windowsSecured"] ? "true" : undefined}>
+                    <FieldLabel>Vos fenêtres sont-elles sécurisées ?</FieldLabel>
+                    <ChipGroup options={["Oui", "Non", "Autre"]} value={windowsSecured} onChange={(v) => { setWindowsSecured(v); clearError("windowsSecured") }} />
+                    <FieldError>{errors["windowsSecured"]}</FieldError>
+                  </Field>
+                  <Field>
+                    <FieldLabel>Envisagez-vous de sécuriser vos fenêtres ?</FieldLabel>
+                    <Input value={plansToSecureWindows} onChange={(e) => setPlansToSecureWindows(e.target.value)} className={inp(false)} />
+                    <FieldDescription>Facultatif</FieldDescription>
+                  </Field>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Étape 6 — Extérieur */}
+          {step === 6 && (
+            <div className="grid gap-4">
+              <Field data-error={errors["hasGarden"] ? "true" : undefined}>
+                <FieldLabel>Avez-vous un jardin ?</FieldLabel>
+                <ChipGroup options={["Oui", "Non", "Autre"]} value={hasGarden} onChange={(v) => { setHasGarden(v); clearError("hasGarden") }} />
+                <FieldError>{errors["hasGarden"]}</FieldError>
+              </Field>
+              {hasGarden !== "" && hasGarden !== "Non" && (
+                <>
+                  <Field data-error={errors["gardenDescription"] ? "true" : undefined}>
+                    <FieldLabel>Précisez votre lieu de vie</FieldLabel>
+                    <Input placeholder="Maison mitoyenne avec jardin clos" value={gardenDescription} onChange={(e) => { setGardenDescription(e.target.value); clearError("gardenDescription") }} className={inp(!!errors["gardenDescription"])} />
+                    <FieldError>{errors["gardenDescription"]}</FieldError>
+                  </Field>
+                  <Field data-error={errors["gardenSurface"] ? "true" : undefined}>
+                    <FieldLabel>Quelle est la superficie de votre jardin ?</FieldLabel>
+                    <Input placeholder="200 m²" value={gardenSurface} onChange={(e) => { setGardenSurface(e.target.value); clearError("gardenSurface") }} className={inp(!!errors["gardenSurface"])} />
+                    <FieldError>{errors["gardenSurface"]}</FieldError>
+                  </Field>
+                  <Field data-error={errors["gardenFenced"] ? "true" : undefined}>
+                    <FieldLabel>Est-il grillagé ?</FieldLabel>
+                    <ChipGroup options={["Oui", "Non"]} value={gardenFenced} onChange={(v) => { setGardenFenced(v); clearError("gardenFenced") }} />
+                    <FieldError>{errors["gardenFenced"]}</FieldError>
+                  </Field>
+                  {gardenFenced === "Oui" && (
+                    <Field data-error={errors["fenceHeight"] ? "true" : undefined}>
+                      <FieldLabel>Précisez la hauteur du grillage</FieldLabel>
+                      <Input placeholder="1,80 m" value={fenceHeight} onChange={(e) => { setFenceHeight(e.target.value); clearError("fenceHeight") }} className={inp(!!errors["fenceHeight"])} />
+                      <FieldError>{errors["fenceHeight"]}</FieldError>
+                    </Field>
+                  )}
+                </>
+              )}
+              <Field data-error={errors["hasBalcony"] ? "true" : undefined}>
+                <FieldLabel>Avez-vous un balcon ou une terrasse ?</FieldLabel>
+                <ChipGroup options={["Oui", "Non", "Autre"]} value={hasBalcony} onChange={(v) => { setHasBalcony(v); clearError("hasBalcony") }} />
+                <FieldError>{errors["hasBalcony"]}</FieldError>
+              </Field>
+              {hasBalcony !== "" && hasBalcony !== "Non" && (
+                <>
+                  <Field data-error={errors["balconySurface"] ? "true" : undefined}>
+                    <FieldLabel>Quelle est sa superficie ?</FieldLabel>
+                    <Input placeholder="6 m²" value={balconySurface} onChange={(e) => { setBalconySurface(e.target.value); clearError("balconySurface") }} className={inp(!!errors["balconySurface"])} />
+                    <FieldError>{errors["balconySurface"]}</FieldError>
+                  </Field>
+                  <Field data-error={errors["balconySecured"] ? "true" : undefined}>
+                    <FieldLabel>Le balcon est-il sécurisé (filet de protection ou autre) ?</FieldLabel>
+                    <ChipGroup options={["Oui", "Non", "Autre"]} value={balconySecured} onChange={(v) => { setBalconySecured(v); clearError("balconySecured") }} />
+                    <FieldError>{errors["balconySecured"]}</FieldError>
+                  </Field>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Étape 7 — Autres animaux */}
+          {step === 7 && (
+            <div className="grid gap-4">
+              <Field data-error={errors["hasOtherPets"] ? "true" : undefined}>
+                <FieldLabel>Avez-vous d&apos;autres animaux ?</FieldLabel>
+                <ChipGroup options={["Oui", "Non"]} value={hasOtherPets} onChange={(v) => { setHasOtherPets(v); clearError("hasOtherPets") }} />
+                <FieldError>{errors["hasOtherPets"]}</FieldError>
+              </Field>
+              {hasOtherPets === "Oui" && (
+                <>
+                  <Field data-error={errors["otherPetsDetails"] ? "true" : undefined}>
+                    <FieldLabel>Quels animaux avez-vous ?</FieldLabel>
+                    <Textarea rows={3} placeholder="Nombre / espèce / race / sexe et âge" value={otherPetsDetails} onChange={(e) => { setOtherPetsDetails(e.target.value); clearError("otherPetsDetails") }} className={inp(!!errors["otherPetsDetails"]) + " resize-y leading-[1.55]"} />
+                    <FieldError>{errors["otherPetsDetails"]}</FieldError>
+                  </Field>
+                  <Field data-error={errors["otherPetsSterilized"] ? "true" : undefined}>
+                    <FieldLabel>Sont-ils stérilisés ?</FieldLabel>
+                    <ChipGroup options={["Oui", "Non"]} value={otherPetsSterilized} onChange={(v) => { setOtherPetsSterilized(v); clearError("otherPetsSterilized") }} />
+                    <FieldError>{errors["otherPetsSterilized"]}</FieldError>
+                  </Field>
+                  <Field data-error={errors["otherPetsSince"] ? "true" : undefined}>
+                    <FieldLabel>Depuis combien de temps les avez-vous ?</FieldLabel>
+                    <Input placeholder="3 ans" value={otherPetsSince} onChange={(e) => { setOtherPetsSince(e.target.value); clearError("otherPetsSince") }} className={inp(!!errors["otherPetsSince"])} />
+                    <FieldError>{errors["otherPetsSince"]}</FieldError>
+                  </Field>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Étape 8 — Remarques & engagement */}
+          {step === 8 && (
+            <div className="grid gap-4">
+              <Field>
+                <FieldLabel>Avez-vous des remarques à nous partager ou quelque chose que vous souhaitez ajouter ?</FieldLabel>
+                <Textarea rows={4} value={remarks} onChange={(e) => setRemarks(e.target.value)} className={inp(false) + " resize-y leading-[1.55]"} />
+                <FieldDescription>Facultatif</FieldDescription>
+              </Field>
+
+              {errors["responsibilityAgreement"] && (
+                <div data-error="true" className="flex items-start gap-2 px-3.5 py-2.5 rounded-lg bg-red-50 border border-red-200 text-xs text-red-600">
+                  <AlertCircle size={13} className="shrink-0 mt-0.5" />
+                  {errors["responsibilityAgreement"]}
+                </div>
+              )}
+
+              <label
+                onClick={() => { setResponsibilityAgreement((v) => !v); clearError("responsibilityAgreement") }}
+                className="flex items-start gap-3 py-1 cursor-pointer group"
+              >
+                <span
+                  className={`w-[18px] h-[18px] rounded-[5px] mt-0.5 border-[1.5px] flex items-center justify-center shrink-0 transition-colors ${
+                    responsibilityAgreement
+                      ? "bg-[#3FA66E] border-[#3FA66E]"
+                      : errors["responsibilityAgreement"]
+                      ? "bg-white border-red-400"
+                      : "bg-white border-border-strong group-hover:border-ink/40"
+                  }`}
                 >
-                  <span
-                    className={`w-[18px] h-[18px] rounded-[5px] mt-0.5 border-[1.5px] flex items-center justify-center shrink-0 transition-colors ${
-                      isChecked
-                        ? "bg-[#3FA66E] border-[#3FA66E]"
-                        : isErrored
-                        ? "bg-white border-red-400"
-                        : "bg-white border-border-strong group-hover:border-ink/40"
-                    }`}
-                  >
-                    {isChecked && (
-                      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                        <path d="M2 5.5l2.2 2.2 4.8-4.8" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </span>
-                  <span className={`text-xs leading-[1.55] flex-1 ${isChecked ? "text-ink" : "text-ink-muted"}`}>
-                    {text}
-                    {required && (
-                      <span className={`ml-1.5 text-[10px] font-semibold ${isErrored ? "text-red-500" : "text-ink-subtle"}`}>
-                        requis
-                      </span>
-                    )}
-                  </span>
-                </label>
-              )
-            })}
-          </div>
+                  {responsibilityAgreement && (
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                      <path d="M2 5.5l2.2 2.2 4.8-4.8" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </span>
+                <span className={`text-xs leading-[1.55] flex-1 ${responsibilityAgreement ? "text-ink" : "text-ink-muted"}`}>
+                  En validant ce formulaire, vous vous engagez à accepter l&apos;entière responsabilité de l&apos;entretien de l&apos;animal, ce qui inclut les frais vétérinaires (vaccination annuelle, déparasitage, vermifugation, maladie…), la nourriture, les accessoires et autres frais, ainsi que les conséquences juridiques et pécuniaires liées à la responsabilité de tout possesseur de ce type d&apos;animal.
+                </span>
+              </label>
+            </div>
+          )}
         </div>
       </div>
 
@@ -443,29 +783,45 @@ function AdoptionFormInner({ cat, onClose }: { cat: CardAnimal; onClose: () => v
             <span>Vos réponses sont strictement confidentielles.</span>
           </div>
           <div className="flex gap-2 shrink-0">
-            <DialogClose
-              render={
+            {isBlocked ? (
+              <DialogClose
+                render={
+                  <Button
+                    variant="outline"
+                    className="px-4 py-2.5 rounded-lg bg-white text-ink border border-border-strong text-xs font-semibold cursor-pointer font-[inherit] h-auto"
+                  />
+                }
+              >
+                Fermer
+              </DialogClose>
+            ) : (
+              <>
+                {step > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleBack}
+                    className="px-4 py-2.5 rounded-lg bg-white text-ink border border-border-strong text-xs font-semibold cursor-pointer font-[inherit] h-auto"
+                  >
+                    Précédent
+                  </Button>
+                )}
                 <Button
-                  variant="outline"
-                  className="px-4 py-2.5 rounded-lg bg-white text-ink border border-border-strong text-xs font-semibold cursor-pointer font-[inherit] h-auto"
-                />
-              }
-            >
-              Annuler
-            </DialogClose>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="inline-flex items-center gap-2 px-[18px] py-2.5 rounded-lg text-white text-xs font-semibold border-none cursor-pointer font-[inherit] disabled:opacity-60 h-auto"
-              style={{ background: "linear-gradient(90deg, #F76C70 0%, #E84A77 100%)" }}
-            >
-              {loading ? "Envoi…" : "Envoyer ma demande"}
-              {!loading && <ArrowRight size={13} />}
-            </Button>
+                  type="button"
+                  disabled={loading}
+                  onClick={handleNext}
+                  className="inline-flex items-center gap-2 px-[18px] py-2.5 rounded-lg text-white text-xs font-semibold border-none cursor-pointer font-[inherit] disabled:opacity-60 h-auto"
+                  style={{ background: "linear-gradient(90deg, #F76C70 0%, #E84A77 100%)" }}
+                >
+                  {step < TOTAL_STEPS ? "Suivant" : loading ? "Envoi…" : "Envoyer ma demande"}
+                  {!loading && <ArrowRight size={13} />}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
-    </form>
+    </div>
   )
 }
 
@@ -527,7 +883,7 @@ export function AdoptModal({ cat, defaultOpen = false }: { cat: CardAnimal; defa
 
               <div className="flex items-center gap-2 text-xs text-white/85 mt-4">
                 <Badge className="bg-white/[0.18] border border-white/30 text-white/85 h-auto px-2.5 py-1 rounded-full font-semibold text-xs">
-                  ~ 8 minutes
+                  {TOTAL_STEPS} étapes
                 </Badge>
                 <span>·</span>
                 <span>Vos réponses sont sauvegardées au fur et à mesure.</span>
