@@ -4,6 +4,7 @@ import DistributionForm from '@/components/admin/distribution-form'
 import { fetchResource, fetchUsers } from '@/lib/strapi'
 import type { StrapiDistributionRaw } from '@/lib/strapi'
 import { updateDistribution } from '../actions'
+import { requireAdmin } from '@/lib/auth'
 import { AD } from '@/lib/admin-tokens'
 import { cardStyle } from '@/lib/admin-styles'
 
@@ -12,6 +13,7 @@ export default async function EditDistributionPage({
 }: {
   params: Promise<{ documentId: string }>
 }) {
+  await requireAdmin()
   const { documentId } = await params
   const allUsers = await fetchUsers()
 

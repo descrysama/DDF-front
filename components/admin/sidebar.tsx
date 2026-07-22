@@ -13,6 +13,8 @@ import {
   Settings,
   Megaphone,
   Users,
+  Sparkles,
+  UserCheck,
 } from 'lucide-react'
 import { AD } from '@/lib/admin-tokens'
 import type { StrapiDistributionRaw } from '@/lib/strapi'
@@ -29,12 +31,18 @@ type NavItem = {
 const GESTION_ITEMS: NavItem[] = [
   { key: 'dashboard', label: 'Tableau de bord',       href: '/admin',                    icon: Home },
   { key: 'cats',      label: 'Chats',                  href: '/admin/animals',            icon: PawPrint },
+  { key: 'mes-chats', label: 'Mes chats',               href: '/admin/my-animals',         icon: UserCheck },
+  { key: 'libres',    label: 'Chats libres',            href: '/admin/unassigned-animals', icon: Sparkles },
   { key: 'annonces',  label: 'Annonces',                href: '/admin/announcements',      icon: Megaphone },
   { key: 'demandes',  label: "Demandes d'adoption",    href: '/admin/adoption-requests',  icon: Heart,   badge: null, badgeHighlight: true },
   { key: 'fa',        label: "Familles d'accueil",     href: '/admin/foster-families',    icon: Smile },
   { key: 'distrib',   label: 'Distributions',          href: '/admin/distributions',       icon: Calendar },
   { key: 'blog',      label: 'Blog & actualités',      href: '/admin/blog',               icon: FileText },
 ]
+
+// A Membre (bénévole) only moderates adoption requests for their own animals —
+// every other admin section works on data that isn't scoped to them yet.
+const BENEVOLE_GESTION_KEYS = new Set(['mes-chats', 'libres', 'demandes'])
 
 const CONFIG_ITEMS: NavItem[] = [
   { key: 'utilisateurs', label: 'Utilisateurs', href: '/admin/users', icon: Users },
@@ -53,10 +61,14 @@ const SECTION_LABEL_STYLE: React.CSSProperties = {
 
 interface AdminSidebarProps {
   nextDistribution: StrapiDistributionRaw | null
+  isAdmin: boolean
 }
 
-export default function AdminSidebar({ nextDistribution }: AdminSidebarProps) {
+export default function AdminSidebar({ nextDistribution, isAdmin }: AdminSidebarProps) {
   const pathname = usePathname()
+  const gestionItems = isAdmin
+    ? GESTION_ITEMS
+    : GESTION_ITEMS.filter((item) => BENEVOLE_GESTION_KEYS.has(item.key))
 
   function isActive(item: NavItem) {
     if (item.href === '/admin') return pathname === '/admin'
@@ -179,17 +191,19 @@ export default function AdminSidebar({ nextDistribution }: AdminSidebarProps) {
       <div style={{ padding: '0 14px', marginBottom: 16 }}>
         <p style={SECTION_LABEL_STYLE}>Gestion</p>
         <nav style={{ paddingLeft: 14 }}>
-          {GESTION_ITEMS.map(renderItem)}
+          {gestionItems.map(renderItem)}
         </nav>
       </div>
 
       {/* Configuration section */}
-      <div style={{ padding: '0 14px', marginBottom: 16 }}>
-        <p style={SECTION_LABEL_STYLE}>Configuration</p>
-        <nav style={{ paddingLeft: 14 }}>
-          {CONFIG_ITEMS.map(renderItem)}
-        </nav>
-      </div>
+      {isAdmin && (
+        <div style={{ padding: '0 14px', marginBottom: 16 }}>
+          <p style={SECTION_LABEL_STYLE}>Configuration</p>
+          <nav style={{ paddingLeft: 14 }}>
+            {CONFIG_ITEMS.map(renderItem)}
+          </nav>
+        </div>
+      )}
 
       {/* Promo card */}
       <div style={{ flex: 1 }} />

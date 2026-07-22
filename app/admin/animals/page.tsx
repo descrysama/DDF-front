@@ -1,4 +1,5 @@
 import { fetchAnimals, fetchAdoptionRequests } from '@/lib/strapi'
+import { requireAdmin } from '@/lib/auth'
 import { deleteAnimal } from './actions'
 import StatusBadge from '@/components/admin/status-badge'
 import PageHeader from '@/components/admin/page-header'
@@ -23,6 +24,7 @@ const AVATAR_TONES: [string, string][] = [
 const GRID_COLS = '32px 1.6fr 0.9fr 0.9fr 1.1fr 110px'
 
 export default async function AdminAnimalsPage() {
+  await requireAdmin()
   const [{ animals, total }, adoptionData] = await Promise.all([
     fetchAnimals({ limit: 100 }),
     fetchAdoptionRequests({ limit: 1 }),

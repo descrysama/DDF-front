@@ -1,7 +1,7 @@
 import AdminSidebar from '@/components/admin/sidebar'
 import AdminHeader from '@/components/admin/admin-header'
 import { fetchNextDistribution } from '@/lib/strapi'
-import { getCurrentUser } from '@/lib/auth'
+import { getCurrentUser, isAdmin } from '@/lib/auth'
 import { AD } from '@/lib/admin-tokens'
 
 export const metadata = {
@@ -18,7 +18,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: AD.bg }}>
       <AdminHeader user={user} />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <AdminSidebar nextDistribution={nextDistribution} />
+        <AdminSidebar nextDistribution={nextDistribution} isAdmin={isAdmin(user)} />
         <main style={{ flex: 1, overflow: 'auto' }}>
           {children}
         </main>

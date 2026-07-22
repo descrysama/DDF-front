@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { fetchResource, fetchAnnouncements, fetchUsers, fetchAnimals } from '@/lib/strapi'
 import type { StrapiAdoptionRequestRaw } from '@/lib/strapi'
 import { updateAdoptionRequest, deleteAdoptionRequest } from '../actions'
+import { getCurrentUser, isAdmin } from '@/lib/auth'
 import StatusBadge from '@/components/admin/status-badge'
 import SubmitButton from '@/components/admin/submit-button'
 import { AD } from '@/lib/admin-tokens'
@@ -37,22 +38,33 @@ export default async function AdoptionRequestDetailPage({
   params: Promise<{ documentId: string }>
 }) {
   const { documentId } = await params
+  const currentUser = await getCurrentUser()
+  const admin = isAdmin(currentUser)
 
   let request: StrapiAdoptionRequestRaw
   try {
     const res = await fetchResource<StrapiAdoptionRequestRaw>(
-      `/api/adoption-requests/${documentId}?populate[0]=announcement&populate[1]=adopter&populate[2]=referent&populate[3]=animal`
+      `/api/adoption-requests/${documentId}?populate[announcement]=true&populate[adopter]=true&populate[referent]=true&populate[animal][populate][referent]=true&populate[animal][populate][backup_referents]=true`
     )
     request = res.data
   } catch {
     notFound()
   }
 
-  const [{ announcements }, users, { animals }] = await Promise.all([
-    fetchAnnouncements({ limit: 100 }),
-    fetchUsers(),
-    fetchAnimals({ limit: 200 }),
-  ])
+  if (!admin) {
+    const ownsRequest =
+      request.animal?.referent?.id === currentUser?.id ||
+      request.animal?.backup_referents?.some((u) => u.id === currentUser?.id)
+    if (!ownsRequest) notFound()
+  }
+
+  const [{ announcements }, users, { animals }] = admin
+    ? await Promise.all([
+        fetchAnnouncements({ limit: 100 }),
+        fetchUsers(),
+        fetchAnimals({ limit: 200 }),
+      ])
+    : [{ announcements: [] }, [], { animals: [] }]
   const boundUpdate = updateAdoptionRequest.bind(null, documentId)
   const boundDelete = deleteAdoptionRequest.bind(null, documentId)
 
@@ -80,11 +92,13 @@ export default async function AdoptionRequestDetailPage({
             {request.announcement && ` · via ${request.announcement.title}`}
           </p>
         </div>
-        <form action={boundDelete}>
-          <Button variant="destructive" type="submit">
-            Supprimer
-          </Button>
-        </form>
+        {admin && (
+          <form action={boundDelete}>
+            <Button variant="destructive" type="submit">
+              Supprimer
+            </Button>
+          </form>
+        )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
@@ -204,69 +218,73 @@ export default async function AdoptionRequestDetailPage({
             Modifier la demande
           </h2>
           <form action={boundUpdate}>
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>Chat concerné</label>
-              <select
-                name="animal_id"
-                defaultValue={request.animal?.documentId ?? ''}
-                style={fieldStyle}
-              >
-                <option value="">— Aucun —</option>
-                {animals.map(a => (
-                  <option key={a.documentId} value={a.documentId}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {admin && (
+              <>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelStyle}>Chat concerné</label>
+                  <select
+                    name="animal_id"
+                    defaultValue={request.animal?.documentId ?? ''}
+                    style={fieldStyle}
+                  >
+                    <option value="">— Aucun —</option>
+                    {animals.map(a => (
+                      <option key={a.documentId} value={a.documentId}>
+                        {a.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>Annonce liée</label>
-              <select
-                name="announcement_id"
-                defaultValue={request.announcement?.documentId ?? ''}
-                style={fieldStyle}
-              >
-                <option value="">— Aucune —</option>
-                {announcements.map(a => (
-                  <option key={a.documentId} value={a.documentId}>
-                    {a.title}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelStyle}>Annonce liée</label>
+                  <select
+                    name="announcement_id"
+                    defaultValue={request.announcement?.documentId ?? ''}
+                    style={fieldStyle}
+                  >
+                    <option value="">— Aucune —</option>
+                    {announcements.map(a => (
+                      <option key={a.documentId} value={a.documentId}>
+                        {a.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>Adoptant</label>
-              <select
-                name="adopter_id"
-                defaultValue={users.find(u => u.email === request.adopter?.email)?.id ?? ''}
-                style={fieldStyle}
-              >
-                <option value="">— Aucun —</option>
-                {users.map(u => (
-                  <option key={u.id} value={u.id}>
-                    {u.username} ({u.email})
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelStyle}>Adoptant</label>
+                  <select
+                    name="adopter_id"
+                    defaultValue={users.find(u => u.email === request.adopter?.email)?.id ?? ''}
+                    style={fieldStyle}
+                  >
+                    <option value="">— Aucun —</option>
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>
+                        {u.username} ({u.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>Référent</label>
-              <select
-                name="referent_id"
-                defaultValue={users.find(u => u.username === request.referent?.username)?.id ?? ''}
-                style={fieldStyle}
-              >
-                <option value="">— Aucun —</option>
-                {users.map(u => (
-                  <option key={u.id} value={u.id}>
-                    {u.username} ({u.email})
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelStyle}>Référent</label>
+                  <select
+                    name="referent_id"
+                    defaultValue={users.find(u => u.username === request.referent?.username)?.id ?? ''}
+                    style={fieldStyle}
+                  >
+                    <option value="">— Aucun —</option>
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>
+                        {u.username} ({u.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
 
             <div style={{ marginBottom: 14 }}>
               <label style={labelStyle}>Statut</label>
@@ -278,27 +296,31 @@ export default async function AdoptionRequestDetailPage({
               </select>
             </div>
 
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>Score de correspondance (%)</label>
-              <input
-                name="match_score"
-                type="number"
-                min={0}
-                max={100}
-                defaultValue={request.match_score ?? ''}
-                style={fieldStyle}
-              />
-            </div>
+            {admin && (
+              <>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelStyle}>Score de correspondance (%)</label>
+                  <input
+                    name="match_score"
+                    type="number"
+                    min={0}
+                    max={100}
+                    defaultValue={request.match_score ?? ''}
+                    style={fieldStyle}
+                  />
+                </div>
 
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>Date de la demande</label>
-              <input
-                name="request_date"
-                type="date"
-                defaultValue={requestDateValue}
-                style={fieldStyle}
-              />
-            </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelStyle}>Date de la demande</label>
+                  <input
+                    name="request_date"
+                    type="date"
+                    defaultValue={requestDateValue}
+                    style={fieldStyle}
+                  />
+                </div>
+              </>
+            )}
 
             <div style={{ marginBottom: 20 }}>
               <label style={labelStyle}>Message</label>

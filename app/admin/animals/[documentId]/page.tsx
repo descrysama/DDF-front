@@ -2,7 +2,12 @@ import { notFound } from 'next/navigation'
 import { fetchResource, fetchUsers, fetchBreeds, fetchCharacters, fetchFosterFamilies } from '@/lib/strapi'
 import type { StrapiMedia, StrapiMedicalEvent, StrapiUser, StrapiBreed, StrapiCharacter } from '@/lib/strapi'
 import AnimalEditClient from './edit-client'
+import { requireAdmin } from '@/lib/auth'
 import { STRAPI_URL } from '@/lib/config'
+
+// Only Membre/Admin accounts may be assigned as an animal's referent — an
+// Adoptant has no business being the person notified about their own requests.
+const REFERENT_ROLES = ['membre', 'admin']
 
 interface FosterAssignment {
   id: number
@@ -45,6 +50,7 @@ export default async function EditAnimalPage({
 }: {
   params: Promise<{ documentId: string }>
 }) {
+  await requireAdmin()
   const { documentId } = await params
 
   let animal: AnimalDetail
@@ -64,12 +70,13 @@ export default async function EditAnimalPage({
     notFound()
   }
 
-  const [users, breeds, characters, { fosterFamilies }] = await Promise.all([
+  const [allUsers, breeds, characters, { fosterFamilies }] = await Promise.all([
     fetchUsers(),
     fetchBreeds(),
     fetchCharacters(),
     fetchFosterFamilies({ limit: 200 }),
   ])
+  const users = allUsers.filter((u) => REFERENT_ROLES.includes(u.role?.name?.toLowerCase() ?? ''))
 
   return (
     <AnimalEditClient

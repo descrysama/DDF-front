@@ -1,4 +1,5 @@
 import { fetchDistributions } from '@/lib/strapi'
+import { requireAdmin } from '@/lib/auth'
 import { deleteDistribution } from './actions'
 import PageHeader from '@/components/admin/page-header'
 import StatCard from '@/components/admin/stat-card'
@@ -14,6 +15,7 @@ function formatDate(value: string): string {
 }
 
 export default async function AdminDistributionsPage() {
+  await requireAdmin()
   const { distributions, total } = await fetchDistributions({ limit: 100 })
 
   const today = new Date().toISOString().slice(0, 10)

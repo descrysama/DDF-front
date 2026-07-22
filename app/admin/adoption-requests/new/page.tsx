@@ -1,12 +1,14 @@
 import Link from 'next/link'
 import { fetchAnnouncements, fetchUsers, fetchAnimals } from '@/lib/strapi'
 import { createAdoptionRequest } from '../actions'
+import { requireAdmin } from '@/lib/auth'
 import { AD } from '@/lib/admin-tokens'
 import { fieldStyle, labelStyle } from '@/lib/admin-styles'
 import SubmitButton from '@/components/admin/submit-button'
 import { Card } from '@/components/ui/card'
 
 export default async function NewAdoptionRequestPage() {
+  await requireAdmin()
   const [{ announcements }, users, { animals }] = await Promise.all([
     fetchAnnouncements({ limit: 100 }),
     fetchUsers(),

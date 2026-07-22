@@ -1,5 +1,7 @@
+import Link from 'next/link'
 import { fetchAdoptionRequests } from '@/lib/strapi'
 import { deleteAdoptionRequest } from './actions'
+import { getCurrentUser, isAdmin } from '@/lib/auth'
 import StatusBadge from '@/components/admin/status-badge'
 import PageHeader from '@/components/admin/page-header'
 import StatCard from '@/components/admin/stat-card'
@@ -26,8 +28,19 @@ function initials(name: string): string {
 
 const GRID_COLS = '32px 1.5fr 1.1fr 0.8fr 0.7fr 0.8fr 130px'
 
-export default async function AdminAdoptionRequestsPage() {
-  const { adoptionRequests, total } = await fetchAdoptionRequests({ limit: 100 })
+export default async function AdminAdoptionRequestsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ animal?: string; animalName?: string }>
+}) {
+  const { animal: animalDocumentId, animalName } = await searchParams
+  const user = await getCurrentUser()
+  const admin = isAdmin(user)
+  const { adoptionRequests, total } = await fetchAdoptionRequests({
+    limit: 100,
+    referentUserId: admin ? undefined : user?.id,
+    animalDocumentId,
+  })
 
   const pending  = adoptionRequests.filter(r => r.status === 'pending').length
   const approved = adoptionRequests.filter(r => r.status === 'approved').length
@@ -44,11 +57,23 @@ export default async function AdminAdoptionRequestsPage() {
 
   return (
     <div style={{ padding: '28px 32px' }}>
+      {animalDocumentId && (
+        <Link
+          href="/admin/adoption-requests"
+          style={{ display: 'inline-block', fontSize: 13, color: AD.inkMuted, textDecoration: 'none', marginBottom: 10 }}
+        >
+          ← Toutes mes demandes
+        </Link>
+      )}
       <PageHeader
         breadcrumb="Admin / Demandes d'adoption"
-        title="Demandes d'adoption"
-        subtitle={`${total} demande(s) au total`}
-        action={{ label: '+ Nouvelle demande', href: '/admin/adoption-requests/new' }}
+        title={animalDocumentId ? `Demandes pour ${animalName ?? 'ce chat'}` : "Demandes d'adoption"}
+        subtitle={
+          animalDocumentId
+            ? `${total} demande(s) pour ce chat`
+            : admin ? `${total} demande(s) au total` : `${total} demande(s) pour vos chats`
+        }
+        action={admin && !animalDocumentId ? { label: '+ Nouvelle demande', href: '/admin/adoption-requests/new' } : undefined}
       />
 
       {/* Stat strip */}
@@ -173,7 +198,7 @@ export default async function AdminAdoptionRequestsPage() {
               {/* Actions */}
               <ActionButtons
                 editHref={`/admin/adoption-requests/${req.documentId}`}
-                deleteAction={deleteAdoptionRequest.bind(null, req.documentId)}
+                deleteAction={admin ? deleteAdoptionRequest.bind(null, req.documentId) : undefined}
               />
             </div>
           )

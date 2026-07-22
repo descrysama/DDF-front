@@ -1,4 +1,5 @@
 import { fetchFosterFamilies } from '@/lib/strapi'
+import { requireAdmin } from '@/lib/auth'
 import { deleteFosterFamily } from './actions'
 import PageHeader from '@/components/admin/page-header'
 import StatCard from '@/components/admin/stat-card'
@@ -37,6 +38,7 @@ function BoolPill({ value }: { value: boolean }) {
 }
 
 export default async function AdminFosterFamiliesPage() {
+  await requireAdmin()
   const { fosterFamilies, total } = await fetchFosterFamilies({ limit: 100 })
 
   const withAssignments = fosterFamilies.filter(f => (f.foster_assignments?.length ?? 0) > 0)
