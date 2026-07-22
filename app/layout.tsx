@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Nunito, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import AuthHydrator from "@/components/auth-hydrator";
+import TinderFab from "@/components/tinder-fab";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -40,6 +41,7 @@ export default function RootLayout({
       >
         <AuthHydrator />
         {children}
+        <TinderFab />
       </body>
     </html>
   );

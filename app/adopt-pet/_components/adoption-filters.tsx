@@ -1,10 +1,8 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Search } from "lucide-react"
 import { CatCard } from "@/components/cat-card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { ACTIVITY_LABEL, type CardAnimal, type CatTag, type AnimalStatus, type AnimalActivity } from "@/lib/strapi"
@@ -151,16 +149,13 @@ export function AdoptionFilters({ cats }: Props) {
               </SelectContent>
             </Select>
 
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-surface">
-              <Search size={13} className="text-ink-muted shrink-0" />
-              <Input
-                type="search"
-                placeholder="Rechercher un nom"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="h-auto border-none outline-none bg-transparent text-xs md:text-xs font-[inherit] text-ink w-36 shadow-none px-0 py-0 focus-visible:ring-0 focus-visible:border-none dark:bg-transparent"
-              />
-            </div>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Rechercher un nom"
+              className="h-9 w-44 shrink-0 rounded-md border border-border bg-surface px-2.5 text-xs font-[inherit] text-ink outline-none"
+            />
           </div>
         </div>
       </section>

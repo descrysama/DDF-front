@@ -141,15 +141,15 @@ function MatchOverlay({ cat, onClose }: { cat: DiscoverAnimal; onClose: () => vo
               {cat.compatibility !== null && (
                 <> · <strong className="text-ink">{cat.compatibility}% compatible</strong></>
               )}
-              . Lancez votre demande d&apos;adoption dès maintenant.
+              . Venez voir sa fiche pour en savoir plus.
             </p>
             <div className="flex flex-col gap-2">
               <Link
-                href={`/adopt-pet/${cat.documentId}?adopt=1`}
+                href={`/adopt-pet/${cat.documentId}`}
                 className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-white text-sm font-semibold no-underline"
                 style={{ background: "linear-gradient(90deg, #F76C70 0%, #E84A77 100%)" }}
               >
-                Faire une demande d&apos;adoption <ArrowRight size={14} />
+                Voir le chat <ArrowRight size={14} />
               </Link>
               <Button variant="ghost" onClick={onClose} className="text-ink-muted text-sm h-auto hover:bg-transparent">
                 Continuer à swiper

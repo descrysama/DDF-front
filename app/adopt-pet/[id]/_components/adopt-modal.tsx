@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import Image from "next/image"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { Heart, X, ArrowRight, Lock, CheckCircle2, AlertCircle } from "lucide-react"
 import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field"
@@ -858,7 +859,7 @@ export function AdoptModal({ cat, defaultOpen = false }: { cat: CardAnimal; defa
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    className="absolute top-4 right-[18px] w-[30px] h-[30px] rounded-full flex items-center justify-center border-none cursor-pointer text-white hover:bg-white/25 hover:text-white"
+                    className="absolute top-4 right-[18px] z-10 w-[30px] h-[30px] rounded-full flex items-center justify-center border-none cursor-pointer text-white hover:bg-white/25 hover:text-white"
                     style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.30)" }}
                   />
                 }
@@ -867,11 +868,15 @@ export function AdoptModal({ cat, defaultOpen = false }: { cat: CardAnimal; defa
                 <span className="sr-only">Fermer</span>
               </DialogClose>
 
-              <div className="flex items-center gap-3.5 relative">
+              <div className="flex items-center gap-3.5">
                 <div
-                  className="w-[52px] h-[52px] rounded-[10px] border-2 border-white/40 shrink-0"
-                  style={{ background: `linear-gradient(135deg, ${cat.tones[0]} 0%, ${cat.tones[1]} 100%)` }}
-                />
+                  className="relative w-[52px] h-[52px] rounded-[10px] border-2 border-white/40 shrink-0 overflow-hidden"
+                  style={cat.photoUrl ? undefined : { background: `linear-gradient(135deg, ${cat.tones[0]} 0%, ${cat.tones[1]} 100%)` }}
+                >
+                  {cat.photoUrl && (
+                    <Image src={cat.photoUrl} alt={cat.name} fill unoptimized sizes="52px" style={{ objectFit: "cover" }} />
+                  )}
+                </div>
                 <div>
                   <div className="text-xs text-white/85 font-semibold mb-0.5">Demande d&apos;adoption</div>
                   <DialogPrimitive.Title className="text-[22px] font-semibold tracking-[-0.02em] m-0 leading-[1.1] text-white">

@@ -2,8 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { Heart, Play } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Play } from "lucide-react"
 import type { CardAnimalMedia } from "@/lib/strapi"
 
 interface Item {
@@ -64,14 +63,6 @@ export function MediaViewer({ name, tones, tag, tagClass, medias, videoUrl }: Me
         <div className={`absolute top-3.5 left-3.5 ${tagClass} text-white px-3 py-[5px] rounded text-xs font-semibold`}>
           {tag}
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-3.5 right-3.5 w-[38px] h-[38px] rounded-full bg-white/95 hover:bg-white/95 border-none shadow-[0_2px_8px_rgba(0,0,0,0.10)]"
-          aria-label="Ajouter aux favoris"
-        >
-          <Heart size={16} className="text-coral" />
-        </Button>
       </div>
 
       {items.length > 1 && (

@@ -12,7 +12,6 @@ import { MediaViewer } from "./_components/media-viewer"
 
 interface Props {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ adopt?: string }>
 }
 
 const ADOPTION_STEPS = [
@@ -40,9 +39,8 @@ function enteneLabel(cat: CardAnimal): string {
   return `S'entend bien avec ${compat.join(', ')}`
 }
 
-export default async function CatPage({ params, searchParams }: Props) {
+export default async function CatPage({ params }: Props) {
   const { id } = await params
-  const { adopt } = await searchParams
   const cat = await fetchAnimal(id)
   if (!cat) notFound()
 
@@ -161,7 +159,7 @@ export default async function CatPage({ params, searchParams }: Props) {
 
               {/* CTAs */}
               <div className="flex flex-col gap-2">
-                <AdoptModal cat={cat} defaultOpen={adopt === "1"} />
+                <AdoptModal cat={cat} />
               </div>
 
               {/* Adoption fee note */}

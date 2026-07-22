@@ -20,7 +20,7 @@ export async function HeroSection() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-[5px] rounded-full bg-surface border border-coral/25 text-xs font-medium text-coral-ink mb-[22px]">
             <span className="animate-scf-pulse w-1.5 h-1.5 rounded-full bg-coral inline-block" />
-            {total} chats actuellement à l&apos;adoption
+            {`${total} chats actuellement à l'adoption`}
           </div>
 
           <h1 className="text-h1 leading-[0.96] tracking-[-0.035em] font-semibold m-0 mb-[18px] text-ink">
