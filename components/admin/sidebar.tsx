@@ -46,7 +46,6 @@ const BENEVOLE_GESTION_KEYS = new Set(['mes-chats', 'libres', 'demandes'])
 
 const CONFIG_ITEMS: NavItem[] = [
   { key: 'utilisateurs', label: 'Utilisateurs', href: '/admin/users', icon: Users },
-  { key: 'parametres',   label: 'Paramètres',   href: '#',            icon: Settings },
 ]
 
 const SECTION_LABEL_STYLE: React.CSSProperties = {

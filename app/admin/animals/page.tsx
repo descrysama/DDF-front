@@ -1,4 +1,4 @@
-import { fetchAnimals, fetchAdoptionRequests } from '@/lib/strapi'
+import { fetchAnimals, fetchAdoptionRequests, type AnimalStatus, type AnimalCategoryFilter } from '@/lib/strapi'
 import { requireAdmin } from '@/lib/auth'
 import { deleteAnimal } from './actions'
 import StatusBadge from '@/components/admin/status-badge'
@@ -9,6 +9,22 @@ import { AD } from '@/lib/admin-tokens'
 import { Card } from '@/components/ui/card'
 import { Search } from 'lucide-react'
 import Link from 'next/link'
+import SearchInput from '@/components/admin/search-input'
+import FilterSelect from '@/components/admin/filter-select'
+
+const STATUS_OPTIONS: { value: AnimalStatus; label: string }[] = [
+  { value: 'available', label: 'Disponible' },
+  { value: 'in_foster', label: "En famille d'accueil" },
+  { value: 'reserved',  label: 'Réservé' },
+  { value: 'adopted',   label: 'Adopté' },
+]
+
+const CATEGORY_OPTIONS: { value: AnimalCategoryFilter; label: string }[] = [
+  { value: 'Chaton', label: 'Chaton' },
+  { value: 'Adulte', label: 'Adulte' },
+  { value: 'Senior',  label: 'Senior' },
+  { value: 'Duo',    label: 'Duo' },
+]
 
 const AVATAR_TONES: [string, string][] = [
   ['#E8C9B3', '#C99879'],
@@ -22,17 +38,27 @@ const AVATAR_TONES: [string, string][] = [
 ]
 
 const GRID_COLS = '32px 1.6fr 0.9fr 0.9fr 1.1fr 110px'
+const PAGE_SIZE = 20
 
-export default async function AdminAnimalsPage() {
+export default async function AdminAnimalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string; status?: AnimalStatus; category?: AnimalCategoryFilter }>
+}) {
   await requireAdmin()
-  const [{ animals, total }, adoptionData] = await Promise.all([
-    fetchAnimals({ limit: 100 }),
+  const { q, page: pageParam, status, category } = await searchParams
+  const search = q?.trim() ?? ''
+  const page = Number(pageParam) > 0 ? Number(pageParam) : 1
+
+  const [{ animals, total, pageCount }, { animals: allAnimals }, adoptionData] = await Promise.all([
+    fetchAnimals({ limit: PAGE_SIZE, page, search, status, category }),
+    fetchAnimals({ limit: 200 }),
     fetchAdoptionRequests({ limit: 1 }),
   ])
 
-  const available = animals.filter(a => a.status === 'available').length
-  const in_foster = animals.filter(a => a.status === 'in_foster').length
-  const reserved  = animals.filter(a => a.status === 'reserved').length
+  const available = allAnimals.filter(a => a.status === 'available').length
+  const in_foster = allAnimals.filter(a => a.status === 'in_foster').length
+  const reserved  = allAnimals.filter(a => a.status === 'reserved').length
 
   const STAT_CARDS = [
     { label: 'Publiés',              count: available,          dot: '#3FA66E' },
@@ -40,6 +66,19 @@ export default async function AdminAnimalsPage() {
     { label: 'Réservés',             count: reserved,           dot: '#7B6CC4' },
     { label: 'Demandes en attente',  count: adoptionData.total, dot: '#E84A77' },
   ]
+
+  const rangeStart = animals.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
+  const rangeEnd = (page - 1) * PAGE_SIZE + animals.length
+
+  function pageHref(p: number): string {
+    const params = new URLSearchParams()
+    if (search) params.set('q', search)
+    if (status) params.set('status', status)
+    if (category) params.set('category', category)
+    if (p > 1) params.set('page', String(p))
+    const qs = params.toString()
+    return qs ? `/admin/animals?${qs}` : '/admin/animals'
+  }
 
   return (
     <div style={{ padding: '28px 32px' }}>
@@ -62,6 +101,13 @@ export default async function AdminAnimalsPage() {
         {STAT_CARDS.map(({ label, count, dot }) => (
           <StatCard key={label} label={label} count={count} dot={dot} />
         ))}
+      </div>
+
+      {/* Search + filters bar */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+        <SearchInput placeholder="Rechercher un chat par nom…" />
+        <FilterSelect paramName="status" placeholder="Tous les statuts" options={STATUS_OPTIONS} />
+        <FilterSelect paramName="category" placeholder="Toutes les catégories" options={CATEGORY_OPTIONS} />
       </div>
 
       {/* Table container */}
@@ -194,7 +240,7 @@ export default async function AdminAnimalsPage() {
 
         {animals.length === 0 && (
           <div style={{ padding: 40, textAlign: 'center', color: AD.inkMuted, fontSize: 14 }}>
-            Aucun chat trouvé.
+            {search ? `Aucun chat ne correspond à « ${search} ».` : 'Aucun chat trouvé.'}
           </div>
         )}
 
@@ -210,32 +256,53 @@ export default async function AdminAnimalsPage() {
             }}
           >
             <p style={{ fontSize: 12.5, color: AD.inkMuted }}>
-              Affichage de 1 à {animals.length} sur {total} résultats
+              Affichage de {rangeStart} à {rangeEnd} sur {total} résultats
             </p>
             <div style={{ display: 'flex', gap: 4 }}>
-              {['←', '1', '→'].map(btn => (
-                <button
-                  key={btn}
-                  disabled
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 6,
-                    border: `1px solid ${AD.border}`,
-                    background: btn === '1' ? AD.ink : AD.surface,
-                    color: btn === '1' ? '#fff' : AD.inkMuted,
-                    fontSize: 12.5,
-                    fontWeight: btn === '1' ? 700 : 400,
-                    cursor: 'default',
-                  }}
-                >
-                  {btn}
-                </button>
+              <PageButton href={pageHref(page - 1)} disabled={page <= 1}>←</PageButton>
+              {Array.from({ length: pageCount }, (_, i) => i + 1).map((p) => (
+                <PageButton key={p} href={pageHref(p)} active={p === page}>
+                  {p}
+                </PageButton>
               ))}
+              <PageButton href={pageHref(page + 1)} disabled={page >= pageCount}>→</PageButton>
             </div>
           </div>
         )}
       </Card>
     </div>
   )
+}
+
+function PageButton({
+  href,
+  active,
+  disabled,
+  children,
+}: {
+  href: string
+  active?: boolean
+  disabled?: boolean
+  children: React.ReactNode
+}) {
+  const style: React.CSSProperties = {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    border: `1px solid ${AD.border}`,
+    background: active ? AD.ink : AD.surface,
+    color: active ? '#fff' : AD.inkMuted,
+    fontSize: 12.5,
+    fontWeight: active ? 700 : 400,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textDecoration: 'none',
+  }
+
+  if (disabled) {
+    return <span style={{ ...style, opacity: 0.4, cursor: 'default' }}>{children}</span>
+  }
+
+  return <Link href={href} style={style}>{children}</Link>
 }

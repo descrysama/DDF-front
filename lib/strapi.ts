@@ -220,20 +220,51 @@ interface StrapiListResponse<T> {
   meta: { pagination: { page: number; pageSize: number; pageCount: number; total: number } }
 }
 
+export type AnimalCategoryFilter = 'Chaton' | 'Adulte' | 'Senior' | 'Duo'
+
+// Mirrors deriveTag()'s precedence (bonded_with > senior > kitten > adult) as
+// Strapi filters, so admin's "Catégorie" filter matches the same raw fields
+// the table's own "Catégorie" column is computed from.
+function categoryFilterQuery(category?: AnimalCategoryFilter): string {
+  switch (category) {
+    case 'Duo':
+      return '&filters[bonded_with][id][$notNull]=true'
+    case 'Senior':
+      return '&filters[bonded_with][id][$null]=true&filters[age][$gte]=10'
+    case 'Chaton':
+      return '&filters[bonded_with][id][$null]=true&filters[age][$lte]=1'
+    case 'Adulte':
+      return '&filters[bonded_with][id][$null]=true&filters[age][$gt]=1&filters[age][$lt]=10'
+    default:
+      return ''
+  }
+}
+
 export async function fetchAnimals(opts?: {
   limit?: number
   excludeStatus?: AnimalStatus
-}): Promise<{ animals: CardAnimal[]; total: number }> {
+  search?: string
+  page?: number
+  status?: AnimalStatus
+  category?: AnimalCategoryFilter
+}): Promise<{ animals: CardAnimal[]; total: number; page: number; pageCount: number }> {
   const limit = opts?.limit ?? 25
+  const page = opts?.page && opts.page > 0 ? opts.page : 1
   const exclude = opts?.excludeStatus
+  const search = opts?.search?.trim()
   const filter = exclude ? `&filters[status][$ne]=${exclude}` : ''
+  const searchFilter = search ? `&filters[name][$containsi]=${encodeURIComponent(search)}` : ''
+  const statusFilter = opts?.status ? `&filters[status][$eq]=${opts.status}` : ''
+  const categoryFilter = categoryFilterQuery(opts?.category)
 
   const { data, meta } = await strapiGet<StrapiListResponse<StrapiAnimalRaw>>(
-    `/api/animals?populate[breed]=true&populate[bonded_with]=true&populate[characters]=true&populate[medias][populate]=image&pagination[pageSize]=${limit}${filter}`
+    `/api/animals?populate[breed]=true&populate[bonded_with]=true&populate[characters]=true&populate[medias][populate]=image&pagination[pageSize]=${limit}&pagination[page]=${page}${filter}${searchFilter}${statusFilter}${categoryFilter}`
   )
   return {
     animals: data.map(toCardAnimal),
     total: meta.pagination.total,
+    page: meta.pagination.page,
+    pageCount: meta.pagination.pageCount,
   }
 }
 
