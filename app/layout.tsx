@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import AuthHydrator from "@/components/auth-hydrator";
 import TinderFab from "@/components/tinder-fab";
 
+export const dynamic = "force-dynamic";
+
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const geistSans = Geist({

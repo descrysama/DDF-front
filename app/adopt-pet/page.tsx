@@ -4,8 +4,6 @@ import Footer from "@/components/footer"
 import { fetchAnimals } from "@/lib/strapi"
 import { AdoptionFilters } from "./_components/adoption-filters"
 
-export const dynamic = "force-dynamic"
-
 export default async function AdoptionPage() {
   const { animals, total } = await fetchAnimals({ limit: 100 })
 
