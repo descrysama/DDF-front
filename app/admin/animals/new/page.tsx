@@ -2,9 +2,11 @@ import Link from 'next/link'
 import AnimalForm from '@/components/admin/animal-form'
 import { createAnimal } from '../actions'
 import { fetchBreeds, fetchCharacters } from '@/lib/strapi'
+import { requireAdmin } from '@/lib/auth'
 import { AD } from '@/lib/admin-tokens'
 
 export default async function NewAnimalPage() {
+  await requireAdmin()
   const [breeds, characters] = await Promise.all([fetchBreeds(), fetchCharacters()])
   return (
     <div style={{ padding: 32 }}>

@@ -11,6 +11,7 @@ import { useEffect, useState } from "react"
 import { User, Mail, Shield, Pencil, Check, X, Loader2 } from "lucide-react"
 import { AdopterProfileCard } from "./_components/adopter-profile-card"
 import { AvailabilityCard } from "./_components/availability-card"
+import { AdoptionRequestsNotice } from "./_components/adoption-requests-notice"
 
 export default function ProfilePage() {
   const user = useUserStore((s) => s.user)
@@ -124,6 +125,8 @@ export default function ProfilePage() {
               {roleName}
             </Badge>
           </div>
+
+          <AdoptionRequestsNotice />
 
           {success && (
             <div className="mb-4 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">

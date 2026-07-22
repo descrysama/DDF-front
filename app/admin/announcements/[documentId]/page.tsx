@@ -4,6 +4,7 @@ import AnnouncementForm from '@/components/admin/announcement-form'
 import { fetchResource } from '@/lib/strapi'
 import type { StrapiAnnouncementRaw } from '@/lib/strapi'
 import { updateAnnouncement } from '../actions'
+import { requireAdmin } from '@/lib/auth'
 import { AD } from '@/lib/admin-tokens'
 import { Card } from '@/components/ui/card'
 
@@ -12,6 +13,7 @@ export default async function EditAnnouncementPage({
 }: {
   params: Promise<{ documentId: string }>
 }) {
+  await requireAdmin()
   const { documentId } = await params
 
   let announcement: StrapiAnnouncementRaw

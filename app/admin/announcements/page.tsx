@@ -1,4 +1,5 @@
 import { fetchAnnouncements } from '@/lib/strapi'
+import { requireAdmin } from '@/lib/auth'
 import { deleteAnnouncement } from './actions'
 import StatusBadge from '@/components/admin/status-badge'
 import PageHeader from '@/components/admin/page-header'
@@ -10,6 +11,7 @@ import { Card } from '@/components/ui/card'
 const GRID_COLS = '1.8fr 0.8fr 1fr 110px'
 
 export default async function AdminAnnouncementsPage() {
+  await requireAdmin()
   const { announcements, total } = await fetchAnnouncements({ limit: 100 })
 
   const open   = announcements.filter(a => a.status === 'open').length

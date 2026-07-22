@@ -1,5 +1,5 @@
 import { fetchUsers, fetchRoles, type StrapiRole } from '@/lib/strapi'
-import { getCurrentUser } from '@/lib/auth'
+import { getCurrentUser, requireAdmin } from '@/lib/auth'
 import PageHeader from '@/components/admin/page-header'
 import StatCard from '@/components/admin/stat-card'
 import UsersTable from './users-table'
@@ -16,6 +16,7 @@ const BUILTIN_ROLE_TYPES = ['public', 'authenticated']
 const STAT_DOTS = ['#3FA66E', '#E0944A', '#9C9588']
 
 export default async function AdminUsersPage() {
+  await requireAdmin()
   const [users, rolesResult, currentUser] = await Promise.all([
     fetchUsers(),
     fetchRoles().catch((): StrapiRole[] => []),

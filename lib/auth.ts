@@ -39,9 +39,21 @@ export function isAdmin(user: AuthUser | null): boolean {
   return user?.role?.name?.toLowerCase() === 'admin'
 }
 
+export function isBenevole(user: AuthUser | null): boolean {
+  return user?.role?.name?.toLowerCase() === 'membre'
+}
+
 export async function requireAdmin(): Promise<AuthUser> {
   const user = await getCurrentUser()
   if (!user || !isAdmin(user)) {
+    redirect('/login')
+  }
+  return user
+}
+
+export async function requireBenevoleOrAdmin(): Promise<AuthUser> {
+  const user = await getCurrentUser()
+  if (!user || (!isAdmin(user) && !isBenevole(user))) {
     redirect('/login')
   }
   return user

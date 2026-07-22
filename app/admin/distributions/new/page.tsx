@@ -2,10 +2,12 @@ import Link from 'next/link'
 import DistributionForm from '@/components/admin/distribution-form'
 import { createDistribution } from '../actions'
 import { fetchUsers } from '@/lib/strapi'
+import { requireAdmin } from '@/lib/auth'
 import { AD } from '@/lib/admin-tokens'
 import { cardStyle } from '@/lib/admin-styles'
 
 export default async function NewDistributionPage() {
+  await requireAdmin()
   const users = await fetchUsers()
 
   return (

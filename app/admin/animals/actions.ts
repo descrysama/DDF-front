@@ -2,10 +2,10 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { strapiPost, strapiPut, strapiDelete } from '@/lib/strapi'
+import { strapiPost, strapiPut, strapiDelete, fetchResource } from '@/lib/strapi'
 import type { StrapiMedia, StrapiMedicalEvent } from '@/lib/strapi'
 import { STRAPI_URL, strapiAuthHeaders } from '@/lib/config'
-import { requireAdmin } from '@/lib/auth'
+import { requireAdmin, requireBenevoleOrAdmin } from '@/lib/auth'
 
 const AUTH = strapiAuthHeaders()
 const JSON_HEADERS = { ...AUTH, 'Content-Type': 'application/json' }
@@ -250,6 +250,70 @@ export async function updateAnimalReferents(animalDocumentId: string, formData: 
   })
 
   revalidatePath(`/admin/animals/${animalDocumentId}`)
+  // The referent/backup_referents change is exactly what scopes a bénévole's
+  // adoption-requests list — without this, it stays stale for up to 60s
+  // (fetchAdoptionRequests' next.revalidate window).
+  revalidatePath('/admin/adoption-requests')
+}
+
+// A bénévole claims an unreferred cat themselves instead of waiting on an
+// admin. `cache: 'no-store'` (unlike the shared strapiGet helper, which caches
+// for 60s) so two bénévoles racing for the same cat both see the live state
+// right before writing, not a stale "still free" snapshot.
+export async function selfAssignReferent(animalDocumentId: string) {
+  const user = await requireBenevoleOrAdmin()
+
+  const res = await fetch(
+    `${STRAPI_URL}/api/animals/${animalDocumentId}?populate[referent]=true`,
+    { headers: strapiAuthHeaders(), cache: 'no-store' }
+  )
+  if (!res.ok) throw new Error(`Strapi ${res.status}: could not read animal ${animalDocumentId}`)
+  const { data } = (await res.json()) as { data: { referent: { id: number } | null } }
+  if (data.referent) {
+    throw new Error('Ce chat a déjà un référent — quelqu\'un vient de le prendre.')
+  }
+
+  await strapiPut(`/api/animals/${animalDocumentId}`, { referent: user.id })
+
+  revalidatePath('/admin/unassigned-animals')
+  revalidatePath('/admin/my-animals')
+  revalidatePath(`/admin/animals/${animalDocumentId}`)
+  revalidatePath('/admin/adoption-requests')
+}
+
+// The reverse of selfAssignReferent — a bénévole who can't take care of a cat
+// after all steps aside so a colleague can pick it up from "Chats libres".
+// Only clears whichever slot (referent or backup_referents) the caller
+// actually occupies; other people's assignments on the same cat are untouched.
+export async function selfUnassignReferent(animalDocumentId: string) {
+  const user = await requireBenevoleOrAdmin()
+
+  const res = await fetch(
+    `${STRAPI_URL}/api/animals/${animalDocumentId}?populate[referent]=true&populate[backup_referents]=true`,
+    { headers: strapiAuthHeaders(), cache: 'no-store' }
+  )
+  if (!res.ok) throw new Error(`Strapi ${res.status}: could not read animal ${animalDocumentId}`)
+  const { data } = (await res.json()) as {
+    data: { referent: { id: number } | null; backup_referents: { id: number }[] }
+  }
+
+  const payload: Record<string, unknown> = {}
+  if (data.referent?.id === user.id) {
+    payload.referent = null
+  }
+  if (data.backup_referents.some((u) => u.id === user.id)) {
+    payload.backup_referents = data.backup_referents.filter((u) => u.id !== user.id).map((u) => u.id)
+  }
+  if (Object.keys(payload).length === 0) {
+    throw new Error("Vous n'êtes pas rattaché à ce chat.")
+  }
+
+  await strapiPut(`/api/animals/${animalDocumentId}`, payload)
+
+  revalidatePath('/admin/my-animals')
+  revalidatePath('/admin/unassigned-animals')
+  revalidatePath(`/admin/animals/${animalDocumentId}`)
+  revalidatePath('/admin/adoption-requests')
 }
 
 // ─── Famille d'accueil ──────────────────────────────────────────────────────

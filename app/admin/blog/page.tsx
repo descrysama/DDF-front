@@ -1,4 +1,5 @@
 import { fetchBlogPostsAdmin } from '@/lib/strapi'
+import { requireAdmin } from '@/lib/auth'
 import { deleteBlogPost } from './actions'
 import PageHeader from '@/components/admin/page-header'
 import ActionButtons from '@/components/admin/action-buttons'
@@ -8,6 +9,7 @@ import { Card } from '@/components/ui/card'
 const GRID_COLS = '2fr 1fr 0.8fr 150px'
 
 export default async function AdminBlogPage() {
+  await requireAdmin()
   const { posts, total } = await fetchBlogPostsAdmin({ limit: 100 })
 
   return (

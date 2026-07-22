@@ -5,6 +5,7 @@ import StatusBadge from '@/components/admin/status-badge'
 import { fetchResource, fetchAnimalsForFosterPicker, fetchUsersForFosterPicker } from '@/lib/strapi'
 import type { StrapiFosterFamilyRaw } from '@/lib/strapi'
 import { updateFosterFamily, removeFosterAssignment } from '../actions'
+import { requireAdmin } from '@/lib/auth'
 import { AD } from '@/lib/admin-tokens'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,7 @@ export default async function EditFosterFamilyPage({
 }: {
   params: Promise<{ documentId: string }>
 }) {
+  await requireAdmin()
   const { documentId } = await params
 
   let family: StrapiFosterFamilyRaw

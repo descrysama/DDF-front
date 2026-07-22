@@ -2,10 +2,12 @@ import Link from 'next/link'
 import FosterFamilyForm from '@/components/admin/foster-family-form'
 import { createFosterFamily } from '../actions'
 import { fetchAnimalsForFosterPicker, fetchUsersForFosterPicker } from '@/lib/strapi'
+import { requireAdmin } from '@/lib/auth'
 import { AD } from '@/lib/admin-tokens'
 import { cardStyle } from '@/lib/admin-styles'
 
 export default async function NewFosterFamilyPage() {
+  await requireAdmin()
   const [animals, users] = await Promise.all([
     fetchAnimalsForFosterPicker(),
     fetchUsersForFosterPicker(),

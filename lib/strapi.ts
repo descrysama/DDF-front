@@ -237,6 +237,52 @@ export async function fetchAnimals(opts?: {
   }
 }
 
+// Animals with no referent yet — surfaced to bénévoles so they can self-assign
+// instead of waiting on an admin to hand them one.
+export async function fetchUnassignedAnimals(opts?: {
+  limit?: number
+}): Promise<{ animals: CardAnimal[]; total: number }> {
+  const limit = opts?.limit ?? 100
+  const { data, meta } = await strapiGet<StrapiListResponse<StrapiAnimalRaw>>(
+    `/api/animals?populate[0]=breed&populate[1]=bonded_with&populate[medias][populate]=image&filters[referent][id][$null]=true&pagination[pageSize]=${limit}`
+  )
+  return {
+    animals: data.map(toCardAnimal),
+    total: meta.pagination.total,
+  }
+}
+
+export interface MyAnimalAssignment extends CardAnimal {
+  role: 'referent' | 'co-referent'
+}
+
+// Animals a given user is responsible for, as referent or backup referent —
+// backs the "Mes chats" bénévole panel.
+export async function fetchMyAnimals(userId: number): Promise<{ animals: MyAnimalAssignment[]; total: number }> {
+  const params = new URLSearchParams({
+    'populate[breed]': 'true',
+    'populate[bonded_with]': 'true',
+    'populate[medias][populate]': 'image',
+    'populate[referent]': 'true',
+    'populate[backup_referents]': 'true',
+    'pagination[pageSize]': '100',
+  })
+  params.set('filters[$or][0][referent][id][$eq]', String(userId))
+  params.set('filters[$or][1][backup_referents][id][$eq]', String(userId))
+
+  const { data, meta } = await strapiGet<
+    StrapiListResponse<
+      StrapiAnimalRaw & { referent?: { id: number } | null; backup_referents?: { id: number }[] }
+    >
+  >(`/api/animals?${params.toString()}`)
+
+  const animals = data.map((a) => ({
+    ...toCardAnimal(a),
+    role: (a.referent?.id === userId ? 'referent' : 'co-referent') as 'referent' | 'co-referent',
+  }))
+  return { animals, total: meta.pagination.total }
+}
+
 export async function fetchAnimal(documentId: string): Promise<CardAnimal | null> {
   const res = await fetch(
     `${STRAPI_URL}/api/animals/${documentId}?populate[breed]=true&populate[bonded_with]=true&populate[characters]=true&populate[medias][populate]=image&populate[medical_history]=true`,
@@ -538,7 +584,13 @@ export interface StrapiAdoptionRequestRaw {
   chat_info: AdoptionChatInfo | null
   engagements: boolean[] | null
   announcement?: { id: number; documentId: string; title: string }
-  animal?: { id: number; documentId: string; name: string }
+  animal?: {
+    id: number
+    documentId: string
+    name: string
+    referent?: { id: number; username: string } | null
+    backup_referents?: { id: number; username: string }[]
+  }
   adopter?: { username: string; email: string }
   referent?: { username: string }
 }
@@ -562,6 +614,44 @@ export interface StrapiAdopterProfileRaw {
   age_preference: AdopterAgePreference
   activity_level_preference: AdopterActivityPreference
   motivation: string | null
+}
+
+export interface MyAdoptionRequest {
+  documentId: string
+  status: AdoptionRequestStatus
+  requestDate: string | null
+  matchScore: number | null
+  animal: CardAnimal | null
+}
+
+// The public-facing counterpart to the admin fetchAdoptionRequests: what a
+// logged-in adoptant sees of their own requests on "Mes demandes" / /profile.
+export async function fetchMyAdoptionRequests(userId: number): Promise<MyAdoptionRequest[]> {
+  const params = new URLSearchParams({
+    'filters[adopter][id][$eq]': String(userId),
+    'populate[animal][populate][breed]': 'true',
+    'populate[animal][populate][bonded_with]': 'true',
+    'populate[animal][populate][medias][populate]': 'image',
+    sort: 'createdAt:desc',
+    'pagination[pageSize]': '100',
+  })
+  const { data } = await strapiGet<
+    StrapiListResponse<{
+      documentId: string
+      status: AdoptionRequestStatus
+      request_date: string | null
+      match_score: number | null
+      animal: StrapiAnimalRaw | null
+    }>
+  >(`/api/adoption-requests?${params.toString()}`)
+
+  return data.map((r) => ({
+    documentId: r.documentId,
+    status: r.status,
+    requestDate: r.request_date,
+    matchScore: r.match_score,
+    animal: r.animal ? toCardAnimal(r.animal) : null,
+  }))
 }
 
 export async function fetchAdopterProfile(userId: number): Promise<StrapiAdopterProfileRaw | null> {
@@ -718,10 +808,30 @@ export async function fetchFosterFamilies(opts?: {
 
 export async function fetchAdoptionRequests(opts?: {
   limit?: number
+  // Scopes results to requests whose animal has this user as referent or
+  // backup referent — used for the "Membre" (bénévole) restricted view.
+  referentUserId?: number
+  // Narrows further to a single animal (e.g. "Voir ses demandes" from Mes chats).
+  animalDocumentId?: string
 }): Promise<{ adoptionRequests: StrapiAdoptionRequestRaw[]; total: number }> {
   const limit = opts?.limit ?? 100
+  const params = new URLSearchParams({
+    'populate[announcement]': 'true',
+    'populate[adopter]': 'true',
+    'populate[referent]': 'true',
+    'populate[animal][populate][referent]': 'true',
+    'populate[animal][populate][backup_referents]': 'true',
+    'pagination[pageSize]': String(limit),
+  })
+  if (opts?.referentUserId) {
+    params.set('filters[$or][0][animal][referent][id][$eq]', String(opts.referentUserId))
+    params.set('filters[$or][1][animal][backup_referents][id][$eq]', String(opts.referentUserId))
+  }
+  if (opts?.animalDocumentId) {
+    params.set('filters[animal][documentId][$eq]', opts.animalDocumentId)
+  }
   const { data, meta } = await strapiGet<StrapiListResponse<StrapiAdoptionRequestRaw>>(
-    `/api/adoption-requests?populate[0]=announcement&populate[1]=adopter&populate[2]=referent&populate[3]=animal&pagination[pageSize]=${limit}`
+    `/api/adoption-requests?${params.toString()}`
   )
   return { adoptionRequests: data, total: meta.pagination.total }
 }

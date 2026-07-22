@@ -1,4 +1,6 @@
+import { redirect } from 'next/navigation'
 import { fetchAnimals, fetchAnnouncements, fetchFosterFamilies, fetchAdoptionRequests } from '@/lib/strapi'
+import { getCurrentUser, isAdmin } from '@/lib/auth'
 import { AD, TINT } from '@/lib/admin-tokens'
 import { PawPrint, Megaphone, Home, ClipboardList } from 'lucide-react'
 
@@ -9,6 +11,14 @@ const MONO: React.CSSProperties = {
 }
 
 export default async function AdminDashboardPage() {
+  const user = await getCurrentUser()
+  // The dashboard is admin-only ground truth (global counts across every
+  // section) — a bénévole only ever cares about their own cats, so send them
+  // straight to "Mes chats" instead of a landing page with nothing for them.
+  if (!isAdmin(user)) {
+    redirect('/admin/my-animals')
+  }
+
   const [animals, announcements, fosterFamilies, adoptionRequests] = await Promise.all([
     fetchAnimals({ limit: 1 }),
     fetchAnnouncements({ limit: 1 }),

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import BlogPostForm from '@/components/admin/blog-post-form'
 import { fetchBlogPostAdmin } from '@/lib/strapi'
 import { updateBlogPost } from '../actions'
+import { requireAdmin } from '@/lib/auth'
 import { AD } from '@/lib/admin-tokens'
 import { Card } from '@/components/ui/card'
 import { STRAPI_URL } from '@/lib/config'
@@ -12,6 +13,7 @@ export default async function EditBlogPostPage({
 }: {
   params: Promise<{ documentId: string }>
 }) {
+  await requireAdmin()
   const { documentId } = await params
 
   const post = await fetchBlogPostAdmin(documentId)

@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import BlogPostForm from '@/components/admin/blog-post-form'
 import { createBlogPost } from '../actions'
+import { requireAdmin } from '@/lib/auth'
 import { AD } from '@/lib/admin-tokens'
 import { Card } from '@/components/ui/card'
 
-export default function NewBlogPostPage() {
+export default async function NewBlogPostPage() {
+  await requireAdmin()
   return (
     <div style={{ padding: 32 }}>
       <div style={{ marginBottom: 20 }}>
