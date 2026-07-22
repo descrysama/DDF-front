@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'http', hostname: 'localhost', port: '1337', pathname: '/uploads/**' },
-      { protocol: 'http', hostname: '84.235.236.136', port: '1337', pathname: '/uploads/**' },
+      { protocol: 'http', hostname: 'hypnoid-nonbrutal-aylin.ngrok-free.dev', port: '1337', pathname: '/uploads/**' },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
